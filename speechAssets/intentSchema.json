@@ -1,0 +1,50 @@
+{
+"intents": [
+{
+"intent": "OneshotTideIntent",
+"slots": [
+{
+"name": "Type",
+"type": "LIST_OF_TYPES"
+},
+{
+"name": "Duration",
+"type": "LIST_OF_DURATIONS"
+},
+{
+"name": "Date",
+"type": "AMAZON.DATE"
+}
+]
+},
+{
+"intent": "DialogTideIntent",
+"slots": [
+{
+"name": "Duration",
+"type": "LIST_OF_DURATIONS"
+},
+{
+"name": "Type",
+"type": "LIST_OF_TYPES"
+},
+{
+"name": "Date",
+"type": "AMAZON.DATE"
+}
+]
+},
+{
+"intent": "SupportedCitiesIntent"
+},
+{
+"intent": "AMAZON.HelpIntent"
+},
+{
+"intent": "AMAZON.StopIntent"
+},
+{
+"intent": "AMAZON.CancelIntent"
+}
+]
+}
