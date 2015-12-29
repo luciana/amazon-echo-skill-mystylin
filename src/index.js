@@ -291,14 +291,7 @@ function getPilatesSequenceResponse(cityStation, date, response) {
         var speechPoseOutput;
 
         if (err) {
-            speechOutput = {
-                speech: "Sorry, the A Lot Of Pilates service is experiencing a problem. Please try again later",
-                type: AlexaSkill.speechOutputType.PLAIN_TEXT
-            },
-            repromptOutput = {
-                speech: "oops something went wrong... make me stop",
-                type: AlexaSkill.speechOutputType.PLAIN_TEXT
-            };
+            speechOutput = "Sorry, the A Lot Of Pilates service is experiencing a problem. Please try again later";
         } else {            
             if(alopAPIResponse.poses.length > 0){
                 speechOutput = "Let's start. I like to call this class " + alopAPIResponse.title;
@@ -311,26 +304,11 @@ function getPilatesSequenceResponse(cityStation, date, response) {
                         speechPoseOutput = ". Next exercise is " + pose.name;
                     }
                     
-                    speechPoseOutput += ".We are going to " + pose.repetition + ". Go."
-                    + "<audio src='https://s3.amazonaws.com/s3-us-my-pilates-pal/sounds/"+ pose.sound_track_page +"'/>";
-                }                
-                speechOutput = {
-                    speech: "<speak>" + speechOutput + speechPoseOutput +  "</speak>",
-                    type: AlexaSkill.speechOutputType.PLAIN_TEXT
-                },
-                repromptOutput = {
-                    speech: "having fun yet?",
-                    type: AlexaSkill.speechOutputType.PLAIN_TEXT
-                }; 
+                    speechPoseOutput += ".We are going to " + pose.repetition + ". Go." + pose.description;                 
+                }
+                speechOutput = speechOutput + speechPoseOutput;
             }else{
-                speechOutput = {
-                    speech: "Sorry, the A Lot Of Pilates service is experiencing a problem. Please try again later",
-                    type: AlexaSkill.speechOutputType.PLAIN_TEXT
-                },
-                repromptOutput = {
-                    speech: "oops something went wrong... make me stop",
-                    type: AlexaSkill.speechOutputType.PLAIN_TEXT
-                };   
+                speechOutput = "Sorry, the A Lot Of Pilates service is experiencing a problem. Please try again later";
            }
             
         }
