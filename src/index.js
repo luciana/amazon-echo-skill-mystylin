@@ -134,11 +134,11 @@ var DURATIONS = {
 function handleWelcomeRequest(response) {
     var whichDurationPrompt = "How long do you want your class to be?",
         speechOutput = {
-            speech: "<speak>Welcome to A Lot Of Pilates - Ready to feel great?. " + "<audio src='https://s3.amazonaws.com/ask-storage/tidePooler/OceanWaves.mp3'/>" + whichDurationPrompt + "</speak>",
+            speech: "<speak>Welcome to A Lot Of Pilates - Ready to feel great?. " + "<audio src='https://s3.amazonaws.com/ask-storage/tidePooler/OceanWaves.mp3'/>" + "</speak>",
             type: AlexaSkill.speechOutputType.SSML
         },
         repromptOutput = {
-            speech: "Ready to feel great? " + "I can lead you through a pilates sequence" + "You can select the follow " + whichDurationPrompt,
+            speech: "Ready to feel great? " + "I can lead you through a pilates sequence",
             type: AlexaSkill.speechOutputType.PLAIN_TEXT
         };
 
@@ -286,13 +286,53 @@ function handleOneshotTideRequest(intent, session, response) {
 function getPilatesSequenceResponse(cityStation, date, response) {
 
     // Issue the request, and respond to the user
-    makeALOPRequest(cityStation.station, date, function alopResponseCallback(err, highTideResponse) {
+    makeALOPRequest(cityStation.station, date, function alopResponseCallback(err, alopAPIResponse) {
         var speechOutput;
+        var speechPoseOutput;
 
         if (err) {
-            speechOutput = "Sorry, the A Lot Of Pilates service is experiencing a problem. Please try again later";
-        } else {
-            speechOutput = "something worked";
+            speechOutput = {
+                speech: "Sorry, the A Lot Of Pilates service is experiencing a problem. Please try again later",
+                type: AlexaSkill.speechOutputType.PLAIN_TEXT
+            },
+            repromptOutput = {
+                speech: "oops something went wrong... make me stop",
+                type: AlexaSkill.speechOutputType.PLAIN_TEXT
+            };
+        } else {            
+            if(alopAPIResponse.poses.length > 0){
+                speechOutput = "Let's start. I like to call this class " + alopAPIResponse.title;
+                for(var i = 0; i < alopAPIResponse.poses.length; i++){
+                    var pose = alopAPIResponse.poses[i];
+                                     
+                    if( i === 0 ){
+                        speechPoseOutput = ". Get ready on your mat for the " + pose.name;
+                    }else{
+                        speechPoseOutput = ". Next exercise is " + pose.name;
+                    }
+                    
+                    speechPoseOutput += ".We are going to " + pose.repetition + ". Go."
+                    + "<audio src='https://s3.amazonaws.com/s3-us-my-pilates-pal/sounds/"+ pose.sound_track_page +"'/>";
+                }                
+                speechOutput = {
+                    speech: "<speak>" + speechOutput + speechPoseOutput +  "</speak>",
+                    type: AlexaSkill.speechOutputType.PLAIN_TEXT
+                },
+                repromptOutput = {
+                    speech: "having fun yet?",
+                    type: AlexaSkill.speechOutputType.PLAIN_TEXT
+                }; 
+            }else{
+                speechOutput = {
+                    speech: "Sorry, the A Lot Of Pilates service is experiencing a problem. Please try again later",
+                    type: AlexaSkill.speechOutputType.PLAIN_TEXT
+                },
+                repromptOutput = {
+                    speech: "oops something went wrong... make me stop",
+                    type: AlexaSkill.speechOutputType.PLAIN_TEXT
+                };   
+           }
+            
         }
 
         response.tellWithCard(speechOutput, "ALotOfPilates", speechOutput);
@@ -310,6 +350,7 @@ function getFinalTideResponse(cityStation, date, response) {
         var speechOutput;
 
         if (err) {
+            console.log("ERROR : " + err);
             speechOutput = "Sorry, the A Lot Of Pilates service is experiencing a problem. Please try again later";
         } else {
             speechOutput = date.displayDate + " in " + cityStation.city + ", let's start with "
@@ -329,33 +370,22 @@ function getFinalTideResponse(cityStation, date, response) {
  * DEV version: curl -H 'Content-Type: application/json' -H 'Accept: application/json' -X POST http://alop.herokuapp.com/api/v1/studios/random -d '{"category": 2}' -H "X-3scale-Proxy-Secret-Token:MPP-Allow-API-Call"
  */
 function makeALOPRequest(station, date, alopResponseCallback) {
-    
-    var endpoint = 'http://alop.herokuapp.com/api/v1/studios/random';
-
-    // Build the post string from an object
-      var post_data = querystring.stringify({
-          'duration' : '2',
-          'category': '2'
-      });
-
-     // An object of options to indicate where to post to
-      var post_options = {
-          host: 'alop.herokuapp.com',
-          port: '80',
-          path: '/api/v1/studios/random',
-          method: 'POST',
-          headers: {
-              'Content-Type': 'application/json',
-              'X-3scale-Proxy-Secret-Token': 'MPP-Allow-API-Call',
-              //'Content-Length': Buffer.byteLength(post_data),
-              'body': JSON.stringify({duration: '2'})
-          }
-      };
-
+       
+     // An object of options to indicate where to post to    
+    var post_options = {
+      hostname: 'alop.herokuapp.com',
+      port: 80,
+      path: '/api/v1/workouts/524',
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-3scale-Proxy-Secret-Token': 'MPP-Allow-API-Call'
+      }
+    };
     var req = http.request(post_options, function(res) {
+        console.log('STATUS: ' + res.statusCode);
         res.setEncoding('utf8');
         var alopResponseString = '';
-        console.log('Status Code: ' + res.statusCode);
 
         if (res.statusCode != 200) {
             alopResponseCallback(new Error("Non 200 Response"));
@@ -369,12 +399,10 @@ function makeALOPRequest(station, date, alopResponseCallback) {
             var alopResponseObject = JSON.parse(alopResponseString);
 
             if (alopResponseObject.error) {
-                console.log("NOAA error: " );
-                //alopResponseCallback(new Error(noaaResponseObj.error.message));
+                alopResponseCallback(new Error(alopResponseObject.error.message));
             } else {
-                console.log('DATA Code: ' + alopResponseObject);
-               // var highTide = findHighTide(alopResponseObject);
-               // alopResponseCallback(null, highTide);
+                console.log('Workout name: ' + alopResponseObject.title);    
+                alopResponseCallback(null, alopResponseObject);
             }
         });
 
@@ -383,8 +411,7 @@ function makeALOPRequest(station, date, alopResponseCallback) {
         alopResponseCallback(new Error(e.message));
     });
 
-    req.write(data);
-    req.end();
+req.end();
     
 }
 
