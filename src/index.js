@@ -298,17 +298,17 @@ function getPilatesSequenceResponse(cityStation, date, response) {
             };    
         } else {            
             if(alopAPIResponse.poses.length > 0){
-                var speechOutputStart = "Let's start. I like to call this class " + alopAPIResponse.title + " <break time=\"0.2s\" /> ";
+                var speechOutputStart = "Alright! I like to call this class " + alopAPIResponse.title + " <break time=\"1.0s\" /> ";
+                var speechPoseOutput ="";    
                 for(var i = 0; i < alopAPIResponse.poses.length; i++){
-                    var pose = alopAPIResponse.poses[i];
-                    var speechPoseOutput;                
+                    var pose = alopAPIResponse.poses[i];                                
                     if( i === 0 ){
-                        speechPoseOutput = ". Get ready on your mat for the " + pose.name;
+                        speechPoseOutput += ". Get ready on your mat for the " + pose.name;
                     }else{
-                        speechPoseOutput = ". Next exercise is " + pose.name;
+                        speechPoseOutput += ". Next exercise is " + pose.name;
                     }
-                    
-                    speechPoseOutput += ". <break time=\"0.2s\" /> We are going to " + pose.repetition + ". Go.";                 
+                    //TODO: pose.duration is causing a problem. setting the break here for a static number worked fine.
+                    speechPoseOutput += ". <break time=\"0.2s\" />. " + pose.repetition + ". Go. <break time=\"" + pose.duration +"s\" />";                 
                 } 
                 var speechText ="<speak>"  + speechOutputStart + speechPoseOutput + "</speak>";      
                 speechOutput = {
