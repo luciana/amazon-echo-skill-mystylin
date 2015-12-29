@@ -2,13 +2,13 @@ DialogTideIntent {Duration}
 DialogTideIntent {Duration} {Type}
 DialogTideIntent {Date}
 
-OneshotTideIntent class
-OneshotTideIntent class for {Duration}
-OneshotTideIntent class for {Duration} {Type}
-OneshotTideIntent class for {Duration} {Type} {Date}
-OneshotTideIntent class for {Duration} {Date}
-OneshotTideIntent class for {Date}
-OneshotTideIntent class {Date}
+OneshotTideIntent start class
+OneshotTideIntent start class for {Duration}
+OneshotTideIntent start class for {Duration} {Type}
+OneshotTideIntent start class for {Duration} {Type} {Date}
+OneshotTideIntent start class for {Duration} {Date}
+OneshotTideIntent start class for {Date}
+OneshotTideIntent start class {Date}
 OneshotTideIntent get the high tide for {Duration} {Date}
 OneshotTideIntent get the next tide for {Duration} for {Date}
 OneshotTideIntent get the tides for {Date}

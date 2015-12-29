@@ -134,11 +134,12 @@ var DURATIONS = {
 function handleWelcomeRequest(response) {
     var whichDurationPrompt = "How long do you want your class to be?",
         speechOutput = {
-            speech: "<speak>Welcome to A Lot Of Pilates - Ready to feel great?. " + "<audio src='https://s3.amazonaws.com/ask-storage/tidePooler/OceanWaves.mp3'/>" + "</speak>",
+            speech: "<speak>Welcome to A Lot Of Pilates - Ready to feel great?. " + "<audio src='https://s3.amazonaws.com/ask-storage/tidePooler/OceanWaves.mp3'/>" + 
+            "When ready say start class" + "</speak>",
             type: AlexaSkill.speechOutputType.SSML
         },
         repromptOutput = {
-            speech: "Ready to feel great? " + "I can lead you through a pilates sequence",
+            speech: "Ready to feel great? " + "I can lead you through a pilates sequence. Just say start class when ready.",
             type: AlexaSkill.speechOutputType.PLAIN_TEXT
         };
 
@@ -288,32 +289,43 @@ function getPilatesSequenceResponse(cityStation, date, response) {
     // Issue the request, and respond to the user
     makeALOPRequest(cityStation.station, date, function alopResponseCallback(err, alopAPIResponse) {
         var speechOutput;
-        var speechPoseOutput;
+        
 
         if (err) {
-            speechOutput = "Sorry, the A Lot Of Pilates service is experiencing a problem. Please try again later";
+            speechOutput = {
+                speech:"Sorry, the A Lot Of Pilates service is experiencing a problem. Please try again later",
+                type: AlexaSkill.speechOutputType.PLAIN_TEXT
+            };    
         } else {            
             if(alopAPIResponse.poses.length > 0){
-                speechOutput = "Let's start. I like to call this class " + alopAPIResponse.title;
+                var speechOutputStart = "Let's start. I like to call this class " + alopAPIResponse.title + " <break time=\"0.2s\" /> ";
                 for(var i = 0; i < alopAPIResponse.poses.length; i++){
                     var pose = alopAPIResponse.poses[i];
-                                     
+                    var speechPoseOutput;                
                     if( i === 0 ){
                         speechPoseOutput = ". Get ready on your mat for the " + pose.name;
                     }else{
                         speechPoseOutput = ". Next exercise is " + pose.name;
                     }
                     
-                    speechPoseOutput += ".We are going to " + pose.repetition + ". Go." + pose.description;                 
-                }
-                speechOutput = speechOutput + speechPoseOutput;
+                    speechPoseOutput += ". <break time=\"0.2s\" /> We are going to " + pose.repetition + ". Go.";                 
+                } 
+                var speechText ="<speak>"  + speechOutputStart + speechPoseOutput + "</speak>";      
+                speechOutput = {
+                    speech: speechText,
+                    type: AlexaSkill.speechOutputType.SSML
+                };
             }else{
-                speechOutput = "Sorry, the A Lot Of Pilates service is experiencing a problem. Please try again later";
+                speechOutput = {
+                    speech:"Sorry, the A Lot Of Pilates service is experiencing a problem. Please try again later",
+                     type: AlexaSkill.speechOutputType.PLAIN_TEXT
+                };
            }
             
         }
-
-        response.tellWithCard(speechOutput, "ALotOfPilates", speechOutput);
+        console.log("speechOutput", speechOutput);
+        //response.tellWithCard(speechOutput, "ALotOfPilates", speechOutput);
+        response.tell(speechOutput);
     });
 }
 
