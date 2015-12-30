@@ -21,17 +21,14 @@
  *
  * Examples:
  * One-shot model:
- *  User:  "Alexa, ask Tide Pooler when is the high tide in Seattle on Saturday"
- *  Alexa: "Saturday June 20th in Seattle the first high tide will be around 7:18 am,
- *          and will peak at ...""
+ *  User:  "Alexa, start a pilates class"
+ *  Alexa: "Welcome to A Lot Of Pilates! Ready to feel great? say start class ...""
  * Dialog model:
- *  User:  "Alexa, open Tide Pooler"
- *  Alexa: "Welcome to Tide Pooler. Which city would you like tide information for?"
- *  User:  "Seattle"
- *  Alexa: "For which date?"
- *  User:  "this Saturday"
- *  Alexa: "Saturday June 20th in Seattle the first high tide will be around 7:18 am,
- *          and will peak at ...""
+ *  User:  "Alexa, start a pilates class"
+ *  Alexa: "Welcome to A Lot Of Pilates! How long do you prefer your class to be?"
+ *  User:  "30 minutes"
+ *  Alexa: "Let's get started. When ready say start class"
+ *  User:  "start class"
  */
 
 /**
@@ -103,11 +100,15 @@ ALotOfPilates.prototype.intentHandlers = {
         }
     },
 
-    "SupportedCitiesIntent": function (intent, session, response) {
-        handleSupportedCitiesRequest(intent, session, response);
+    "SupportedDurationsIntent": function (intent, session, response) {
+        handleSupportedDurationsRequest(intent, session, response);
     },
 
     "AMAZON.HelpIntent": function (intent, session, response) {
+        handleHelpRequest(response);
+    },
+
+    "AMAZON.StartOverIntent": function (intent, session, response) {
         handleHelpRequest(response);
     },
 
@@ -156,7 +157,7 @@ function handleHelpRequest(response) {
 /**
  * Handles the case where the user asked or for, or is otherwise being with supported cities
  */
-function handleSupportedCitiesRequest(intent, session, response) {
+function handleSupportedDurationsRequest(intent, session, response) {
     // get city re-prompt
     var repromptText = "What is your prefered class duration?";
     var speechOutput = "Currently, You can take class that lasts  " + getAllStationsText() + " minutes" + repromptText;
