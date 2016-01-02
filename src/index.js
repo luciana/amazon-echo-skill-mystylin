@@ -182,7 +182,7 @@ function handleSupportedDurationsRequest(intent, session, response) {
  */
 function handleCityDialogRequest(intent, session, response) {
 
-    var cityStation = getCityStationFromIntent(intent, false),
+    var cityStation = getDurationFromIntent(intent, false),
         repromptText,
         speechOutput;
     if (cityStation.error) {
@@ -251,7 +251,7 @@ function handleNoSlotDialogRequest(intent, session, response) {
         response.ask(speechOutput, repromptText);
     } else {
         // get duration re-prompt
-        handleSupportedCitiesRequest(intent, session, response);
+        handleSupportedDurationsRequest(intent, session, response);
     }
 }
 
@@ -263,13 +263,13 @@ function handleGetNextExerciseIntentRequest(intent, session, response){
 
 /**
  * This handles the one-shot interaction, where the user utters a phrase like:
- * 'Alexa, open Tide Pooler and get tide information for Seattle on Saturday'.
+ * 'Alexa, start a Pilates class'.
  * If there is an error in a slot, this will guide the user to the dialog approach.
  */
 function handleOneshotTideRequest(intent, session, response) {
 
     // Determine city, using default if none provided
-    var cityStation = getCityStationFromIntent(intent, true),
+    var cityStation = getDurationFromIntent(intent, true),
         repromptText,
         speechOutput;
     if (cityStation.error) {
@@ -286,13 +286,12 @@ function handleOneshotTideRequest(intent, session, response) {
     var date = getDateFromIntent(intent);
     if (!date) {
         // Invalid date. set city in session and prompt for date
-        session.attributes.duration = cityStation;
-        repromptText = "Please try again saying a day of the week, for example, Saturday. "
-            + "For which date would you like tide information?";
-        speechOutput = "I'm sorry, I didn't understand that date. " + repromptText;
+        //session.attributes.duration = cityStation;
+        //repromptText = "Please try again saying a day of the week, for example, Saturday. " + "For which date would you like tide information?";
+        //speechOutput = "I'm sorry, I didn't understand that date. " + repromptText;
 
-        response.ask(speechOutput, repromptText);
-        return;
+        //response.ask(speechOutput, repromptText);
+        //return;
     }
 
     // all slots filled, either from the user or by default values. Move to final request
@@ -305,6 +304,7 @@ function handleOneshotTideRequest(intent, session, response) {
  */
 function getPilatesSequenceResponse(duration, type, response) {
 
+    console.log("GET Pilates Sequence");
     // Issue the request, and respond to the user
     makeALOPRequest(duration, type, function alopResponseCallback(err, alopAPIResponse) {
         var speechOutput;
@@ -318,7 +318,7 @@ function getPilatesSequenceResponse(duration, type, response) {
         } else {            
 
             if(alopAPIResponse.poses.length > 0){ 
-                console.log("Start teaching the class");                              
+                console.log("SUCESSFUL Get on Pilates Sequence");                              
                 teachClass(alopAPIResponse, response);   
                 speechOutput = {
                     speech:"Good job, you completed the class.. hope you feel great!",
@@ -336,10 +336,11 @@ function getPilatesSequenceResponse(duration, type, response) {
     });
 }
 
-function teachClass(alopAPIResponse, response){   
+function teachClass(alopAPIResponse, response){  
+     console.log("START Teaching Pilates Class"); 
      var speechPoseOutput =""; 
      console.log("This workout has " + alopAPIResponse.poses.length + " exercises");
-    for(i = 0; i < alopAPIResponse.poses.length; i++){          
+    for(var i = 0; i < alopAPIResponse.poses.length; i++){    
         var pose = alopAPIResponse.poses[i];                          
         if( i === 0 ){
             speechPoseOutput += "Get ready on your mat for the " + pose.name;       
@@ -514,28 +515,9 @@ function makeTideRequest(station, date, tideResponseCallback) {
     queryString += '&product=predictions&datum=' + datum + '&units=english&time_zone=lst_ldt&format=json';
 
     http.get(endpoint + queryString, function (res) {
-        var noaaResponseString = '';
+        
         console.log('Status Code: ' + res.statusCode);
 
-        if (res.statusCode != 200) {
-            tideResponseCallback(new Error("Non 200 Response"));
-        }
-
-        res.on('data', function (data) {
-            noaaResponseString += data;
-        });
-
-        res.on('end', function () {
-            var noaaResponseObject = JSON.parse(noaaResponseString);
-
-            if (noaaResponseObject.error) {
-                console.log("NOAA error: " + noaaResponseObj.error.message);
-                tideResponseCallback(new Error(noaaResponseObj.error.message));
-            } else {
-               // var highTide = findHighTide(noaaResponseObject);
-               // tideResponseCallback(null, highTide);
-            }
-        });
     }).on('error', function (e) {
         console.log("Communications error: " + e.message);
         tideResponseCallback(new Error(e.message));
@@ -543,22 +525,17 @@ function makeTideRequest(station, date, tideResponseCallback) {
 }
 
 /**
- * Formats the height, rounding to the nearest 1/2 foot. e.g.
- * 4.354 -> "four and a half feet".
+ * Formats the duration, rounding to the heighest value divided by 10. e.g.
+ * 89 -> 9.
  */
-function getFormattedDuration(height) {
-
-
-    var remainder = height % 1;
-    var formattedHeight;
-    formattedHeight = Math.ceil(height / 10);
-    return formattedHeight;
+function getFormattedDuration(duration) {
+    return Math.ceil(duration / 10);
 }
 
 /**
- * Gets the city from the intent, or returns an error
+ * Gets class duration from intent, or returns an error
  */
-function getCityStationFromIntent(intent, assignDefault) {
+function getDurationFromIntent(intent, assignDefault) {
 
     var durationSlot = intent.slots.Duration;
     // slots can be missing, or slots can be provided but with empty value.
@@ -569,14 +546,14 @@ function getCityStationFromIntent(intent, assignDefault) {
                 error: true
             };
         } else {
-            // For sample skill, default to Seattle.
+            // For sample skill, default to 30 minutes class.
             return {
                 city: '30',
                 station: 2
             };
         }
     } else {
-        // lookup the city. Sample skill uses well known mapping of a few known cities to station id.
+        // lookup the duration. 
         var durationFrame = durationSlot.value;
         if (DURATIONS[durationFrame.toLowerCase()]) {
             return {
