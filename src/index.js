@@ -151,6 +151,7 @@ function handleWelcomeRequest(response) {
 }
 
 function handleEndClassRequest(response) {
+    console.log("END Class");
     var speechOutput = {
             speech: "Good job. You are all done. Hope you feel as great as me!",
             type: AlexaSkill.speechOutputType.PLAIN_TEXT
@@ -352,7 +353,7 @@ function teachClass(alopAPIResponse, response){
         speechPoseOutput += ". <break time=\"3s\" />. ";
         speechPoseOutput += handleExerciseTimings(pose);
     }
-    console.log(speechPoseOutput);
+    //console.log(speechPoseOutput);
     var speechText ="<speak>" + speechPoseOutput + "</speak>";
         var speechOutput = {
             speech: speechText,
@@ -361,13 +362,13 @@ function teachClass(alopAPIResponse, response){
 
     
     response.tell(speechOutput);
-
     handleEndClassRequest(response);
 }
 
 function handleExerciseTimings(pose){
     var speechExerciseOutput ="";
     var sideLegSeriesPoseIdArray = [431,432,434,435,326];
+    //var sideLegSeriesPoseIdArray = [];
 
         if(pose.id === 133){ //Hold it for 20 to 30 seconds
             speechExerciseOutput += "Start holding the " + pose.name;
@@ -380,7 +381,7 @@ function handleExerciseTimings(pose){
             speechExerciseOutput += "done. ";
         }else if (sideLegSeriesPoseIdArray.indexOf(pose.id) > -1){//Side Leg Series
             speechExerciseOutput += "Get in position for the " + pose.name;
-            speechExerciseOutput += ".<break time=\"2s\" />. ";
+            speechExerciseOutput += ".<break time=\"2s\" />.";
             speechExerciseOutput += "Start";
             speechExerciseOutput += ".<break time=\"10s\" />. ";
             speechExerciseOutput += ".<break time=\"10s\" />. ";
@@ -388,7 +389,7 @@ function handleExerciseTimings(pose){
             speechExerciseOutput += ".<break time=\"10s\" />. ";
             speechExerciseOutput += ".<break time=\"10s\" />. ";
             speechExerciseOutput += "Switch sides";
-            speechExerciseOutput += ".<break time=\"s\" />. ";
+            speechExerciseOutput += ".<break time=\"10s\" />. ";
             speechExerciseOutput += ".<break time=\"10s\" />. ";
             speechExerciseOutput += ".<break time=\"10s\" />. ";
             speechExerciseOutput += ".<break time=\"10s\" />. ";
@@ -403,27 +404,27 @@ function handleExerciseTimings(pose){
             speechExerciseOutput += ".<break time=\"16s\" />. ";
         }else if (pose.id === 266){ //Pulse your arms 100 times            
             speechExerciseOutput += ".<break time=\"2s\" />. ";
-            speechExerciseOutput += "Inhale 5 times";
+            speechExerciseOutput += "Inhale through the nose for 5 counts";
             speechExerciseOutput += ".<break time=\"5s\" />. ";
-            speechExerciseOutput += "Exhale 5 times";
+            speechExerciseOutput += "Exhale through the mouth for 5 counts.";
             speechExerciseOutput += ".<break time=\"5s\" />. ";
             speechExerciseOutput += "Inhale 5 times";
             speechExerciseOutput += ".<break time=\"5s\" />. ";
             speechExerciseOutput += "Exhale 5 times";
             speechExerciseOutput += ".<break time=\"5s\" />. ";
             speechExerciseOutput += "Repeat 8 more times";
-            speechExerciseOutput += ".<break time=\"10s\" />. ";
-            speechExerciseOutput += ".<break time=\"10s\" />. ";
-            speechExerciseOutput += ".<break time=\"10s\" />. ";
-            speechExerciseOutput += ".<break time=\"10s\" />. ";
-            speechExerciseOutput += "Keep going 5 more times";
-            speechExerciseOutput += ".<break time=\"10s\" />. ";
+            speechExerciseOutput += ".<break time=\"10s\" /> ";
+            speechExerciseOutput += "<break time=\"10s\" />. ";
+            speechExerciseOutput += "<break time=\"10s\" />. ";
+            speechExerciseOutput += "<break time=\"10s\" />. ";
+            speechExerciseOutput += "Keep going 5 more times.";
+            speechExerciseOutput += "<break time=\"10s\" /> ";
             speechExerciseOutput += ".<break time=\"10s\" />";
             speechExerciseOutput += ".<break time=\"10s\" />";
             speechExerciseOutput += ".<break time=\"10s\" />";
-            speechExerciseOutput += "Almost there..90";
+            speechExerciseOutput += "Almost there! 90";
             speechExerciseOutput += ".<break time=\"5s\" />. ";
-            speechExerciseOutput += "Good job.";
+            speechExerciseOutput += "Good job! Relax.";
             speechExerciseOutput += ".<break time=\"2s\" />. ";
         }else if (pose.id === 541){ //Repeat 3-5 times (standing roll down)
             speechExerciseOutput += "Let's start standing for the " + pose.name;
@@ -445,9 +446,9 @@ function handleExerciseTimings(pose){
 
             speechExerciseOutput += ". Go. ";
             //var duration = Math.floor(40 / 10);
-            //for(i = 0; i < 4; i++){
-                speechExerciseOutput += "<break time=\"1s\" />. ";
-            //}
+            for(var i = 0; i < 4; i++){
+                speechExerciseOutput += "<break time=\"10s\" />. ";
+            }
         }
     //console.log("Exercise output " + speechExerciseOutput);
     return speechExerciseOutput;
