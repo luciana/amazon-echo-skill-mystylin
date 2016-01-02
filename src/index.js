@@ -40,6 +40,7 @@ var APP_ID = 'amzn1.echo-sdk-ams.app.ef7b5d42-f176-4806-9ea3-6ef6d041c2aa';
 var http = require('http'),
     alexaDateUtil = require('./alexaDateUtil');
 
+
 /**
  * The AlexaSkill prototype and helper functions
  */
@@ -62,8 +63,7 @@ ALotOfPilates.prototype.constructor = ALotOfPilates;
 // ----------------------- Override AlexaSkill request and intent handlers -----------------------
 
 ALotOfPilates.prototype.eventHandlers.onSessionStarted = function (sessionStartedRequest, session) {
-    console.log("onSessionStarted requestId: " + sessionStartedRequest.requestId
-        + ", sessionId: " + session.sessionId);
+    console.log("onSessionStarted requestId: " + sessionStartedRequest.requestId + ", sessionId: " + session.sessionId);
     // any initialization logic goes here
 };
 
@@ -73,9 +73,8 @@ ALotOfPilates.prototype.eventHandlers.onLaunch = function (launchRequest, sessio
 };
 
 ALotOfPilates.prototype.eventHandlers.onSessionEnded = function (sessionEndedRequest, session) {
-    console.log("onSessionEnded requestId: " + sessionEndedRequest.requestId
-        + ", sessionId: " + session.sessionId);
-    // any cleanup logic goes here
+    console.log("onSessionEnded requestId: " + sessionEndedRequest.requestId + ", sessionId: " + session.sessionId);
+  
 };
 
 /**
@@ -102,6 +101,10 @@ ALotOfPilates.prototype.intentHandlers = {
 
     "SupportedDurationsIntent": function (intent, session, response) {
         handleSupportedDurationsRequest(intent, session, response);
+    },
+
+    "GetNextExerciseIntent": function (intent, session, response) {
+        handleGetNextExerciseIntentRequest(intent, session, response);
     },
 
     "AMAZON.HelpIntent": function (intent, session, response) {
@@ -133,8 +136,8 @@ var DURATIONS = {
 };
 
 function handleWelcomeRequest(response) {
-    var whichDurationPrompt = "How long do you want your class to be?",
-        speechOutput = {
+   
+        var speechOutput = {
             speech: "<speak>Welcome to A Lot Of Pilates - Ready to feel great?. " + "<audio src='https://s3.amazonaws.com/ask-storage/tidePooler/OceanWaves.mp3'/>" + 
             "When ready say start class" + "</speak>",
             type: AlexaSkill.speechOutputType.SSML
@@ -145,6 +148,15 @@ function handleWelcomeRequest(response) {
         };
 
     response.ask(speechOutput, repromptOutput);
+}
+
+function handleEndClassRequest(response) {
+    var speechOutput = {
+            speech: "Good job. You are all done. Hope you feel as great as me!",
+            type: AlexaSkill.speechOutputType.PLAIN_TEXT
+        };
+
+    response.tell(speechOutput);
 }
 
 function handleHelpRequest(response) {
@@ -160,7 +172,7 @@ function handleHelpRequest(response) {
 function handleSupportedDurationsRequest(intent, session, response) {
     // get city re-prompt
     var repromptText = "What is your prefered class duration?";
-    var speechOutput = "Currently, You can take class that lasts  " + getAllStationsText() + " minutes" + repromptText;
+    var speechOutput = "Currently, You can take class that lasts  " + getAllDurationText() + " minutes" + repromptText;
 
     response.ask(speechOutput, repromptText);
 }
@@ -174,7 +186,7 @@ function handleCityDialogRequest(intent, session, response) {
         repromptText,
         speechOutput;
     if (cityStation.error) {
-        repromptText = "Currently, You can take class that lasts   " + getAllStationsText() + "What is your prefered class duration?";
+        repromptText = "Currently, You can take class that lasts   " + getAllDurationText() + "What is your prefered class duration?";
         // if we received a value for the incorrect city, repeat it to the user, otherwise we received an empty slot
         speechOutput = cityStation.city ? "I'm sorry, I don't have any data for " + cityStation.city + ". " + repromptText : repromptText;
         response.ask(speechOutput, repromptText);
@@ -183,7 +195,7 @@ function handleCityDialogRequest(intent, session, response) {
 
     // if we don't have a date yet, go to date. If we have a date, we perform the final request
     if (session.attributes.date) {
-        getPilatesSequenceResponse(cityStation, session.attributes.date, response);
+        //getPilatesSequenceResponse(cityStation, session.attributes.date, response);
     } else {
         // set city in session and prompt for date
         session.attributes.city = cityStation;
@@ -212,7 +224,7 @@ function handleDateDialogRequest(intent, session, response) {
 
     // if we don't have a city yet, go to city. If we have a city, we perform the final request
     if (session.attributes.duration) {
-        getPilatesSequenceResponse(session.attributes.duration, date, response);
+       // getPilatesSequenceResponse(session.attributes.duration, date, response);
     } else {
         // The user provided a date out of turn. Set date in session and prompt for city
         session.attributes.date = date;
@@ -243,6 +255,12 @@ function handleNoSlotDialogRequest(intent, session, response) {
     }
 }
 
+function handleGetNextExerciseIntentRequest(intent, session, response){
+
+    console.log("session", session);
+    console.log("response", response);
+}
+
 /**
  * This handles the one-shot interaction, where the user utters a phrase like:
  * 'Alexa, open Tide Pooler and get tide information for Seattle on Saturday'.
@@ -256,7 +274,7 @@ function handleOneshotTideRequest(intent, session, response) {
         speechOutput;
     if (cityStation.error) {
         // invalid city. move to the dialog
-        repromptText = "Currently, You can take class that lasts   " + getAllStationsText() + "What is your prefered class duration?";
+        repromptText = "Currently, You can take class that lasts   " + getAllDurationText() + "What is your prefered class duration?";
         // if we received a value for the incorrect city, repeat it to the user, otherwise we received an empty slot
         speechOutput = cityStation.city ? "I'm sorry, I don't have any data for " + cityStation.city + ". " + repromptText : repromptText;
 
@@ -285,77 +303,154 @@ function handleOneshotTideRequest(intent, session, response) {
  * Both the one-shot and dialog based paths lead to this method to issue the request, and
  * respond to the user with the final answer.
  */
-function getPilatesSequenceResponse(cityStation, date, response) {
+function getPilatesSequenceResponse(duration, type, response) {
 
     // Issue the request, and respond to the user
-    makeALOPRequest(cityStation.station, date, function alopResponseCallback(err, alopAPIResponse) {
+    makeALOPRequest(duration, type, function alopResponseCallback(err, alopAPIResponse) {
         var speechOutput;
         
-
         if (err) {
             speechOutput = {
                 speech:"Sorry, the A Lot Of Pilates service is experiencing a problem. Please try again later",
                 type: AlexaSkill.speechOutputType.PLAIN_TEXT
-            };    
+            };     
+            response.tell(speechOutput);
         } else {            
-            if(alopAPIResponse.poses.length > 0){
-                var speechOutputStart = "Alright! I like to call this class " + alopAPIResponse.title + " <break time=\"1.0s\" /> ";
-                var speechPoseOutput ="";    
-                for(var i = 0; i < alopAPIResponse.poses.length; i++){
-                    var pose = alopAPIResponse.poses[i];                                
-                    if( i === 0 ){
-                        speechPoseOutput += ". Get ready on your mat for the " + pose.name;
-                    }else{
-                        speechPoseOutput += ". Next exercise is " + pose.name;
-                    }
-                    //TODO: pose.duration is causing a problem. setting the break here for a static number worked fine.
-                    speechPoseOutput += ". <break time=\"0.2s\" />. " + pose.repetition + ". Go. <break time=\"" + pose.duration +"s\" />";                 
-                } 
-                var speechText ="<speak>"  + speechOutputStart + speechPoseOutput + "</speak>";      
+
+            if(alopAPIResponse.poses.length > 0){ 
+                console.log("Start teaching the class");                              
+                teachClass(alopAPIResponse, response);   
                 speechOutput = {
-                    speech: speechText,
-                    type: AlexaSkill.speechOutputType.SSML
-                };
+                    speech:"Good job, you completed the class.. hope you feel great!",
+                    type: AlexaSkill.speechOutputType.PLAIN_TEXT
+                };     
+                response.tell(speechOutput);          
             }else{
                 speechOutput = {
                     speech:"Sorry, the A Lot Of Pilates service is experiencing a problem. Please try again later",
                      type: AlexaSkill.speechOutputType.PLAIN_TEXT
                 };
-           }
-            
+                response.tell(speechOutput);
+           }    
         }
-        console.log("speechOutput", speechOutput);
-        //response.tellWithCard(speechOutput, "ALotOfPilates", speechOutput);
-        response.tell(speechOutput);
     });
 }
 
-/**
- * Both the one-shot and dialog based paths lead to this method to issue the request, and
- * respond to the user with the final answer.
- */
-function getFinalTideResponse(cityStation, date, response) {
-
-    // Issue the request, and respond to the user
-    makeTideRequest(cityStation.station, date, function tideResponseCallback(err, highTideResponse) {
-        var speechOutput;
-
-        if (err) {
-            console.log("ERROR : " + err);
-            speechOutput = "Sorry, the A Lot Of Pilates service is experiencing a problem. Please try again later";
-        } else {
-            speechOutput = date.displayDate + " in " + cityStation.city + ", let's start with "
-                + highTideResponse.firstHighTideTime + ", and will peak at about " + highTideResponse.firstHighTideHeight
-                + ", followed by a low tide at around " + highTideResponse.lowTideTime
-                + " that will be about " + highTideResponse.lowTideHeight
-                + ". The second high tide will be around " + highTideResponse.secondHighTideTime
-                + ", and will peak at about " + highTideResponse.secondHighTideHeight + ".";
+function teachClass(alopAPIResponse, response){   
+     var speechPoseOutput =""; 
+     console.log("This workout has " + alopAPIResponse.poses.length + " exercises");
+    for(i = 0; i < alopAPIResponse.poses.length; i++){          
+        var pose = alopAPIResponse.poses[i];                          
+        if( i === 0 ){
+            speechPoseOutput += "Get ready on your mat for the " + pose.name;       
+        }else{
+            speechPoseOutput += "Next exercise is " + pose.name;
         }
+        
+        speechPoseOutput += ". <break time=\"0.2s\" />. " + pose.repetition;  
+        speechPoseOutput += ". <break time=\"3s\" />. ";
+        speechPoseOutput += handleExerciseTimings(pose);
+    }
+    console.log(speechPoseOutput);
+    var speechText ="<speak>" + speechPoseOutput + "</speak>";
+        var speechOutput = {
+            speech: speechText,
+            type: AlexaSkill.speechOutputType.SSML
+        };
 
-        response.tellWithCard(speechOutput, "ALotOfPilates", speechOutput);
-    });
+    
+    response.tell(speechOutput);
+
+    handleEndClassRequest(response);
 }
 
+function handleExerciseTimings(pose){
+    var speechExerciseOutput ="";
+    var sideLegSeriesPoseIdArray = [431,432,434,435,326];
+
+        if(pose.id === 133){ //Hold it for 20 to 30 seconds
+            speechExerciseOutput += "Start holding the " + pose.name;
+            speechExerciseOutput += "<break time=\"10s\" />. "; 
+            speechExerciseOutput += "10 seconds"; 
+            speechExerciseOutput += ".<break time=\"10s\" />. ";
+            speechExerciseOutput += ".<break time=\"5s\" />. ";
+            speechExerciseOutput += "Almost done";
+            speechExerciseOutput += ".<break time=\"3s\" />. ";
+            speechExerciseOutput += "done. ";
+        }else if (sideLegSeriesPoseIdArray.indexOf(pose.id) > -1){//Side Leg Series
+            speechExerciseOutput += "Get in position for the " + pose.name;
+            speechExerciseOutput += ".<break time=\"2s\" />. ";
+            speechExerciseOutput += "Start";
+            speechExerciseOutput += ".<break time=\"10s\" />. ";
+            speechExerciseOutput += ".<break time=\"10s\" />. ";
+            speechExerciseOutput += ".<break time=\"10s\" />. ";
+            speechExerciseOutput += ".<break time=\"10s\" />. ";
+            speechExerciseOutput += ".<break time=\"10s\" />. ";
+            speechExerciseOutput += "Switch sides";
+            speechExerciseOutput += ".<break time=\"s\" />. ";
+            speechExerciseOutput += ".<break time=\"10s\" />. ";
+            speechExerciseOutput += ".<break time=\"10s\" />. ";
+            speechExerciseOutput += ".<break time=\"10s\" />. ";
+            speechExerciseOutput += ".<break time=\"10s\" />. ";
+            speechExerciseOutput += ".<break time=\"10s\" />. ";
+        }else if (pose.id === 327){ //Inhale, Exhale 3-5 times"
+            speechExerciseOutput += "<break time=\"2s\" />. ";
+            speechExerciseOutput += "Relax in " + pose.name;
+            speechExerciseOutput += "Inhale";
+            speechExerciseOutput += ".<break time=\"4s\" />. ";
+            speechExerciseOutput += "Exhale";
+            speechExerciseOutput += ".<break time=\"16s\" />. ";
+        }else if (pose.id === 266){ //Pulse your arms 100 times            
+            speechExerciseOutput += ".<break time=\"2s\" />. ";
+            speechExerciseOutput += "Inhale 5 times";
+            speechExerciseOutput += ".<break time=\"5s\" />. ";
+            speechExerciseOutput += "Exhale 5 times";
+            speechExerciseOutput += ".<break time=\"5s\" />. ";
+            speechExerciseOutput += "Inhale 5 times";
+            speechExerciseOutput += ".<break time=\"5s\" />. ";
+            speechExerciseOutput += "Exhale 5 times";
+            speechExerciseOutput += ".<break time=\"5s\" />. ";
+            speechExerciseOutput += "Repeat 8 more times";
+            speechExerciseOutput += ".<break time=\"10s\" />. ";
+            speechExerciseOutput += ".<break time=\"10s\" />. ";
+            speechExerciseOutput += ".<break time=\"10s\" />. ";
+            speechExerciseOutput += ".<break time=\"10s\" />. ";
+            speechExerciseOutput += "Keep going 5 more times";
+            speechExerciseOutput += ".<break time=\"10s\" />. ";
+            speechExerciseOutput += ".<break time=\"10s\" />";
+            speechExerciseOutput += ".<break time=\"10s\" />";
+            speechExerciseOutput += ".<break time=\"10s\" />";
+            speechExerciseOutput += "Almost there..90";
+            speechExerciseOutput += ".<break time=\"5s\" />. ";
+            speechExerciseOutput += "Good job.";
+            speechExerciseOutput += ".<break time=\"2s\" />. ";
+        }else if (pose.id === 541){ //Repeat 3-5 times (standing roll down)
+            speechExerciseOutput += "Let's start standing for the " + pose.name;
+            speechExerciseOutput += ".<break time=\"2s\" />. ";
+            speechExerciseOutput += "Inhale to lower the chin towards the chest, letting the head by heavy";
+            speechExerciseOutput += ".<break time=\"2s\" />. ";
+            speechExerciseOutput += "Exhale";
+            speechExerciseOutput += ".<break time=\"2s\" />. ";
+            speechExerciseOutput += "Inhale and pause at the bottom";
+            speechExerciseOutput += ".<break time=\"2s\" />. ";
+            speechExerciseOutput += "Exhale and come up. Head comes up last.";
+            speechExerciseOutput += ".<break time=\"10s\" />. ";
+            speechExerciseOutput += "Repeat 2 more times";
+            speechExerciseOutput += ".<break time=\"10s\" />";
+            speechExerciseOutput += ".<break time=\"10s\" />";
+            speechExerciseOutput += ".<break time=\"10s\" />";
+        }else{  //Generic timining   
+            console.log("Exercise duration " + pose.duration + " formatted " + getFormattedDuration(pose.duration));
+
+            speechExerciseOutput += ". Go. ";
+            //var duration = Math.floor(40 / 10);
+            //for(i = 0; i < 4; i++){
+                speechExerciseOutput += "<break time=\"1s\" />. ";
+            //}
+        }
+    //console.log("Exercise output " + speechExerciseOutput);
+    return speechExerciseOutput;
+}
 /**
  * Uses ALOP API, triggered by POST on /studios API with category and duration inputs.
  * DEV version: curl -H 'Content-Type: application/json' -H 'Accept: application/json' -X POST http://alop.herokuapp.com/api/v1/studios/random -d '{"category": 2}' -H "X-3scale-Proxy-Secret-Token:MPP-Allow-API-Call"
@@ -366,7 +461,7 @@ function makeALOPRequest(station, date, alopResponseCallback) {
     var post_options = {
       hostname: 'alop.herokuapp.com',
       port: 80,
-      path: '/api/v1/workouts/524',
+      path: '/api/v1/workouts/479', //680
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -437,8 +532,8 @@ function makeTideRequest(station, date, tideResponseCallback) {
                 console.log("NOAA error: " + noaaResponseObj.error.message);
                 tideResponseCallback(new Error(noaaResponseObj.error.message));
             } else {
-                var highTide = findHighTide(noaaResponseObject);
-                tideResponseCallback(null, highTide);
+               // var highTide = findHighTide(noaaResponseObject);
+               // tideResponseCallback(null, highTide);
             }
         });
     }).on('error', function (e) {
@@ -448,90 +543,15 @@ function makeTideRequest(station, date, tideResponseCallback) {
 }
 
 /**
- * Algorithm to find the 2 high tides for the day, the first of which is smaller and occurs
- * mid-day, the second of which is larger and typically in the evening
- */
-function findHighTide(noaaResponseObj) {
-    var predictions = noaaResponseObj.predictions;
-    var lastPrediction;
-    var firstHighTide, secondHighTide, lowTide;
-    var firstTideDone = false;
-
-    for (var i = 0; i < predictions.length; i++) {
-        var prediction = predictions[i];
-
-        if (!lastPrediction) {
-            lastPrediction = prediction;
-            continue;
-        }
-
-        if (isTideIncreasing(lastPrediction, prediction)) {
-            if (!firstTideDone) {
-                firstHighTide = prediction;
-            } else {
-                secondHighTide = prediction;
-            }
-
-        } else { // we're decreasing
-
-            if (!firstTideDone && firstHighTide) {
-                firstTideDone = true;
-            } else if (secondHighTide) {
-                break; // we're decreasing after have found 2nd tide. We're done.
-            }
-
-            if (firstTideDone) {
-                lowTide = prediction;
-            }
-        }
-
-        lastPrediction = prediction;
-    }
-
-    return {
-        firstHighTideTime: alexaDateUtil.getFormattedTime(new Date(firstHighTide.t)),
-        firstHighTideHeight: getFormattedHeight(firstHighTide.v),
-        lowTideTime: alexaDateUtil.getFormattedTime(new Date(lowTide.t)),
-        lowTideHeight: getFormattedHeight(lowTide.v),
-        secondHighTideTime: alexaDateUtil.getFormattedTime(new Date(secondHighTide.t)),
-        secondHighTideHeight: getFormattedHeight(secondHighTide.v)
-    };
-}
-
-function isTideIncreasing(lastPrediction, currentPrediction) {
-    return parseFloat(lastPrediction.v) < parseFloat(currentPrediction.v);
-}
-
-/**
  * Formats the height, rounding to the nearest 1/2 foot. e.g.
  * 4.354 -> "four and a half feet".
  */
-function getFormattedHeight(height) {
-    var isNegative = false;
-    if (height < 0) {
-        height = Math.abs(height);
-        isNegative = true;
-    }
+function getFormattedDuration(height) {
+
 
     var remainder = height % 1;
-    var feet, remainderText;
-
-    if (remainder < 0.25) {
-        remainderText = '';
-        feet = Math.floor(height);
-    } else if (remainder < 0.75) {
-        remainderText = " and a half";
-        feet = Math.floor(height);
-    } else {
-        remainderText = '';
-        feet = Math.ceil(height);
-    }
-
-    if (isNegative) {
-        feet *= -1;
-    }
-
-    var formattedHeight = feet + remainderText + " feet";
+    var formattedHeight;
+    formattedHeight = Math.ceil(height / 10);
     return formattedHeight;
 }
 
@@ -604,7 +624,7 @@ function getDateFromIntent(intent) {
     }
 }
 
-function getAllStationsText() {
+function getAllDurationText() {
     var durationList = '';
     for (var duration in DURATIONS) {
         durationList += duration + ", ";
