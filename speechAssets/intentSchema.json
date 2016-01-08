@@ -1,7 +1,7 @@
 {
 "intents": [
 {
-"intent": "OneshotTideIntent",
+"intent": "OneshotStartPilatesClassIntent",
 "slots": [
 {
 "name": "Type",

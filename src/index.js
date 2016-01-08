@@ -1,29 +1,17 @@
-/**
-    Copyright 2014-2015 Amazon.com, Inc. or its affiliates. All Rights Reserved.
-
-    Licensed under the Apache License, Version 2.0 (the "License"). You may not use this file except in compliance with the License. A copy of the License is located at
-
-        http://aws.amazon.com/apache2.0/
-
-    or in the "license" file accompanying this file. This file is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
-*/
 
 /**
- * This sample shows how to create a Lambda function for handling Alexa Skill requests that:
- * - Web service: communicate with an external web service to get tide data from NOAA CO-OPS API (http://tidesandcurrents.noaa.gov/api/)
- * - Multiple optional slots: has 2 slots (city and date), where the user can provide 0, 1, or 2 values, and assumes defaults for the unprovided values
- * - DATE slot: demonstrates date handling and formatted date responses appropriate for speech
- * - Custom slot type: demonstrates using custom slot types to handle a finite set of known values
- * - Dialog and Session state: Handles two models, both a one-shot ask and tell model, and a multi-turn dialog model.
- *   If the user provides an incorrect slot in a one-shot model, it will direct to the dialog model. See the
- *   examples section for sample interactions of these models.
- * - Pre-recorded audio: Uses the SSML 'audio' tag to include an ocean wave sound in the welcome response.
+ * A Lot Of Pilates Alexa Skills
  *
- * Examples:
+ * Start a pilates class from Amazon Echo. This code communicates with A Lot Of Pilates(ALOP) API to start a pilates class. One slot is available where you can specify the duration of the class. Get fit with Amazon Alexa!
+ *
+ * Author: Luciana Bruscino
+ * Copywrite 2016 ALotOfPilates.com
+ *
+ * Example:
  * One-shot model:
  *  User:  "Alexa, start a pilates class"
  *  Alexa: "Welcome to A Lot Of Pilates! Ready to feel great? say start class ...""
- * Dialog model:
+ * Dialog model: (Not yet implemented)
  *  User:  "Alexa, start a pilates class"
  *  Alexa: "Welcome to A Lot Of Pilates! How long do you prefer your class to be?"
  *  User:  "30 minutes"
@@ -36,6 +24,7 @@
  * Find it at : https://console.aws.amazon.com/lambda/home
  */
 var APP_ID = 'amzn1.echo-sdk-ams.app.ef7b5d42-f176-4806-9ea3-6ef6d041c2aa';
+var API_KEY = 'MPP-Allow-API-Call';
 
 var http = require('http'),
     alexaDateUtil = require('./alexaDateUtil');
@@ -81,22 +70,23 @@ ALotOfPilates.prototype.eventHandlers.onSessionEnded = function (sessionEndedReq
  * override intentHandlers to map intent handling functions.
  */
 ALotOfPilates.prototype.intentHandlers = {
-    "OneshotTideIntent": function (intent, session, response) {
-        handleOneshotTideRequest(intent, session, response);
+    "OneshotStartPilatesClassIntent": function (intent, session, response) {       
+        handleOneshotStartPilatesClassRequest(intent, session, response);
     },
 
-    "DialogTideIntent": function (intent, session, response) {
+    "DialogStartPilatesClassIntent": function (intent, session, response) {
         // Determine if this turn is for duration, for date, or an error.
         // We could be passed slots with values, no slots, slots with no value.
-        var durationSlot = intent.slots.Duration;
-        var dateSlot = intent.slots.Date;
-        if (durationSlot && durationSlot.value) {
-            handleCityDialogRequest(intent, session, response);
-        } else if (dateSlot && dateSlot.value) {
-            handleDateDialogRequest(intent, session, response);
-        } else {
-            handleNoSlotDialogRequest(intent, session, response);
-        }
+        // var durationSlot = intent.slots.Duration;
+        // var dateSlot = intent.slots.Date;
+        // if (durationSlot && durationSlot.value) {
+        //     handleDurationDialogRequest(intent, session, response);
+        // } else if (dateSlot && dateSlot.value) {
+        //     handleDateDialogRequest(intent, session, response);
+        // } else {
+        //     handleNoSlotDialogRequest(intent, session, response);
+        // }
+         handleOneshotStartPilatesClassRequest(intent, session, response);
     },
 
     "SupportedDurationsIntent": function (intent, session, response) {
@@ -128,7 +118,7 @@ ALotOfPilates.prototype.intentHandlers = {
 
 // -------------------------- ALotOfPilates Domain Specific Business Logic --------------------------
 
-// example city to NOAA station mapping. Can be found on: http://tidesandcurrents.noaa.gov/map/
+// Duration options for a Dialog model - one slot model
 var DURATIONS = {
     '10 minutes': 1,
     '30 minutes': 2,
@@ -138,8 +128,10 @@ var DURATIONS = {
 function handleWelcomeRequest(response) {
    
         var speechOutput = {
-            speech: "<speak>Welcome to A Lot Of Pilates - Ready to feel great?. " + "<audio src='https://s3.amazonaws.com/ask-storage/tidePooler/OceanWaves.mp3'/>" + 
-            "When ready say start class" + "</speak>",
+            /*speech: "<speak>Welcome to A Lot Of Pilates - Ready to feel great?. " + "<audio src='https://s3.amazonaws.com/ask-storage/tidePooler/OceanWaves.mp3'/>" + 
+            "When ready say start class" + "</speak>",*/
+            speech: "<speak>Welcome to A Lot Of Pilates - Ready to feel great?. " +
+            "<break time=\"1s\" />. " + "When ready say start class" + "</speak>",
             type: AlexaSkill.speechOutputType.SSML
         },
         repromptOutput = {
@@ -150,14 +142,8 @@ function handleWelcomeRequest(response) {
     response.ask(speechOutput, repromptOutput);
 }
 
-function handleEndClassRequest(response) {
-    console.log("END Class");
-    var speechOutput = {
-            speech: "Good job. You are all done. Hope you feel as great as me!",
-            type: AlexaSkill.speechOutputType.PLAIN_TEXT
-        };
-
-    response.tell(speechOutput);
+function handleEndClassRequest(){
+    return "Good job. You are all done. Hope you feel as great as me! Visit ALotOfPilates.com for video classes.";
 }
 
 function handleHelpRequest(response) {
@@ -179,31 +165,31 @@ function handleSupportedDurationsRequest(intent, session, response) {
 }
 
 /**
- * Handles the dialog step where the user provides a city
+ * Handles the dialog step where the user provides a duration for the pilates class
  */
-function handleCityDialogRequest(intent, session, response) {
+function handleDurationDialogRequest(intent, session, response) {
 
-    var cityStation = getDurationFromIntent(intent, false),
+    var durationStation = getDurationFromIntent(intent, false),
         repromptText,
         speechOutput;
-    if (cityStation.error) {
+    if (durationStation.error) {
         repromptText = "Currently, You can take class that lasts   " + getAllDurationText() + "What is your prefered class duration?";
         // if we received a value for the incorrect city, repeat it to the user, otherwise we received an empty slot
-        speechOutput = cityStation.city ? "I'm sorry, I don't have any data for " + cityStation.city + ". " + repromptText : repromptText;
+        speechOutput = durationStation.duration ? "I'm sorry, I don't have any data for " + durationStation.duration + ". " + repromptText : repromptText;
         response.ask(speechOutput, repromptText);
         return;
     }
 
     // if we don't have a date yet, go to date. If we have a date, we perform the final request
     if (session.attributes.date) {
-        //getPilatesSequenceResponse(cityStation, session.attributes.date, response);
+        //getPilatesSequenceResponse(durationStation, session.attributes.date, response);
     } else {
-        // set city in session and prompt for date
-        session.attributes.city = cityStation;
-        speechOutput = "For which date?";
-        repromptText = "For which date would you like tide information for " + cityStation.city + "?";
+        // set duration in session and prompt for date
+        //session.attributes.duration = durationStation;
+        //speechOutput = "For which date?";
+        //repromptText = "How long would you like your class to last " + durationStation.duration + "?";
 
-        response.ask(speechOutput, repromptText);
+        //response.ask(speechOutput, repromptText);
     }
 }
 
@@ -228,11 +214,11 @@ function handleDateDialogRequest(intent, session, response) {
        // getPilatesSequenceResponse(session.attributes.duration, date, response);
     } else {
         // The user provided a date out of turn. Set date in session and prompt for city
-        session.attributes.date = date;
-        speechOutput = "For which duration would you like  " + date.displayDate + "?";
-        repromptText = "For which duration?";
+        //session.attributes.date = date;
+        //speechOutput = "For which duration would you like  " + date.displayDate + "?";
+        //repromptText = "For which duration?";
 
-        response.ask(speechOutput, repromptText);
+        //response.ask(speechOutput, repromptText);
     }
 }
 
@@ -246,7 +232,7 @@ function handleDateDialogRequest(intent, session, response) {
 function handleNoSlotDialogRequest(intent, session, response) {
     if (session.attributes.duration) {
         // get date re-prompt
-        var repromptText = "Please try again saying a day of the week, for example, Saturday. ";
+        var repromptText = "Please try again saying how long you want the class to be, for example, 30 minutes. ";
         var speechOutput = repromptText;
 
         response.ask(speechOutput, repromptText);
@@ -267,36 +253,38 @@ function handleGetNextExerciseIntentRequest(intent, session, response){
  * 'Alexa, start a Pilates class'.
  * If there is an error in a slot, this will guide the user to the dialog approach.
  */
-function handleOneshotTideRequest(intent, session, response) {
+function handleOneshotStartPilatesClassRequest(intent, session, response) {
 
-    // Determine city, using default if none provided
-    var cityStation = getDurationFromIntent(intent, true),
+    console.log("START OneshotStartPilatesClassIntent");
+    // Determine duration, using default if none provided
+    var durationStation = getDurationFromIntent(intent, true),
         repromptText,
         speechOutput;
-    if (cityStation.error) {
-        // invalid city. move to the dialog
+    if (durationStation.error) {
+        // invalid duration. move to the dialog
         repromptText = "Currently, You can take class that lasts   " + getAllDurationText() + "What is your prefered class duration?";
-        // if we received a value for the incorrect city, repeat it to the user, otherwise we received an empty slot
-        speechOutput = cityStation.city ? "I'm sorry, I don't have any data for " + cityStation.city + ". " + repromptText : repromptText;
+        // if we received a value for the incorrect duration, repeat it to the user, otherwise we received an empty slot and assume default
+        speechOutput = durationStation.duration ? "I'm sorry, I don't have any data for " + durationStation.duration + ". " + repromptText : repromptText;
 
         response.ask(speechOutput, repromptText);
         return;
     }
-
+    console.log("Duration Station " + durationStation.duration + " id " + durationStation.duration_id);
+    var type = 2;
     // Determine custom date
-    var date = getDateFromIntent(intent);
-    if (!date) {
+    //var date = getDateFromIntent(intent);
+    //if (!date) {
         // Invalid date. set city in session and prompt for date
-        //session.attributes.duration = cityStation;
+        //session.attributes.duration = durationStation;
         //repromptText = "Please try again saying a day of the week, for example, Saturday. " + "For which date would you like tide information?";
         //speechOutput = "I'm sorry, I didn't understand that date. " + repromptText;
 
         //response.ask(speechOutput, repromptText);
         //return;
-    }
+    //}
 
     // all slots filled, either from the user or by default values. Move to final request
-    getPilatesSequenceResponse(cityStation, date, response);
+    getPilatesSequenceResponse(durationStation, type, response);
 }
 
 /**
@@ -320,12 +308,7 @@ function getPilatesSequenceResponse(duration, type, response) {
 
             if(alopAPIResponse.poses.length > 0){ 
                 console.log("SUCESSFUL Get on Pilates Sequence");                              
-                teachClass(alopAPIResponse, response);   
-                speechOutput = {
-                    speech:"Good job, you completed the class.. hope you feel great!",
-                    type: AlexaSkill.speechOutputType.PLAIN_TEXT
-                };     
-                response.tell(speechOutput);          
+                teachClass(alopAPIResponse, response);                   
             }else{
                 speechOutput = {
                     speech:"Sorry, the A Lot Of Pilates service is experiencing a problem. Please try again later",
@@ -341,7 +324,7 @@ function teachClass(alopAPIResponse, response){
      console.log("START Teaching Pilates Class"); 
      var speechPoseOutput =""; 
      console.log("This workout has " + alopAPIResponse.poses.length + " exercises");
-    for(var i = 0; i < alopAPIResponse.poses.length; i++){    
+    for(var i = 0; i < alopAPIResponse.poses.length; i++){
         var pose = alopAPIResponse.poses[i];                          
         if( i === 0 ){
             speechPoseOutput += "Get ready on your mat for the " + pose.name;       
@@ -351,8 +334,9 @@ function teachClass(alopAPIResponse, response){
         
         speechPoseOutput += ". <break time=\"0.2s\" />. " + pose.repetition;  
         speechPoseOutput += ". <break time=\"3s\" />. ";
-        speechPoseOutput += handleExerciseTimings(pose);
+        //speechPoseOutput += handleExerciseTimings(pose);
     }
+    //speechPoseOutput += handleEndClassRequest();
     //console.log(speechPoseOutput);
     var speechText ="<speak>" + speechPoseOutput + "</speak>";
         var speechOutput = {
@@ -362,7 +346,8 @@ function teachClass(alopAPIResponse, response){
 
     
     response.tell(speechOutput);
-    handleEndClassRequest(response);
+   // response.shouldEndSession (false);
+    
 }
 
 function handleExerciseTimings(pose){
@@ -380,21 +365,24 @@ function handleExerciseTimings(pose){
             speechExerciseOutput += ".<break time=\"3s\" />. ";
             speechExerciseOutput += "done. ";
         }else if (sideLegSeriesPoseIdArray.indexOf(pose.id) > -1){//Side Leg Series
-            speechExerciseOutput += "Get in position for the " + pose.name;
-            speechExerciseOutput += ".<break time=\"2s\" />.";
+            speechExerciseOutput += "Lie on one side with bottom arm bent for head to lay on.";
+            speechExerciseOutput += ".<break time=\"2s\" />";
+            speechExerciseOutput += "Position the legs about 45 degrees in front of the body";  
+            speechExerciseOutput += ".<break time=\"2s\" />";          
             speechExerciseOutput += "Start";
-            speechExerciseOutput += ".<break time=\"10s\" />. ";
-            speechExerciseOutput += ".<break time=\"10s\" />. ";
-            speechExerciseOutput += ".<break time=\"10s\" />. ";
-            speechExerciseOutput += ".<break time=\"10s\" />. ";
-            speechExerciseOutput += ".<break time=\"10s\" />. ";
+            speechExerciseOutput += ".<break time=\"10s\" />";
+            speechExerciseOutput += "<break time=\"10s\" /> ";
+            speechExerciseOutput += "<break time=\"10s\" />. ";
+            speechExerciseOutput += "<break time=\"10s\" />. ";
+            speechExerciseOutput += "<break time=\"10s\" />. ";
             speechExerciseOutput += "Switch sides";
-            speechExerciseOutput += ".<break time=\"10s\" />. ";
-            speechExerciseOutput += ".<break time=\"10s\" />. ";
-            speechExerciseOutput += ".<break time=\"10s\" />. ";
-            speechExerciseOutput += ".<break time=\"10s\" />. ";
-            speechExerciseOutput += ".<break time=\"10s\" />. ";
-            speechExerciseOutput += ".<break time=\"10s\" />. ";
+            speechExerciseOutput += ".<break time=\"5s\" /> ";
+            speechExerciseOutput += "Start";
+            speechExerciseOutput += ".<break time=\"10s\" /> ";
+            speechExerciseOutput += ".<break time=\"10s\" /> ";
+            speechExerciseOutput += ".<break time=\"10s\" /> ";
+            speechExerciseOutput += ".<break time=\"10s\" /> ";
+            speechExerciseOutput += ".<break time=\"10s\" /> ";
         }else if (pose.id === 327){ //Inhale, Exhale 3-5 times"
             speechExerciseOutput += "<break time=\"2s\" />. ";
             speechExerciseOutput += "Relax in " + pose.name;
@@ -405,23 +393,23 @@ function handleExerciseTimings(pose){
         }else if (pose.id === 266){ //Pulse your arms 100 times            
             speechExerciseOutput += ".<break time=\"2s\" />. ";
             speechExerciseOutput += "Inhale through the nose for 5 counts";
-            speechExerciseOutput += ".<break time=\"5s\" />. ";
+            speechExerciseOutput += ".<break time=\"3s\" />. ";
             speechExerciseOutput += "Exhale through the mouth for 5 counts.";
-            speechExerciseOutput += ".<break time=\"5s\" />. ";
+            speechExerciseOutput += ".<break time=\"3s\" />. ";
             speechExerciseOutput += "Inhale 5 times";
-            speechExerciseOutput += ".<break time=\"5s\" />. ";
+            speechExerciseOutput += ".<break time=\"3s\" />. ";
             speechExerciseOutput += "Exhale 5 times";
-            speechExerciseOutput += ".<break time=\"5s\" />. ";
+            speechExerciseOutput += ".<break time=\"3s\" />. ";
             speechExerciseOutput += "Repeat 8 more times";
-            speechExerciseOutput += ".<break time=\"10s\" /> ";
-            speechExerciseOutput += "<break time=\"10s\" />. ";
-            speechExerciseOutput += "<break time=\"10s\" />. ";
-            speechExerciseOutput += "<break time=\"10s\" />. ";
+            speechExerciseOutput += ".<break time=\"6s\" /> ";
+            speechExerciseOutput += "<break time=\"6s\" />. ";
+            speechExerciseOutput += "<break time=\"6s\" />. ";
+            speechExerciseOutput += "<break time=\"6s\" />. ";
             speechExerciseOutput += "Keep going 5 more times.";
-            speechExerciseOutput += "<break time=\"10s\" /> ";
-            speechExerciseOutput += ".<break time=\"10s\" />";
-            speechExerciseOutput += ".<break time=\"10s\" />";
-            speechExerciseOutput += ".<break time=\"10s\" />";
+            speechExerciseOutput += "<break time=\"6s\" /> ";
+            speechExerciseOutput += "<break time=\"6s\" />";
+            speechExerciseOutput += "<break time=\"6s\" />";
+            speechExerciseOutput += "<break time=\"6s\" />";
             speechExerciseOutput += "Almost there! 90";
             speechExerciseOutput += ".<break time=\"5s\" />. ";
             speechExerciseOutput += "Good job! Relax.";
@@ -454,22 +442,25 @@ function handleExerciseTimings(pose){
     return speechExerciseOutput;
 }
 /**
- * Uses ALOP API, triggered by POST on /studios API with category and duration inputs.
- * DEV version: curl -H 'Content-Type: application/json' -H 'Accept: application/json' -X POST http://alop.herokuapp.com/api/v1/studios/random -d '{"category": 2}' -H "X-3scale-Proxy-Secret-Token:MPP-Allow-API-Call"
+ * Uses ALOP API, triggered by GET on /workouts API with category and duration querystrings.
+ * DEV version: curl -H 'Content-Type: application/json' -H 'Accept: application/json' -X GET http://alop.herokuapp.com/api/v1/workouts/680 -H "X-3scale-Proxy-Secret-Token:MPP-Allow-API-Call"
  */
-function makeALOPRequest(station, date, alopResponseCallback) {
+function makeALOPRequest(duration, type, alopResponseCallback) {
        
+    
      // An object of options to indicate where to post to    
     var post_options = {
       hostname: 'alop.herokuapp.com',
       port: 80,
-      path: '/api/v1/workouts/479', //680
+      path: '/api/v1/workouts/680', //680, 649
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
         'X-3scale-Proxy-Secret-Token': 'MPP-Allow-API-Call'
       }
     };
+
+    console.log("makeALOPRequest");
     var req = http.request(post_options, function(res) {
         console.log('STATUS: ' + res.statusCode);
         res.setEncoding('utf8');
@@ -489,7 +480,7 @@ function makeALOPRequest(station, date, alopResponseCallback) {
             if (alopResponseObject.error) {
                 alopResponseCallback(new Error(alopResponseObject.error.message));
             } else {
-                console.log('Workout name: ' + alopResponseObject.title);    
+                console.log('Workout name: ' + alopResponseObject.title);
                 alopResponseCallback(null, alopResponseObject);
             }
         });
@@ -504,16 +495,15 @@ req.end();
 }
 
 /**
- * Uses NOAA.gov API, documented: http://tidesandcurrents.noaa.gov/api/
+ * Uses ALOP API, triggered by GET on /workouts API with category and duration querystrings.
  * Results can be verified at: http://tidesandcurrents.noaa.gov/noaatidepredictions/NOAATidesFacade.jsp?Stationid=[id]
  */
-function makeTideRequest(station, date, tideResponseCallback) {
+function makeALOPGETRequest(duration, type, alopResponseCallback) {
 
     var datum = "MLLW";
-    var endpoint = 'http://tidesandcurrents.noaa.gov/api/datagetter';
-    var queryString = '?' + date.requestDateParam;
-    queryString += '&station=9447130';
-    queryString += '&product=predictions&datum=' + datum + '&units=english&time_zone=lst_ldt&format=json';
+    var endpoint = 'http://alop.herokuapp.com/api/v1/workouts/680';
+    var queryString = '?duration=' + duration;
+    queryString += '&type=' + type + '&units=english&time_zone=lst_ldt&format=json';
 
     http.get(endpoint + queryString, function (res) {
         
@@ -521,7 +511,7 @@ function makeTideRequest(station, date, tideResponseCallback) {
 
     }).on('error', function (e) {
         console.log("Communications error: " + e.message);
-        tideResponseCallback(new Error(e.message));
+        alopResponseCallback(new Error(e.message));
     });
 }
 
@@ -537,7 +527,7 @@ function getFormattedDuration(duration) {
  * Gets class duration from intent, or returns an error
  */
 function getDurationFromIntent(intent, assignDefault) {
-
+    console.log("GET Duration From Intent");
     var durationSlot = intent.slots.Duration;
     // slots can be missing, or slots can be provided but with empty value.
     // must test for both.
@@ -549,8 +539,8 @@ function getDurationFromIntent(intent, assignDefault) {
         } else {
             // For sample skill, default to 30 minutes class.
             return {
-                city: '30',
-                station: 2
+                duration: '30',
+                duration_id: 2
             };
         }
     } else {
@@ -558,13 +548,13 @@ function getDurationFromIntent(intent, assignDefault) {
         var durationFrame = durationSlot.value;
         if (DURATIONS[durationFrame.toLowerCase()]) {
             return {
-                city: durationFrame,
-                station: DURATIONS[durationFrame.toLowerCase()]
+                duration: durationFrame,
+                duration_id: DURATIONS[durationFrame.toLowerCase()]
             };
         } else {
             return {
                 error: true,
-                city: durationFrame
+                duration: durationFrame
             };
         }
     }

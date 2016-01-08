@@ -2,89 +2,89 @@ DialogTideIntent {Duration}
 DialogTideIntent {Duration} {Type}
 DialogTideIntent {Date}
 
-OneshotTideIntent start class
-OneshotTideIntent start class for {Duration}
-OneshotTideIntent start class for {Duration} {Type}
-OneshotTideIntent start class for {Duration} {Type} {Date}
-OneshotTideIntent start class for {Duration} {Date}
-OneshotTideIntent start class for {Date}
-OneshotTideIntent start class {Date}
-OneshotTideIntent get the high tide for {Duration} {Date}
-OneshotTideIntent get the next tide for {Duration} for {Date}
-OneshotTideIntent get the tides for {Date}
-OneshotTideIntent get tide information for {Duration}
-OneshotTideIntent get tide information for {Duration} {Type}
-OneshotTideIntent get tide information for {Duration} {Type} on {Date}
-OneshotTideIntent get tide information for {Duration} Duration
-OneshotTideIntent get tide information for {Duration} for {Date}
-OneshotTideIntent get tide information for {Duration} on {Date}
-OneshotTideIntent get tide information for {Duration} {Date}
-OneshotTideIntent get tides for {Duration}
-OneshotTideIntent get tides for {Duration} {Type}
-OneshotTideIntent get tides for {Duration} {Type} {Date}
-OneshotTideIntent get tides for {Duration} {Date}
-OneshotTideIntent tide information
-OneshotTideIntent tide information for {Duration}
-OneshotTideIntent tide information for {Duration} {Type}
-OneshotTideIntent tide information for {Duration} on {Date}
-OneshotTideIntent tide information for {Date}
-OneshotTideIntent when high tide is
-OneshotTideIntent when is high tide
-OneshotTideIntent when is high tide for {Duration} {Date}
-OneshotTideIntent when is high tide in {Duration}
-OneshotTideIntent when is high tide in {Duration} {Type}
-OneshotTideIntent when is high tide in {Duration} Duration
-OneshotTideIntent when is high tide in {Duration} on {Date}
-OneshotTideIntent when is high tide on {Date}
-OneshotTideIntent when is high tide {Date}
-OneshotTideIntent when is next tide
-OneshotTideIntent when is next tide in {Duration} {Type}
-OneshotTideIntent when is next tide in {Duration} {Type} on {Date}
-OneshotTideIntent when is next tide on {Date}
-OneshotTideIntent when is the highest tide in {Duration}
-OneshotTideIntent when is the highest tide in {Duration} {Date}
-OneshotTideIntent when is the highest tide {Date}
-OneshotTideIntent when is the next high tide {Date}
-OneshotTideIntent when is the next highest water
-OneshotTideIntent when is the next highest water for {Duration}
-OneshotTideIntent when is the next highest water for {Duration} {Type} for {Date}
-OneshotTideIntent when is the next highest water for {Duration} {Type}
-OneshotTideIntent when is the next highest water for {Date}
-OneshotTideIntent when is the next tide for {Duration}
-OneshotTideIntent when is the next tide for {Duration} {Type}
-OneshotTideIntent when is the next tide for {Duration} Duration
-OneshotTideIntent when is the next tide for {Duration} for {Date}
-OneshotTideIntent when is the next tide for {Date}
-OneshotTideIntent when is today's high tide
-OneshotTideIntent when is today's highest tide {Date}
-OneshotTideIntent when will the water be highest for {Duration}
-OneshotTideIntent when will the water be highest for {Duration} for {Date}
-OneshotTideIntent when will the water be highest for {Date}
-OneshotTideIntent when will the water be highest {Date}
-OneshotTideIntent when is high tide on {Date}
-OneshotTideIntent when is the next tide for {Date}
-OneshotTideIntent when is next tide on {Date}
-OneshotTideIntent get the tides for {Date}
-OneshotTideIntent when is the highest tide {Date}
-OneshotTideIntent when is the next highest water for {Date}
-OneshotTideIntent when is high tide on {Date}
-OneshotTideIntent get high tide for {Date}
-OneshotTideIntent get high tide {Date}
-OneshotTideIntent when is high tide {Date}
-OneshotTideIntent tide information for {Date}
-OneshotTideIntent when is high tide in {Duration} on {Date}
-OneshotTideIntent get the next tide for {Duration} for {Date}
-OneshotTideIntent get high tide for {Duration} California {Date}
-OneshotTideIntent when is high tide for {Duration} {Date}
-OneshotTideIntent tide information for {Duration} on {Date}
-OneshotTideIntent when is high tide in {Duration} on {Date}
-OneshotTideIntent when is the next tide for {Duration} for {Date}
-OneshotTideIntent when is next tide in {Duration} {Type} on {Date}
-OneshotTideIntent get high tide for {Duration} {Date}
-OneshotTideIntent get the high tide for {Duration} {Date}
-OneshotTideIntent tide information for {Duration} on {Date}
-OneshotTideIntent get tide information for {Duration} on {Date}
-OneshotTideIntent get tides for {Duration} {Date}
+OneshotStartPilatesClassIntent start class
+OneshotStartPilatesClassIntent start class for {Duration}
+OneshotStartPilatesClassIntent start class for {Duration} {Type}
+OneshotStartPilatesClassIntent start class for {Duration} {Type} {Date}
+OneshotStartPilatesClassIntent start class for {Duration} {Date}
+OneshotStartPilatesClassIntent start class for {Date}
+OneshotStartPilatesClassIntent start class {Date}
+OneshotStartPilatesClassIntent get the high tide for {Duration} {Date}
+OneshotStartPilatesClassIntent get the next tide for {Duration} for {Date}
+OneshotStartPilatesClassIntent get the tides for {Date}
+OneshotStartPilatesClassIntent get tide information for {Duration}
+OneshotStartPilatesClassIntent get tide information for {Duration} {Type}
+OneshotStartPilatesClassIntent get tide information for {Duration} {Type} on {Date}
+OneshotStartPilatesClassIntent get tide information for {Duration} Duration
+OneshotStartPilatesClassIntent get tide information for {Duration} for {Date}
+OneshotStartPilatesClassIntent get tide information for {Duration} on {Date}
+OneshotStartPilatesClassIntent get tide information for {Duration} {Date}
+OneshotStartPilatesClassIntent get tides for {Duration}
+OneshotStartPilatesClassIntent get tides for {Duration} {Type}
+OneshotStartPilatesClassIntent get tides for {Duration} {Type} {Date}
+OneshotStartPilatesClassIntent get tides for {Duration} {Date}
+OneshotStartPilatesClassIntent tide information
+OneshotStartPilatesClassIntent tide information for {Duration}
+OneshotStartPilatesClassIntent tide information for {Duration} {Type}
+OneshotStartPilatesClassIntent tide information for {Duration} on {Date}
+OneshotStartPilatesClassIntent tide information for {Date}
+OneshotStartPilatesClassIntent when high tide is
+OneshotStartPilatesClassIntent when is high tide
+OneshotStartPilatesClassIntent when is high tide for {Duration} {Date}
+OneshotStartPilatesClassIntent when is high tide in {Duration}
+OneshotStartPilatesClassIntent when is high tide in {Duration} {Type}
+OneshotStartPilatesClassIntent when is high tide in {Duration} Duration
+OneshotStartPilatesClassIntent when is high tide in {Duration} on {Date}
+OneshotStartPilatesClassIntent when is high tide on {Date}
+OneshotStartPilatesClassIntent when is high tide {Date}
+OneshotStartPilatesClassIntent when is next tide
+OneshotStartPilatesClassIntent when is next tide in {Duration} {Type}
+OneshotStartPilatesClassIntent when is next tide in {Duration} {Type} on {Date}
+OneshotStartPilatesClassIntent when is next tide on {Date}
+OneshotStartPilatesClassIntent when is the highest tide in {Duration}
+OneshotStartPilatesClassIntent when is the highest tide in {Duration} {Date}
+OneshotStartPilatesClassIntent when is the highest tide {Date}
+OneshotStartPilatesClassIntent when is the next high tide {Date}
+OneshotStartPilatesClassIntent when is the next highest water
+OneshotStartPilatesClassIntent when is the next highest water for {Duration}
+OneshotStartPilatesClassIntent when is the next highest water for {Duration} {Type} for {Date}
+OneshotStartPilatesClassIntent when is the next highest water for {Duration} {Type}
+OneshotStartPilatesClassIntent when is the next highest water for {Date}
+OneshotStartPilatesClassIntent when is the next tide for {Duration}
+OneshotStartPilatesClassIntent when is the next tide for {Duration} {Type}
+OneshotStartPilatesClassIntent when is the next tide for {Duration} Duration
+OneshotStartPilatesClassIntent when is the next tide for {Duration} for {Date}
+OneshotStartPilatesClassIntent when is the next tide for {Date}
+OneshotStartPilatesClassIntent when is today's high tide
+OneshotStartPilatesClassIntent when is today's highest tide {Date}
+OneshotStartPilatesClassIntent when will the water be highest for {Duration}
+OneshotStartPilatesClassIntent when will the water be highest for {Duration} for {Date}
+OneshotStartPilatesClassIntent when will the water be highest for {Date}
+OneshotStartPilatesClassIntent when will the water be highest {Date}
+OneshotStartPilatesClassIntent when is high tide on {Date}
+OneshotStartPilatesClassIntent when is the next tide for {Date}
+OneshotStartPilatesClassIntent when is next tide on {Date}
+OneshotStartPilatesClassIntent get the tides for {Date}
+OneshotStartPilatesClassIntent when is the highest tide {Date}
+OneshotStartPilatesClassIntent when is the next highest water for {Date}
+OneshotStartPilatesClassIntent when is high tide on {Date}
+OneshotStartPilatesClassIntent get high tide for {Date}
+OneshotStartPilatesClassIntent get high tide {Date}
+OneshotStartPilatesClassIntent when is high tide {Date}
+OneshotStartPilatesClassIntent tide information for {Date}
+OneshotStartPilatesClassIntent when is high tide in {Duration} on {Date}
+OneshotStartPilatesClassIntent get the next tide for {Duration} for {Date}
+OneshotStartPilatesClassIntent get high tide for {Duration} California {Date}
+OneshotStartPilatesClassIntent when is high tide for {Duration} {Date}
+OneshotStartPilatesClassIntent tide information for {Duration} on {Date}
+OneshotStartPilatesClassIntent when is high tide in {Duration} on {Date}
+OneshotStartPilatesClassIntent when is the next tide for {Duration} for {Date}
+OneshotStartPilatesClassIntent when is next tide in {Duration} {Type} on {Date}
+OneshotStartPilatesClassIntent get high tide for {Duration} {Date}
+OneshotStartPilatesClassIntent get the high tide for {Duration} {Date}
+OneshotStartPilatesClassIntent tide information for {Duration} on {Date}
+OneshotStartPilatesClassIntent get tide information for {Duration} on {Date}
+OneshotStartPilatesClassIntent get tides for {Duration} {Date}
 
 SupportedCitiesIntent what cities
 SupportedCitiesIntent what cities are supported
