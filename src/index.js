@@ -23,10 +23,16 @@
  * App ID for the skill
  * Find it at : https://console.aws.amazon.com/lambda/home
  */
-var APP_ID = 'amzn1.echo-sdk-ams.app.ef7b5d42-f176-4806-9ea3-6ef6d041c2aa';
-var API_KEY = 'MPP-Allow-API-Call';
+var APP_ID = ''; //get an APP ID - i.e amzn1.echo-sdk-ams.app.xxxxxx
 
-var http = require('http'),
+/**
+ * Get an API_KEY from A Lot Of Pilates Developer site 
+ * This will allow to retrieve Pilates classes
+ * curl "https://api-2445581417326.apicast.io:443/api/v1/workouts/680" -H'api_key: <your alop_api_key>'
+ **/
+var API_KEY = ''; //get an api key from https://a-lot-of-pilates.3scale.net/docs
+
+var https = require('https'),
     alexaDateUtil = require('./alexaDateUtil');
 
 
@@ -130,8 +136,8 @@ function handleWelcomeRequest(response) {
         var speechOutput = {
             /*speech: "<speak>Welcome to A Lot Of Pilates - Ready to feel great?. " + "<audio src='https://s3.amazonaws.com/ask-storage/tidePooler/OceanWaves.mp3'/>" + 
             "When ready say start class" + "</speak>",*/
-            speech: "<speak>Welcome to A Lot Of Pilates - Ready to feel great?. " +
-            "<break time=\"1s\" />. " + "When ready say start class" + "</speak>",
+            speech: "<speak>Welcome to A Lot Of Pilates - Ready to feel great ? " +
+            ".<break time=\"1s\" />. " + "When ready say start class" + "</speak>",
             type: AlexaSkill.speechOutputType.SSML
         },
         repromptOutput = {
@@ -300,7 +306,7 @@ function getPilatesSequenceResponse(duration, type, response) {
         
         if (err) {
             speechOutput = {
-                speech:"Sorry, the A Lot Of Pilates service is experiencing a problem. Please try again later",
+                speech:"Sorry, the A Lot Of Pilates service is experiencing a problem. Please access ALotOfPilates.com to take video classes now.",
                 type: AlexaSkill.speechOutputType.PLAIN_TEXT
             };     
             response.tell(speechOutput);
@@ -311,7 +317,7 @@ function getPilatesSequenceResponse(duration, type, response) {
                 teachClass(alopAPIResponse, response);                   
             }else{
                 speechOutput = {
-                    speech:"Sorry, the A Lot Of Pilates service is experiencing a problem. Please try again later",
+                    speech:"Sorry, the A Lot Of Pilates service is experiencing a problem. Please access ALotOfPilates.com to take video classes now.",
                      type: AlexaSkill.speechOutputType.PLAIN_TEXT
                 };
                 response.tell(speechOutput);
@@ -443,25 +449,25 @@ function handleExerciseTimings(pose){
 }
 /**
  * Uses ALOP API, triggered by GET on /workouts API with category and duration querystrings.
- * DEV version: curl -H 'Content-Type: application/json' -H 'Accept: application/json' -X GET http://alop.herokuapp.com/api/v1/workouts/680 -H "X-3scale-Proxy-Secret-Token:MPP-Allow-API-Call"
+ * https://api-2445581417326.apicast.io:443/api/
  */
 function makeALOPRequest(duration, type, alopResponseCallback) {
        
     
      // An object of options to indicate where to post to    
     var post_options = {
-      hostname: 'alop.herokuapp.com',
-      port: 80,
+      hostname: 'api-2445581417326.apicast.io',
+      port: 443,
       path: '/api/v1/workouts/680', //680, 649
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
-        'X-3scale-Proxy-Secret-Token': 'MPP-Allow-API-Call'
+        'api_key': API_KEY
       }
     };
 
     console.log("makeALOPRequest");
-    var req = http.request(post_options, function(res) {
+    var req = https.request(post_options, function(res) {
         console.log('STATUS: ' + res.statusCode);
         res.setEncoding('utf8');
         var alopResponseString = '';
