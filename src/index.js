@@ -30,10 +30,12 @@ var APP_ID = ''; //get an APP ID - i.e amzn1.echo-sdk-ams.app.xxxxxx
  * This will allow to retrieve Pilates classes
  * curl "https://api-2445581417326.apicast.io:443/api/v1/workouts/680" -H'api_key: <your alop_api_key>'
  **/
-var API_KEY = ''; //get an api key from https://a-lot-of-pilates.3scale.net/docs
+ var API_KEY =''; //get an api key from https://a-lot-of-pilates.3scale.net/docs and store in a config.js file
+
 
 var https = require('https'),
-    alexaDateUtil = require('./alexaDateUtil');
+    alexaDateUtil = require('./alexaDateUtil'),
+    config = require('./config');
 
 
 /**
@@ -48,7 +50,7 @@ var AlexaSkill = require('./AlexaSkill');
  * @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Introduction_to_Object-Oriented_JavaScript#Inheritance
  */
 var ALotOfPilates = function () {
-    AlexaSkill.call(this, APP_ID);
+    AlexaSkill.call(this, config.app_id); //I store the APP_ID in a config file instead of global variable (APP_ID)
 };
 
 // Extend AlexaSkill
@@ -134,10 +136,10 @@ var DURATIONS = {
 function handleWelcomeRequest(response) {
    
         var speechOutput = {
-            /*speech: "<speak>Welcome to A Lot Of Pilates - Ready to feel great?. " + "<audio src='https://s3.amazonaws.com/ask-storage/tidePooler/OceanWaves.mp3'/>" + 
-            "When ready say start class" + "</speak>",*/
-            speech: "<speak>Welcome to A Lot Of Pilates - Ready to feel great ? " +
-            ".<break time=\"1s\" />. " + "When ready say start class" + "</speak>",
+            speech: "<speak>Welcome to A Lot Of Pilates - Ready to feel great?. " + "<audio src='https://s3.amazonaws.com/ask-storage/tidePooler/OceanWaves.mp3'/>" + 
+            "When ready say start class" + "</speak>",
+            //speech: "<speak>Welcome to A Lot Of Pilates - Ready to feel great ? " +
+            //".<break time=\"1s\" />. " + "When ready say start class" + "</speak>",
             type: AlexaSkill.speechOutputType.SSML
         },
         repromptOutput = {
@@ -327,9 +329,8 @@ function getPilatesSequenceResponse(duration, type, response) {
 }
 
 function teachClass(alopAPIResponse, response){  
-     console.log("START Teaching Pilates Class"); 
-     var speechPoseOutput =""; 
-     console.log("This workout has " + alopAPIResponse.poses.length + " exercises");
+    console.log("START Teaching Pilates Class"); 
+    var speechPoseOutput ="";
     for(var i = 0; i < alopAPIResponse.poses.length; i++){
         var pose = alopAPIResponse.poses[i];                          
         if( i === 0 ){
@@ -339,10 +340,10 @@ function teachClass(alopAPIResponse, response){
         }
         
         speechPoseOutput += ". <break time=\"0.2s\" />. " + pose.repetition;  
-        speechPoseOutput += ". <break time=\"3s\" />. ";
-        //speechPoseOutput += handleExerciseTimings(pose);
+        speechPoseOutput += ". <break time=\"1s\" />. ";
+        speechPoseOutput += handleExerciseTimings(pose);
     }
-    //speechPoseOutput += handleEndClassRequest();
+    speechPoseOutput += handleEndClassRequest();
     //console.log(speechPoseOutput);
     var speechText ="<speak>" + speechPoseOutput + "</speak>";
         var speechOutput = {
@@ -363,8 +364,8 @@ function handleExerciseTimings(pose){
 
         if(pose.id === 133){ //Hold it for 20 to 30 seconds
             speechExerciseOutput += "Start holding the " + pose.name;
-            speechExerciseOutput += "<break time=\"10s\" />. "; 
-            speechExerciseOutput += "10 seconds"; 
+            speechExerciseOutput += "<break time=\"10s\" />. ";
+            speechExerciseOutput += "10 seconds";
             speechExerciseOutput += ".<break time=\"10s\" />. ";
             speechExerciseOutput += ".<break time=\"5s\" />. ";
             speechExerciseOutput += "Almost done";
@@ -395,7 +396,7 @@ function handleExerciseTimings(pose){
             speechExerciseOutput += "Inhale";
             speechExerciseOutput += ".<break time=\"4s\" />. ";
             speechExerciseOutput += "Exhale";
-            speechExerciseOutput += ".<break time=\"16s\" />. ";
+            speechExerciseOutput += ".<break time=\"6s\" />. ";
         }else if (pose.id === 266){ //Pulse your arms 100 times            
             speechExerciseOutput += ".<break time=\"2s\" />. ";
             speechExerciseOutput += "Inhale through the nose for 5 counts";
@@ -436,10 +437,10 @@ function handleExerciseTimings(pose){
             speechExerciseOutput += ".<break time=\"10s\" />";
             speechExerciseOutput += ".<break time=\"10s\" />";
         }else{  //Generic timining   
-            console.log("Exercise duration " + pose.duration + " formatted " + getFormattedDuration(pose.duration));
+            //console.log("Exercise duration " + pose.duration + " formatted " + getFormattedDuration(pose.duration));
 
             speechExerciseOutput += ". Go. ";
-            //var duration = Math.floor(40 / 10);
+            var duration = getFormattedDuration(pose.duration);
             for(var i = 0; i < 4; i++){
                 speechExerciseOutput += "<break time=\"10s\" />. ";
             }
@@ -458,17 +459,17 @@ function makeALOPRequest(duration, type, alopResponseCallback) {
     var post_options = {
       hostname: 'api-2445581417326.apicast.io',
       port: 443,
-      path: '/api/v1/workouts/680', //680, 649
+      path: '/api/v1/workouts/649', //680, 649
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
-        'api_key': API_KEY
+        'api_key': config.api_key ///I store the APP_ID in a config file instead of global variable (API_KEY)
       }
     };
 
     console.log("makeALOPRequest");
     var req = https.request(post_options, function(res) {
-        console.log('STATUS: ' + res.statusCode);
+        console.log('STATUS: ' + res.statusCode);       
         res.setEncoding('utf8');
         var alopResponseString = '';
 
