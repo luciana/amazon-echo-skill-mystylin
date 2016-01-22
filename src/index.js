@@ -34,7 +34,6 @@ var APP_ID = ''; //get an APP ID - i.e amzn1.echo-sdk-ams.app.xxxxxx
 
 
 var https = require('https'),
-    alexaDateUtil = require('./alexaDateUtil'),
     config = require('./config');
 
 
@@ -201,34 +200,6 @@ function handleDurationDialogRequest(intent, session, response) {
     }
 }
 
-/**
- * Handles the dialog step where the user provides a date
- */
-function handleDateDialogRequest(intent, session, response) {
-
-    var date = getDateFromIntent(intent),
-        repromptText,
-        speechOutput;
-    if (!date) {
-        repromptText = "Please try again saying a day of the week, for example, Saturday. " + "For which date would you like tide information?";
-        speechOutput = "I'm sorry, I didn't understand that date. " + repromptText;
-
-        response.ask(speechOutput, repromptText);
-        return;
-    }
-
-    // if we don't have a city yet, go to city. If we have a city, we perform the final request
-    if (session.attributes.duration) {
-       // getPilatesSequenceResponse(session.attributes.duration, date, response);
-    } else {
-        // The user provided a date out of turn. Set date in session and prompt for city
-        //session.attributes.date = date;
-        //speechOutput = "For which duration would you like  " + date.displayDate + "?";
-        //repromptText = "For which duration?";
-
-        //response.ask(speechOutput, repromptText);
-    }
-}
 
 /**
  * Handle no slots, or slot(s) with no values.
@@ -239,7 +210,7 @@ function handleDateDialogRequest(intent, session, response) {
  */
 function handleNoSlotDialogRequest(intent, session, response) {
     if (session.attributes.duration) {
-        // get date re-prompt
+        // get duration re-prompt
         var repromptText = "Please try again saying how long you want the class to be, for example, 30 minutes. ";
         var speechOutput = repromptText;
 
@@ -279,19 +250,6 @@ function handleOneshotStartPilatesClassRequest(intent, session, response) {
     }
     console.log("Duration Station " + durationStation.duration + " id " + durationStation.duration_id);
     var type = 2;
-    // Determine custom date
-    //var date = getDateFromIntent(intent);
-    //if (!date) {
-        // Invalid date. set city in session and prompt for date
-        //session.attributes.duration = durationStation;
-        //repromptText = "Please try again saying a day of the week, for example, Saturday. " + "For which date would you like tide information?";
-        //speechOutput = "I'm sorry, I didn't understand that date. " + repromptText;
-
-        //response.ask(speechOutput, repromptText);
-        //return;
-    //}
-
-    // all slots filled, either from the user or by default values. Move to final request
     getPilatesSequenceResponse(durationStation, type, response);
 }
 
@@ -409,9 +367,10 @@ function handleExerciseTimings(pose){
             speechExerciseOutput += ".<break time=\"2s\" />. ";
             speechExerciseOutput += "Exhale";
             speechExerciseOutput += ".<break time=\"2s\" />. ";
-            speechExerciseOutput += "Breathe deeply into the back ribs and enjoy";
+            speechExerciseOutput += "Breathe deeply into the back ribs and relax";
             speechExerciseOutput += ".<break time=\"4s\" />. ";
             speechExerciseOutput += ".<break time=\"6s\" />. ";
+            speechExerciseOutput += ".<break time=\"10s\" />. ";
         }else if (pose.id === 160){ //Rolling like a ball            
             speechExerciseOutput += "Get in position for " + pose.name;
             speechExerciseOutput += "<break time=\"2s\" />. ";
@@ -421,7 +380,7 @@ function handleExerciseTimings(pose){
             speechExerciseOutput += ".<break time=\"2s\" />. ";
             speechExerciseOutput += "Breathe deeply into the back ribs";
             speechExerciseOutput += ".<break time=\"0.4s\" />. ";
-            speechExerciseOutput += "and enjoy";
+            speechExerciseOutput += "Relax";
             speechExerciseOutput += ".<break time=\"10s\" />. ";
         }else if (pose.id === 310){ //Pelvic Tilt         
             speechExerciseOutput += "Lay on your back with your knees bent for the " + pose.name;
@@ -554,9 +513,7 @@ function handleExerciseTimings(pose){
             speechExerciseOutput += "Legs width apart and knees soft";
             speechExerciseOutput += ".<break time=\"0.5s\" />. ";
             speechExerciseOutput += "Inhale to lower the chin towards the chest";
-            speechExerciseOutput += ".<break time=\"0.1s\" />. ";
-            speechExerciseOutput += "letting the head by heavy";
-            speechExerciseOutput += ".<break time=\"1s\" />. ";
+            speechExerciseOutput += ".<break time=\"2s\" />. ";
             speechExerciseOutput += "Exhale";
             speechExerciseOutput += ".<break time=\"1s\" />. ";
             speechExerciseOutput += "Inhale and pause at the bottom";
@@ -696,38 +653,6 @@ function getDurationFromIntent(intent, assignDefault) {
                 duration: durationFrame
             };
         }
-    }
-}
-
-/**
- * Gets the date from the intent, defaulting to today if none provided,
- * or returns an error
- */
-function getDateFromIntent(intent) {
-
-    var dateSlot = intent.slots.Date;
-    // slots can be missing, or slots can be provided but with empty value.
-    // must test for both.
-    if (!dateSlot || !dateSlot.value) {
-        // default to today
-        return {
-            displayDate: "Today",
-            requestDateParam: "date=today"
-        };
-    } else {
-
-        var date = new Date(dateSlot.value);
-
-        // format the request date like YYYYMMDD
-        var month = (date.getMonth() + 1);
-        month = month < 10 ? '0' + month : month;
-        var dayOfMonth = date.getDate();
-        dayOfMonth = dayOfMonth < 10 ? '0' + dayOfMonth : dayOfMonth;
-        var requestDay = "begin_date=" + date.getFullYear() + month + dayOfMonth + "&range=24";
-        return {
-            displayDate: alexaDateUtil.getFormattedDate(date),
-            requestDateParam: requestDay
-        };
     }
 }
 
