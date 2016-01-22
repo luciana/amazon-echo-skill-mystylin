@@ -136,10 +136,10 @@ var DURATIONS = {
 function handleWelcomeRequest(response) {
    
         var speechOutput = {
-            speech: "<speak>Welcome to A Lot Of Pilates - Ready to feel great?. " + "<audio src='https://s3.amazonaws.com/ask-storage/tidePooler/OceanWaves.mp3'/>" + 
-            "When ready say start class" + "</speak>",
-            //speech: "<speak>Welcome to A Lot Of Pilates - Ready to feel great ? " +
-            //".<break time=\"1s\" />. " + "When ready say start class" + "</speak>",
+            /*speech: "<speak>Welcome to A Lot Of Pilates - Ready to feel great?. " + "<audio src='https://s3.amazonaws.com/ask-storage/tidePooler/OceanWaves.mp3'/>" + 
+            "When ready say start class" + "</speak>",*/
+            speech: "<speak>Welcome to A Lot Of Pilates - Get ready to feel great! " +
+            ".<break time=\"1s\" />. " + "When ready say start class" + "</speak>",
             type: AlexaSkill.speechOutputType.SSML
         },
         repromptOutput = {
@@ -151,7 +151,7 @@ function handleWelcomeRequest(response) {
 }
 
 function handleEndClassRequest(){
-    return "Good job. You are all done. Hope you feel as great as me! Visit ALotOfPilates.com for video classes.";
+    return "Good job! You are all done. Hope you feel as great as me! Visit ALotOfPilates.com for video classes.";
 }
 
 function handleHelpRequest(response) {
@@ -328,8 +328,7 @@ function getPilatesSequenceResponse(duration, type, response) {
     });
 }
 
-function teachClass(alopAPIResponse, response){  
-    console.log("START Teaching Pilates Class"); 
+function teachClass(alopAPIResponse, response){      
     var speechPoseOutput ="";
     for(var i = 0; i < alopAPIResponse.poses.length; i++){
         var pose = alopAPIResponse.poses[i];                          
@@ -360,17 +359,26 @@ function teachClass(alopAPIResponse, response){
 function handleExerciseTimings(pose){
     var speechExerciseOutput ="";
     var sideLegSeriesPoseIdArray = [431,432,434,435,326];
-    //var sideLegSeriesPoseIdArray = [];
+    var plankPosesIdArray = [133,564];
 
-        if(pose.id === 133){ //Hold it for 20 to 30 seconds
-            speechExerciseOutput += "Start holding the " + pose.name;
-            speechExerciseOutput += "<break time=\"10s\" />. ";
+        if (plankPosesIdArray.indexOf(pose.id) > -1){//Planks - Hold it for 20 to 30 seconds
+            speechExerciseOutput += "Get in position for the " + pose.name;
+            speechExerciseOutput += "<break time=\"3s\" />. ";
+            speechExerciseOutput += "Start holding the plank";
+            speechExerciseOutput += "<break time=\"2s\" />. ";
+            speechExerciseOutput += "Imagine a straight line from the crown of the head down to the toes.";
+            speechExerciseOutput += "<break time=\"7s\" />. ";
             speechExerciseOutput += "10 seconds";
-            speechExerciseOutput += ".<break time=\"10s\" />. ";
+            speechExerciseOutput += "Breath in through the nose, out through the mouth.";
+            speechExerciseOutput += ".<break time=\"8s\" />. ";
+            speechExerciseOutput += "Engage your legs by squeezing an imaginary ball between them";
             speechExerciseOutput += ".<break time=\"5s\" />. ";
             speechExerciseOutput += "Almost done";
             speechExerciseOutput += ".<break time=\"3s\" />. ";
-            speechExerciseOutput += "done. ";
+            speechExerciseOutput += "you are  ";
+            speechExerciseOutput += ".<break time=\"0.1s\" />. ";
+            speechExerciseOutput += "done. Relax ";
+            speechExerciseOutput += ".<break time=\"10s\" />. ";
         }else if (sideLegSeriesPoseIdArray.indexOf(pose.id) > -1){//Side Leg Series
             speechExerciseOutput += "Lie on one side with bottom arm bent for head to lay on.";
             speechExerciseOutput += ".<break time=\"2s\" />";
@@ -390,15 +398,69 @@ function handleExerciseTimings(pose){
             speechExerciseOutput += ".<break time=\"10s\" /> ";
             speechExerciseOutput += ".<break time=\"10s\" /> ";
             speechExerciseOutput += ".<break time=\"10s\" /> ";
-        }else if (pose.id === 327){ //Inhale, Exhale 3-5 times"
-            speechExerciseOutput += "<break time=\"2s\" />. ";
-            speechExerciseOutput += "Relax in " + pose.name;
-            speechExerciseOutput += "Inhale";
-            speechExerciseOutput += ".<break time=\"4s\" />. ";
-            speechExerciseOutput += "Exhale";
-            speechExerciseOutput += ".<break time=\"6s\" />. ";
-        }else if (pose.id === 266){ //Pulse your arms 100 times            
+        }else if (pose.id === 327){ //Inhale, Exhale 3-5 times"            
+            speechExerciseOutput += "Start seated with your knees bent";
+            speechExerciseOutput += "<break time=\"0.3s\" />. ";
+            speechExerciseOutput += "Lift feet off the floor";       
+            speechExerciseOutput += ".<break time=\"0.2s\" />. ";
+            speechExerciseOutput += "Place your hands on the backs of your thigh";
+            speechExerciseOutput += ".<break time=\"0.2s\" />. ";
+            speechExerciseOutput += "Look down at your belly by curling the chin towards the chest";
             speechExerciseOutput += ".<break time=\"2s\" />. ";
+            speechExerciseOutput += "Exhale";
+            speechExerciseOutput += ".<break time=\"2s\" />. ";
+            speechExerciseOutput += "Breathe deeply into the back ribs and enjoy";
+            speechExerciseOutput += ".<break time=\"4s\" />. ";
+            speechExerciseOutput += ".<break time=\"6s\" />. ";
+        }else if (pose.id === 160){ //Rolling like a ball            
+            speechExerciseOutput += "Get in position for " + pose.name;
+            speechExerciseOutput += "<break time=\"2s\" />. ";
+            speechExerciseOutput += "Inhale";
+            speechExerciseOutput += ".<break time=\"2s\" />. ";
+            speechExerciseOutput += "Exhale";
+            speechExerciseOutput += ".<break time=\"2s\" />. ";
+            speechExerciseOutput += "Breathe deeply into the back ribs";
+            speechExerciseOutput += ".<break time=\"0.4s\" />. ";
+            speechExerciseOutput += "and enjoy";
+            speechExerciseOutput += ".<break time=\"10s\" />. ";
+        }else if (pose.id === 310){ //Pelvic Tilt         
+            speechExerciseOutput += "Lay on your back with your knees bent for the " + pose.name;
+            speechExerciseOutput += ".<break time=\"0.2s\" />. ";
+            speechExerciseOutput += "Place your heels under the knees";
+            speechExerciseOutput += ".<break time=\"0.2s\" />. ";
+            speechExerciseOutput += "and hips width apart";
+            speechExerciseOutput += ".<break time=\"0.2s\" />. ";
+            speechExerciseOutput += "Inhale, with pelvis in neutral position";
+            speechExerciseOutput += ".<break time=\"1s\" />. ";
+            speechExerciseOutput += "Exhale, tilt the pelvis back";
+            speechExerciseOutput += ".<break time=\"2s\" />. ";
+            speechExerciseOutput += "Repeat 4 more times.";
+            speechExerciseOutput += ".<break time=\"4s\" />. ";
+            speechExerciseOutput += ".<break time=\"6s\" />. ";
+        }else if (pose.id === 511){ //Basic Bridge
+            speechExerciseOutput += "Stay on your back with your knees bent";
+            speechExerciseOutput += ".<break time=\"0.5s\" />. ";
+            speechExerciseOutput += "Place your heels under the knees";
+            speechExerciseOutput += ".<break time=\"1s\" />. ";
+            speechExerciseOutput += "Inhale, with pelvis is neutral position";
+            speechExerciseOutput += ".<break time=\"1s\" />. ";
+            speechExerciseOutput += "Exhale, and press your feet into the mat";
+            speechExerciseOutput += ".<break time=\"0.5s\" />. ";
+            speechExerciseOutput += "squeeze your butt as you lift your hips up off the mat.";
+            speechExerciseOutput += ".<break time=\"2s\" />. ";
+            speechExerciseOutput += "Inhale. Stay in the position";
+            speechExerciseOutput += ".<break time=\"1s\" />. ";
+            speechExerciseOutput += "Exhale. Roll your spine down onto the mat one vertebrae at a time";
+            speechExerciseOutput += ".<break time=\"1s\" />. ";
+            speechExerciseOutput += "Repeat 6 more times.";
+            speechExerciseOutput += ".<break time=\"4s\" />. ";
+            speechExerciseOutput += ".<break time=\"6s\" />. ";
+            speechExerciseOutput += ".<break time=\"6s\" />. ";
+        }else if (pose.id === 266){ //Pulse your arms 100 times    
+            speechExerciseOutput += "Get in position for the " + pose.name;  
+            speechExerciseOutput += ".<break time=\"2s\" />. ";
+            speechExerciseOutput += "Pulse your arms";
+            speechExerciseOutput += ".<break time=\"0.1s\" /> ";
             speechExerciseOutput += "Inhale through the nose for 5 counts";
             speechExerciseOutput += ".<break time=\"3s\" />. ";
             speechExerciseOutput += "Exhale through the mouth for 5 counts.";
@@ -407,42 +469,112 @@ function handleExerciseTimings(pose){
             speechExerciseOutput += ".<break time=\"3s\" />. ";
             speechExerciseOutput += "Exhale 5 times";
             speechExerciseOutput += ".<break time=\"3s\" />. ";
-            speechExerciseOutput += "Repeat 8 more times";
-            speechExerciseOutput += ".<break time=\"6s\" /> ";
-            speechExerciseOutput += "<break time=\"6s\" />. ";
-            speechExerciseOutput += "<break time=\"6s\" />. ";
-            speechExerciseOutput += "<break time=\"6s\" />. ";
-            speechExerciseOutput += "Keep going 5 more times.";
-            speechExerciseOutput += "<break time=\"6s\" /> ";
-            speechExerciseOutput += "<break time=\"6s\" />";
-            speechExerciseOutput += "<break time=\"6s\" />";
-            speechExerciseOutput += "<break time=\"6s\" />";
-            speechExerciseOutput += "Almost there! 90";
-            speechExerciseOutput += ".<break time=\"5s\" />. ";
-            speechExerciseOutput += "Good job! Relax.";
-            speechExerciseOutput += ".<break time=\"2s\" />. ";
-        }else if (pose.id === 541){ //Repeat 3-5 times (standing roll down)
-            speechExerciseOutput += "Let's start standing for the " + pose.name;
-            speechExerciseOutput += ".<break time=\"2s\" />. ";
-            speechExerciseOutput += "Inhale to lower the chin towards the chest, letting the head by heavy";
-            speechExerciseOutput += ".<break time=\"2s\" />. ";
+            speechExerciseOutput += "Inhale";
+            speechExerciseOutput += ".<break time=\"3s\" />. ";
             speechExerciseOutput += "Exhale";
-            speechExerciseOutput += ".<break time=\"2s\" />. ";
-            speechExerciseOutput += "Inhale and pause at the bottom";
-            speechExerciseOutput += ".<break time=\"2s\" />. ";
-            speechExerciseOutput += "Exhale and come up. Head comes up last.";
+            speechExerciseOutput += ".<break time=\"3s\" />. ";
+            speechExerciseOutput += "Repeat 7 more times";
+            speechExerciseOutput += "<break time=\"3s\" />. ";
+            speechExerciseOutput += "<break time=\"3s\" />. ";
+            speechExerciseOutput += "<break time=\"3s\" />. ";
+            speechExerciseOutput += "Keep going 5 more times.";
+            speechExerciseOutput += "<break time=\"3s\" /> ";
+            speechExerciseOutput += "<break time=\"3s\" />";
+            speechExerciseOutput += "<break time=\"3s\" />";
+            speechExerciseOutput += "<break time=\"3s\" />";
+            speechExerciseOutput += "Almost there! 90";
+            speechExerciseOutput += ".<break time=\"3s\" />. ";
+            speechExerciseOutput += "Good job! Relax.";
             speechExerciseOutput += ".<break time=\"10s\" />. ";
+            speechExerciseOutput += ".<break time=\"10s\" />. ";
+        }else if (pose.id === 547){ //Reverse Plank
+            speechExerciseOutput += "Begin seated with your hands placed on the ground for the " + pose.name;
+            speechExerciseOutput += "<break time=\"0.7s\" />. ";
+            speechExerciseOutput += "Stand into your palms to engage the backs of the upper arm and to help lift the chest.";
+             speechExerciseOutput += "<break time=\"0.2s\" />. ";
+            speechExerciseOutput += "Inhale and lift your hips off the floor ";
+            speechExerciseOutput += "<break time=\"0.5s\" />. ";
+            speechExerciseOutput += "Exhale and carefully control your hips to the floor";
+            speechExerciseOutput += ".<break time=\"2s\" />. ";
             speechExerciseOutput += "Repeat 2 more times";
-            speechExerciseOutput += ".<break time=\"10s\" />";
-            speechExerciseOutput += ".<break time=\"10s\" />";
-            speechExerciseOutput += ".<break time=\"10s\" />";
+            speechExerciseOutput += ".<break time=\"4s\" />. ";     
+            speechExerciseOutput += ".<break time=\"6s\" />. ";
+        }else if (pose.id === 291){ //Swan Dive
+            speechExerciseOutput += "Lay on your back ";
+            speechExerciseOutput += "<break time=\"2s\" />. ";
+            speechExerciseOutput += "Start";
+            speechExerciseOutput += ".<break time=\"10s\" />. ";     
+            speechExerciseOutput += ".<break time=\"9s\" />. ";
+         }else if (pose.id === 528){ //Toe Taps
+            speechExerciseOutput += "Lay on your back with your knees bent";
+            speechExerciseOutput += "<break time=\"0.2s\" />. ";
+            speechExerciseOutput += "lift your legs to tabletop";
+            speechExerciseOutput += "<break time=\"0.7s\" />. ";
+            speechExerciseOutput += "Inhale. Lower your right leg";
+            speechExerciseOutput += "<break time=\"0.1s\" />. ";
+            speechExerciseOutput += "keeping them at 90 degree angle ";
+            speechExerciseOutput += "<break time=\"0.2s\" />. ";
+            speechExerciseOutput += "Exhale. Lift right leg back up to table top";
+            speechExerciseOutput += "<break time=\"1s\" />. ";
+            speechExerciseOutput += "Alternate legs";
+            speechExerciseOutput += ".<break time=\"1s\" />. ";
+            speechExerciseOutput += "Repeat movement at your own pace";
+            speechExerciseOutput += ".<break time=\"2s\" />. ";    
+            speechExerciseOutput += ".<break time=\"4s\" />. ";            
+            speechExerciseOutput += "<break time=\"9s\" />. ";
+        }else if (pose.id === 499){ //Toe Taps
+            speechExerciseOutput += "Lift both legs to tabletop";
+            speechExerciseOutput += "<break time=\"0.7s\" />. ";
+            speechExerciseOutput += "Inhale as you lower both legs ";
+            speechExerciseOutput += "<break time=\"0.1s\" />. ";
+            speechExerciseOutput += "keeping them at 90 degree angle ";
+             speechExerciseOutput += "<break time=\"0.2s\" />. ";
+            speechExerciseOutput += "Exhale to lift both legs back up to table top";
+            speechExerciseOutput += "<break time=\"0.5s\" />. ";
+            speechExerciseOutput += "Repeat movement a few more times";
+            speechExerciseOutput += ".<break time=\"4s\" />. ";
+            speechExerciseOutput += ".<break time=\"6s\" />. ";
+            speechExerciseOutput += "<break time=\"10s\" />. ";
+            speechExerciseOutput += ".<break time=\"10s\" />. ";
+        }else if (pose.id === 529){ //Basic Upper Curl
+            speechExerciseOutput += "Lift both legs to tabletop";
+            speechExerciseOutput += "<break time=\"0.7s\" />. ";
+            speechExerciseOutput += "Place your arms behind your head. ";
+             speechExerciseOutput += "<break time=\"1s\" />. ";
+            speechExerciseOutput += "Lift and lower the torso";
+            speechExerciseOutput += "<break time=\"3s\" />. ";
+            speechExerciseOutput += "Repeat movement a few more times";
+            speechExerciseOutput += ".<break time=\"4s\" />. ";
+            speechExerciseOutput += ".<break time=\"6s\" />. ";
+            speechExerciseOutput += ".<break time=\"10s\" />. ";
+            speechExerciseOutput += ".<break time=\"10s\" />. ";
+        }else if (pose.id === 541){ //Repeat 3-5 times (standing roll down)
+            speechExerciseOutput += "Let's stand up for this pose ";
+            speechExerciseOutput += ".<break time=\"2s\" />. ";
+            speechExerciseOutput += "Legs width apart and knees soft";
+            speechExerciseOutput += ".<break time=\"0.5s\" />. ";
+            speechExerciseOutput += "Inhale to lower the chin towards the chest";
+            speechExerciseOutput += ".<break time=\"0.1s\" />. ";
+            speechExerciseOutput += "letting the head by heavy";
+            speechExerciseOutput += ".<break time=\"1s\" />. ";
+            speechExerciseOutput += "Exhale";
+            speechExerciseOutput += ".<break time=\"1s\" />. ";
+            speechExerciseOutput += "Inhale and pause at the bottom";
+            speechExerciseOutput += ".<break time=\"1s\" />. ";
+            speechExerciseOutput += "Exhale and come up";
+            speechExerciseOutput += ".<break time=\"0.5s\" />. ";
+            speechExerciseOutput += " Head comes up last.";
+            speechExerciseOutput += "<break time=\"5s\" />. ";
+            speechExerciseOutput += "Repeat 2 more times";
+            speechExerciseOutput += "<break time=\"5s\" />";
+            speechExerciseOutput += "<break time=\"5s\" />";
+            speechExerciseOutput += "<break time=\"5s\" />";
         }else{  //Generic timining   
             //console.log("Exercise duration " + pose.duration + " formatted " + getFormattedDuration(pose.duration));
-
             speechExerciseOutput += ". Go. ";
-            var duration = getFormattedDuration(pose.duration);
-            for(var i = 0; i < 4; i++){
-                speechExerciseOutput += "<break time=\"10s\" />. ";
+            //var duration = getFormattedDuration(pose.duration);      
+            for(var i = 0; i < 10; i++){
+                speechExerciseOutput += "<break time=\"5s\" />. ";
             }
         }
     //console.log("Exercise output " + speechExerciseOutput);
@@ -459,7 +591,7 @@ function makeALOPRequest(duration, type, alopResponseCallback) {
     var post_options = {
       hostname: 'api-2445581417326.apicast.io',
       port: 443,
-      path: '/api/v1/workouts/649', //680, 649
+      path: '/api/v1/workouts/530', //680, 649, 530, 688
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',

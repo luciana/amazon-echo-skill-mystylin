@@ -7,10 +7,10 @@ For video and audio classes assess alotofpilates.com
 
 ## Setup
 To run this skill on your Echo device, you must setup the following accounts:
-- create an AWS Lamda function, 
-- create an Alexa Skill via amazon developer console
-- connect Alexa Skills to the Lambda function. 
-- deploy the code to AWS Lamda and test it in Amazon Developer console. 
-- you can also check the logs via AWS Cloud Watch (no need for any setup here). 
-- get an API key for A Lot Of Pilates API at https://a-lot-of-pilates.3scale.net/docs
+* create an AWS Lamda function, 
+* create an Alexa Skill via amazon developer console
+* connect Alexa Skills to the Lambda function. 
+* deploy the code to AWS Lamda and test it in Amazon Developer console. 
+* you can also check the logs via AWS Cloud Watch (no need for any setup here). 
+* get an API key for A Lot Of Pilates API at https://a-lot-of-pilates.3scale.net/docs
 
