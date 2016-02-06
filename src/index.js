@@ -11,12 +11,6 @@
  * One-shot model:
  *  User:  "Alexa, start a pilates class"
  *  Alexa: "Welcome to A Lot Of Pilates! Ready to feel great? say start class ...""
- * Dialog model: (Not yet implemented)
- *  User:  "Alexa, start a pilates class"
- *  Alexa: "Welcome to A Lot Of Pilates! How long do you prefer your class to be?"
- *  User:  "30 minutes"
- *  Alexa: "Let's get started. When ready say start class"
- *  User:  "start class"
  */
 
 /**
@@ -81,27 +75,8 @@ ALotOfPilates.prototype.intentHandlers = {
         handleOneshotStartPilatesClassRequest(intent, session, response);
     },
 
-    "DialogStartPilatesClassIntent": function (intent, session, response) {
-        // Determine if this turn is for duration, for date, or an error.
-        // We could be passed slots with values, no slots, slots with no value.
-        // var durationSlot = intent.slots.Duration;
-        // var dateSlot = intent.slots.Date;
-        // if (durationSlot && durationSlot.value) {
-        //     handleDurationDialogRequest(intent, session, response);
-        // } else if (dateSlot && dateSlot.value) {
-        //     handleDateDialogRequest(intent, session, response);
-        // } else {
-        //     handleNoSlotDialogRequest(intent, session, response);
-        // }
-         handleOneshotStartPilatesClassRequest(intent, session, response);
-    },
-
     "SupportedDurationsIntent": function (intent, session, response) {
         handleSupportedDurationsRequest(intent, session, response);
-    },
-
-    "GetNextExerciseIntent": function (intent, session, response) {
-        handleGetNextExerciseIntentRequest(intent, session, response);
     },
 
     "AMAZON.HelpIntent": function (intent, session, response) {
@@ -125,12 +100,6 @@ ALotOfPilates.prototype.intentHandlers = {
 
 // -------------------------- ALotOfPilates Domain Specific Business Logic --------------------------
 
-// Duration options for a Dialog model - one slot model
-var DURATIONS = {
-    '10 minutes': 1,
-    '30 minutes': 2,
-    '50 minutes': 3
-};
 
 function handleWelcomeRequest(response) {
    
@@ -138,11 +107,15 @@ function handleWelcomeRequest(response) {
             /*speech: "<speak>Welcome to A Lot Of Pilates - Ready to feel great?. " + "<audio src='https://s3.amazonaws.com/ask-storage/tidePooler/OceanWaves.mp3'/>" + 
             "When ready say start class" + "</speak>",*/
             speech: "<speak>Welcome to A Lot Of Pilates - Get ready to feel great! " +
-            ".<break time=\"1s\" />. " + "When ready say start class" + "</speak>",
+            ".<break time=\"0.7s\" /> " + 
+            "Get you mat ready on the floor." + 
+            ".<break time=\"1s\" /> " +
+            "Are you ready to start the class?" + 
+            "</speak>",
             type: AlexaSkill.speechOutputType.SSML
         },
         repromptOutput = {
-            speech: "Ready to feel great? " + "I can lead you through a pilates sequence. Just say start class when ready.",
+            speech:  "I can lead you through a pilates sequence. Just say start class when ready." + "Ready to feel great? ",
             type: AlexaSkill.speechOutputType.PLAIN_TEXT
         };
 
@@ -154,78 +127,13 @@ function handleEndClassRequest(){
 }
 
 function handleHelpRequest(response) {
-    var repromptText = "How long do you want your class to be?";
+    var repromptText = "Do you want to start the class?";
     var speechOutput = "I can lead you through a pilates sequence " + "Or you can say exit. " + repromptText;
 
     response.ask(speechOutput, repromptText);
 }
 
-/**
- * Handles the case where the user asked or for, or is otherwise being with supported cities
- */
-function handleSupportedDurationsRequest(intent, session, response) {
-    // get city re-prompt
-    var repromptText = "What is your prefered class duration?";
-    var speechOutput = "Currently, You can take class that lasts  " + getAllDurationText() + " minutes" + repromptText;
 
-    response.ask(speechOutput, repromptText);
-}
-
-/**
- * Handles the dialog step where the user provides a duration for the pilates class
- */
-function handleDurationDialogRequest(intent, session, response) {
-
-    var durationStation = getDurationFromIntent(intent, false),
-        repromptText,
-        speechOutput;
-    if (durationStation.error) {
-        repromptText = "Currently, You can take class that lasts   " + getAllDurationText() + "What is your prefered class duration?";
-        // if we received a value for the incorrect city, repeat it to the user, otherwise we received an empty slot
-        speechOutput = durationStation.duration ? "I'm sorry, I don't have any data for " + durationStation.duration + ". " + repromptText : repromptText;
-        response.ask(speechOutput, repromptText);
-        return;
-    }
-
-    // if we don't have a date yet, go to date. If we have a date, we perform the final request
-    if (session.attributes.date) {
-        //getPilatesSequenceResponse(durationStation, session.attributes.date, response);
-    } else {
-        // set duration in session and prompt for date
-        //session.attributes.duration = durationStation;
-        //speechOutput = "For which date?";
-        //repromptText = "How long would you like your class to last " + durationStation.duration + "?";
-
-        //response.ask(speechOutput, repromptText);
-    }
-}
-
-
-/**
- * Handle no slots, or slot(s) with no values.
- * In the case of a dialog based skill with multiple slots,
- * when passed a slot with no value, we cannot have confidence
- * it is the correct slot type so we rely on session state to
- * determine the next turn in the dialog, and reprompt.
- */
-function handleNoSlotDialogRequest(intent, session, response) {
-    if (session.attributes.duration) {
-        // get duration re-prompt
-        var repromptText = "Please try again saying how long you want the class to be, for example, 30 minutes. ";
-        var speechOutput = repromptText;
-
-        response.ask(speechOutput, repromptText);
-    } else {
-        // get duration re-prompt
-        handleSupportedDurationsRequest(intent, session, response);
-    }
-}
-
-function handleGetNextExerciseIntentRequest(intent, session, response){
-
-    console.log("session", session);
-    console.log("response", response);
-}
 
 /**
  * This handles the one-shot interaction, where the user utters a phrase like:
@@ -235,22 +143,9 @@ function handleGetNextExerciseIntentRequest(intent, session, response){
 function handleOneshotStartPilatesClassRequest(intent, session, response) {
 
     console.log("START OneshotStartPilatesClassIntent");
-    // Determine duration, using default if none provided
-    var durationStation = getDurationFromIntent(intent, true),
-        repromptText,
-        speechOutput;
-    if (durationStation.error) {
-        // invalid duration. move to the dialog
-        repromptText = "Currently, You can take class that lasts   " + getAllDurationText() + "What is your prefered class duration?";
-        // if we received a value for the incorrect duration, repeat it to the user, otherwise we received an empty slot and assume default
-        speechOutput = durationStation.duration ? "I'm sorry, I don't have any data for " + durationStation.duration + ". " + repromptText : repromptText;
-
-        response.ask(speechOutput, repromptText);
-        return;
-    }
-    console.log("Duration Station " + durationStation.duration + " id " + durationStation.duration_id);
+    var duration = 2;
     var type = 2;
-    getPilatesSequenceResponse(durationStation, type, response);
+    getPilatesSequenceResponse(duration, type, response);
 }
 
 /**
@@ -310,8 +205,6 @@ function teachClass(alopAPIResponse, response){
 
     
     response.tell(speechOutput);
-   // response.shouldEndSession (false);
-    
 }
 
 function handleExerciseTimings(pose){
@@ -378,7 +271,7 @@ function handleExerciseTimings(pose){
             speechExerciseOutput += ".<break time=\"2s\" />. ";
             speechExerciseOutput += "Exhale";
             speechExerciseOutput += ".<break time=\"2s\" />. ";
-            speechExerciseOutput += "Breathe deeply into the back ribs";
+            speechExerciseOutput += "Breathe deeply";
             speechExerciseOutput += ".<break time=\"0.4s\" />. ";
             speechExerciseOutput += "Relax";
             speechExerciseOutput += ".<break time=\"10s\" />. ";
@@ -477,7 +370,7 @@ function handleExerciseTimings(pose){
             speechExerciseOutput += "<break time=\"1s\" />. ";
             speechExerciseOutput += "Alternate legs";
             speechExerciseOutput += ".<break time=\"1s\" />. ";
-            speechExerciseOutput += "Repeat movement at your own pace";
+            speechExerciseOutput += "Repeat the movement at your own pace.";
             speechExerciseOutput += ".<break time=\"2s\" />. ";    
             speechExerciseOutput += ".<break time=\"4s\" />. ";            
             speechExerciseOutput += "<break time=\"9s\" />. ";
@@ -511,15 +404,15 @@ function handleExerciseTimings(pose){
             speechExerciseOutput += "Let's stand up for this pose ";
             speechExerciseOutput += ".<break time=\"2s\" />. ";
             speechExerciseOutput += "Legs width apart and knees soft";
-            speechExerciseOutput += ".<break time=\"0.5s\" />. ";
+            speechExerciseOutput += ".<break time=\"1s\" />. ";
             speechExerciseOutput += "Inhale to lower the chin towards the chest";
             speechExerciseOutput += ".<break time=\"2s\" />. ";
             speechExerciseOutput += "Exhale";
-            speechExerciseOutput += ".<break time=\"1s\" />. ";
+            speechExerciseOutput += ".<break time=\"2s\" />. ";
             speechExerciseOutput += "Inhale and pause at the bottom";
             speechExerciseOutput += ".<break time=\"1s\" />. ";
             speechExerciseOutput += "Exhale and come up";
-            speechExerciseOutput += ".<break time=\"0.5s\" />. ";
+            speechExerciseOutput += ".<break time=\"1s\" />. ";
             speechExerciseOutput += " Head comes up last.";
             speechExerciseOutput += "<break time=\"5s\" />. ";
             speechExerciseOutput += "Repeat 2 more times";
@@ -590,79 +483,6 @@ req.end();
     
 }
 
-/**
- * Uses ALOP API, triggered by GET on /workouts API with category and duration querystrings.
- * Results can be verified at: http://tidesandcurrents.noaa.gov/noaatidepredictions/NOAATidesFacade.jsp?Stationid=[id]
- */
-function makeALOPGETRequest(duration, type, alopResponseCallback) {
-
-    var datum = "MLLW";
-    var endpoint = 'http://alop.herokuapp.com/api/v1/workouts/680';
-    var queryString = '?duration=' + duration;
-    queryString += '&type=' + type + '&units=english&time_zone=lst_ldt&format=json';
-
-    http.get(endpoint + queryString, function (res) {
-        
-        console.log('Status Code: ' + res.statusCode);
-
-    }).on('error', function (e) {
-        console.log("Communications error: " + e.message);
-        alopResponseCallback(new Error(e.message));
-    });
-}
-
-/**
- * Formats the duration, rounding to the heighest value divided by 10. e.g.
- * 89 -> 9.
- */
-function getFormattedDuration(duration) {
-    return Math.ceil(duration / 10);
-}
-
-/**
- * Gets class duration from intent, or returns an error
- */
-function getDurationFromIntent(intent, assignDefault) {
-    console.log("GET Duration From Intent");
-    var durationSlot = intent.slots.Duration;
-    // slots can be missing, or slots can be provided but with empty value.
-    // must test for both.
-    if (!durationSlot || !durationSlot.value) {
-        if (!assignDefault) {
-            return {
-                error: true
-            };
-        } else {
-            // For sample skill, default to 30 minutes class.
-            return {
-                duration: '30',
-                duration_id: 2
-            };
-        }
-    } else {
-        // lookup the duration. 
-        var durationFrame = durationSlot.value;
-        if (DURATIONS[durationFrame.toLowerCase()]) {
-            return {
-                duration: durationFrame,
-                duration_id: DURATIONS[durationFrame.toLowerCase()]
-            };
-        } else {
-            return {
-                error: true,
-                duration: durationFrame
-            };
-        }
-    }
-}
-
-function getAllDurationText() {
-    var durationList = '';
-    for (var duration in DURATIONS) {
-        durationList += duration + ", ";
-    }
-    return durationList;
-}
 
 // Create the handler that responds to the Alexa Request.
 exports.handler = function (event, context) {
