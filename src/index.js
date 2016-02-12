@@ -137,19 +137,23 @@ function handleStartOverRequest(response) {
 }
 
 function handleHelpRequest(response) {
-    var speechHelpOutput = "If you are not familiar with Pilates exercises, "+
-            " visit ALotOfPilates.com and start by taking the video classes. " +
+     var repromptText = "Do you want to start the class?";
+     var speechHelpOutput = "I can lead you through a pilates sequence " +
+            "<break time=\"0.2s\" /> " +
+            "but if you are not familiar with Pilates exercises, "+
+            ".<break time=\"0.1s\" /> " +
+            " visit ALotOfPilates.com and take a video instructed class. " +
             ".<break time=\"0.7s\" /> " +
             "You can also read the exercises step by step instructions." +
             ".<break time=\"0.7s\" /> " +
-            "Have fun! ";
+            "Do you want me to continue with the class? ";
 
     var speechText ="<speak>" + speechHelpOutput + "</speak>";
     var speechOutput = {
             speech: speechText,
             type: AlexaSkill.speechOutputType.SSML
     };
-    response.tell(speechOutput);
+    response.ask(speechOutput, repromptText);
 }
 
 
