@@ -75,16 +75,12 @@ ALotOfPilates.prototype.intentHandlers = {
         handleOneshotStartPilatesClassRequest(intent, session, response);
     },
 
-    "SupportedDurationsIntent": function (intent, session, response) {
-        handleSupportedDurationsRequest(intent, session, response);
-    },
-
     "AMAZON.HelpIntent": function (intent, session, response) {
         handleHelpRequest(response);
     },
 
     "AMAZON.StartOverIntent": function (intent, session, response) {
-        handleHelpRequest(response);
+        handleStartOverRequest(response);
     },
 
     "AMAZON.StopIntent": function (intent, session, response) {
@@ -92,6 +88,15 @@ ALotOfPilates.prototype.intentHandlers = {
         response.tell(speechOutput);
     },
 
+    "AMAZON.NoIntent": function (intent, session, response) {
+        var speechOutput = "Ok. Hope you find a better time to start the class. Goodbye!";
+        response.tell(speechOutput);
+    },
+
+    "AMAZON.YesIntent": function (intent, session, response) {
+        handleOneshotStartPilatesClassRequest(intent, session, response);
+    },
+    
     "AMAZON.CancelIntent": function (intent, session, response) {
         var speechOutput = "Goodbye";
         response.tell(speechOutput);
@@ -103,19 +108,17 @@ ALotOfPilates.prototype.intentHandlers = {
 
 function handleWelcomeRequest(response) {
    
-        var speechOutput = {
-            /*speech: "<speak>Welcome to A Lot Of Pilates - Ready to feel great?. " + "<audio src='https://s3.amazonaws.com/ask-storage/tidePooler/OceanWaves.mp3'/>" + 
-            "When ready say start class" + "</speak>",*/
+        var speechOutput = {            
             speech: "<speak>Welcome to A Lot Of Pilates - Get ready to feel great! " +
             ".<break time=\"0.7s\" /> " + 
-            "Get you mat ready on the floor." + 
+            "Get your mat ready on the floor." + 
             ".<break time=\"1s\" /> " +
             "Are you ready to start the class?" + 
             "</speak>",
             type: AlexaSkill.speechOutputType.SSML
         },
         repromptOutput = {
-            speech:  "I can lead you through a pilates sequence. Just say start class when ready." + "Ready to feel great? ",
+            speech:  "I can lead you through a pilates sequence. Just say start class when ready. Should I start?",
             type: AlexaSkill.speechOutputType.PLAIN_TEXT
         };
 
@@ -126,13 +129,28 @@ function handleEndClassRequest(){
     return "Good job! You are all done. Hope you feel as great as me! Visit ALotOfPilates.com for video classes.";
 }
 
-function handleHelpRequest(response) {
+function handleStartOverRequest(response) {
     var repromptText = "Do you want to start the class?";
     var speechOutput = "I can lead you through a pilates sequence " + "Or you can say exit. " + repromptText;
 
     response.ask(speechOutput, repromptText);
 }
 
+function handleHelpRequest(response) {
+    var speechHelpOutput = "If you are not familiar with Pilates exercises, "+
+            " visit ALotOfPilates.com and start by taking the video classes. " +
+            ".<break time=\"0.7s\" /> " +
+            "You can also read the exercises step by step instructions." +
+            ".<break time=\"0.7s\" /> " +
+            "Have fun! ";
+
+    var speechText ="<speak>" + speechHelpOutput + "</speak>";
+    var speechOutput = {
+            speech: speechText,
+            type: AlexaSkill.speechOutputType.SSML
+    };
+    response.tell(speechOutput);
+}
 
 
 /**
@@ -141,8 +159,6 @@ function handleHelpRequest(response) {
  * If there is an error in a slot, this will guide the user to the dialog approach.
  */
 function handleOneshotStartPilatesClassRequest(intent, session, response) {
-
-    console.log("START OneshotStartPilatesClassIntent");
     var duration = 2;
     var type = 2;
     getPilatesSequenceResponse(duration, type, response);
