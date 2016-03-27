@@ -60,6 +60,7 @@ ALotOfPilates.prototype.eventHandlers.onSessionStarted = function (sessionStarte
 
 ALotOfPilates.prototype.eventHandlers.onLaunch = function (launchRequest, session, response) {
     console.log("onLaunch requestId: " + launchRequest.requestId + ", sessionId: " + session.sessionId);
+    session.attributes.stage = 0;
     handleWelcomeRequest(response);
 };
 
@@ -152,21 +153,7 @@ function handleStartOverRequest(response) {
 function handleOneshotStartPilatesClassRequest(intent, session, response) {
     var duration = 2;
     var type = 2;
-     //Check if session variables are already initialized.
-    if (session.attributes.stage) {
-
-        //Ensure the dialogue is on the correct stage.
-        if (session.attributes.stage === 0) {
-            //The joke is already initialized, this function has no more work.
-            speechText = "knock knock!";
-        } else {
-            //The user attempted to jump to the intent of another stage.
-            session.attributes.stage = 0;
-            speechText = "That's not how knock knock jokes work! " + "knock knock";
-        }
-    } else {
-        getPilatesSequenceResponse(duration, type, response, session);
-    }
+    getPilatesSequenceResponse(duration, type, response, session);
 }
 
 /**
@@ -174,19 +161,19 @@ function handleOneshotStartPilatesClassRequest(intent, session, response) {
  * 'Alexa, help me'.
  */
 function handleHelpRequest(intent, session, response) {
-   var speechText = "help!";
-
+   var speechText = "";       
+   console.log("User asked for help at stage " + session.attributes.stage);
         switch (session.attributes.stage) {
-            case 0:
-                speechText = "Pilates classes are great way to feel wonderful " +
-                    "If you are not familiar with the exercises visit alotpilates.com, or you can say exit.";
+            case 0: //haven't retrieve the class yet
+                speechText = "Pilates classes are great way to feel wonderful. " +
+                    "If you are not familiar with the exercises visit a lot pilates dot com. " +
+                    "If you are ready to start say go or you can say exit.";
                 break;
-            case 1:
-                speechText = "You can ask, who's there, or you can say exit.";
-                break;           
+          
             default:
-                speechText = "Knock knock jokes are a fun call and response type of joke. " +
-                    "To start the joke, just ask by saying tell me a joke, or you can say exit.";
+                speechText = "If you are not familiar with this exercise, " +                            
+                            " visit ALotOfPilates.com and take a video instructed class. " +
+                            "To start a new class, just say go, or you can say exit.";
         }
 
         var speechOutput = {
@@ -206,7 +193,7 @@ function handleHelpRequest(intent, session, response) {
  * respond to the user with the final answer.
  */
 function getPilatesSequenceResponse(duration, type, response, session) {
-    console.log("GET Pilates Sequence");
+    //console.log("GET Pilates Sequence");
     // Issue the request, and respond to the user
     makeALOPRequest(duration, type, function alopResponseCallback(err, alopAPIResponse) {
         var speechOutput;
@@ -220,7 +207,9 @@ function getPilatesSequenceResponse(duration, type, response, session) {
         } else {
 
             if(alopAPIResponse.poses.length > 0){ 
-                console.log("SUCESSFUL Get on Pilates Sequence");                   
+                console.log("SUCESSFUL Get on Pilates Sequence"); 
+                 //The stage variable tracks the phase of the dialogue.    
+                session.attributes.stage = 1;                
                 teachClass(alopAPIResponse, response, session);        
             }else{
                 speechOutput = {
@@ -233,10 +222,18 @@ function getPilatesSequenceResponse(duration, type, response, session) {
     });
 }
 
+/**
+ * Call for workout was successfull, so this function responsability is to loop thru the 
+ * exercises the output the exercise information. It calls handleExerciseTimings for descriptions.
+ * At this point, the user is at stage 1 of the session.
+ */
+
 function teachClass(alopAPIResponse, response, session){      
     var speechPoseOutput ="";
+   
+
     for(var i = 0; i < alopAPIResponse.poses.length; i++){
-        var pose = alopAPIResponse.poses[i];                          
+        var pose = alopAPIResponse.poses[i];      
         if( i === 0 ){
             speechPoseOutput += "Get ready on your mat for the " + pose.name;       
         }else{
@@ -264,12 +261,6 @@ function handleExerciseTimings(pose, session){
         var sideLegSeriesPoseIdArray = [431,432,434,435,326];
         var plankPosesIdArray = [133,564];
         var otherSuppotedPoses =[160,266,291,310,327,499,511,528,529,541,547];
-
-              
-
-        //The stage variable tracks the phase of the dialogue. 
-        //When this function completes, it will be on stage 1.
-        session.attributes.stage = 1;
 
         if (plankPosesIdArray.indexOf(pose.id) > -1){//Planks - Hold it for 20 to 30 seconds
             speechExerciseOutput += "Get in position for the " + pose.name;
@@ -331,9 +322,9 @@ function handleExerciseTimings(pose, session){
  */
 function getExerciseInfo(id, session){
     var desc = exercises[id].exerciseDescription;
-            session.attributes.exerciseDescription = desc;
-            session.attributes.exerciseName = exercises[id].exerciseName;
-           return desc;
+    session.attributes.exerciseName = exercises[id].exerciseName;   
+    session.attributes.exerciseDescription = desc;
+    return desc;
 }
 /**
  * Uses ALOP API, triggered by GET on /workouts API with category and duration querystrings.
@@ -354,7 +345,7 @@ function makeALOPRequest(duration, type, alopResponseCallback) {
       }
     };
 
-    console.log("makeALOPRequest");
+    //console.log("makeALOPRequest");
     var req = https.request(post_options, function(res) {
         console.log('STATUS: ' + res.statusCode);       
         res.setEncoding('utf8');
