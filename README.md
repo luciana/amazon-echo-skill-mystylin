@@ -1,9 +1,9 @@
-# Node.js Alexa Skills For A Lot Of Pilates
+# Node.js Alexa Skills For My Stylin App
 
-##ALOP Alexa Skills Documentation
-Start a pilates class from Amazon Echo. This code communicates with A Lot Of Pilates(ALOP) API to start a pilates class. Two slots are available. One slot is class duration and the other is class type. Options for class duration is 10, 30, 50 minutes. Options for class type is Stretching, Pilates or Power Pilates.
+##MYSTYLIN Alexa Skills Documentation
+Get Salon and Spa deals from Alexa. Alexa will search for MyStylin deals in your area and let you know.
 
-For video and audio classes assess alotofpilates.com 
+If you are a business owner, visit members.mystylin.com to start adding deals
 
 ## Setup
 To run this skill on your Echo device, you must setup the following accounts:
@@ -12,5 +12,5 @@ To run this skill on your Echo device, you must setup the following accounts:
 * connect Alexa Skills to the Lambda function. 
 * deploy the code to AWS Lamda and test it in Amazon Developer console. 
 * you can also check the logs via AWS Cloud Watch (no need for any setup here). 
-* get an API key for A Lot Of Pilates API at https://a-lot-of-pilates.3scale.net/docs
+* get an API key for MyStyline API 
 

@@ -5,12 +5,20 @@
  * Start a pilates class from Amazon Echo. This code communicates with A Lot Of Pilates(ALOP) API to start a pilates class. One slot is available where you can specify the duration of the class. Get fit with Amazon Alexa!
  *
  * Author: Luciana Bruscino
- * Copywrite 2016 ALotOfPilates.com
+ * Copywrite 2016 MyStylin.com
  *
  * Example:
  * One-shot model:
- *  User:  "Alexa, start a pilates class"
- *  Alexa: "Welcome to A Lot Of Pilates! Ready to feel great? say start class ...""
+ *  User:  "Alexa, ask MyStylin for Hair deals in Cleveland Ohio"
+ *  Alexa: "You can have 50% off haircut from Shawn K's spa. This is good until today!"
+
+ * Dialog model:
+ *  User:  "Alexa, ask MyStylin for deals"
+ *  Alexa: "Welcome to MyStylin. Which zip code would you like to retrieve deals?"
+ *  User:  "44124"
+ *  Alexa: "What type of service treatment are you looking for? You can say spa, hair, nails"
+ *  User:  "Hair"
+ *  Alexa: "You can have 50% off haircut from Shawn K's spa. This is good until today!"
  */
 
 /**
@@ -20,16 +28,14 @@
 var APP_ID = ''; //get an APP ID - i.e amzn1.echo-sdk-ams.app.xxxxxx
 
 /**
- * Get an API_KEY from A Lot Of Pilates Developer site 
- * This will allow to retrieve Pilates classes
- * curl "https://api-2445581417326.apicast.io:443/api/v1/workouts/680" -H'api_key: <your alop_api_key>'
+ * Get an API_KEY from MyStylin 
+ * curl "https://api-2445581417326.apicast.io:443/api/v1/deals/search" -H'api_key: <your alop_api_key>'
  **/
  var API_KEY =''; //get an api key from https://a-lot-of-pilates.3scale.net/docs and store in a config.js file
 
 
 var https = require('https'),
-    config = require('./config'),
-    exercises = require('./exercises');
+    config = require('./config')
 
 
 /**
@@ -38,33 +44,33 @@ var https = require('https'),
 var AlexaSkill = require('./AlexaSkill');
 
 /**
- * ALotOfPilates is a child of AlexaSkill.
+ * MyStylin is a child of AlexaSkill.
  * To read more about inheritance in JavaScript, see the link below.
  *
  * @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Introduction_to_Object-Oriented_JavaScript#Inheritance
  */
-var ALotOfPilates = function () {
+var MyStylin = function () {
     AlexaSkill.call(this, config.app_id); //I store the APP_ID in a config file instead of global variable (APP_ID)
 };
 
 // Extend AlexaSkill
-ALotOfPilates.prototype = Object.create(AlexaSkill.prototype);
-ALotOfPilates.prototype.constructor = ALotOfPilates;
+MyStylin.prototype = Object.create(AlexaSkill.prototype);
+MyStylin.prototype.constructor = MyStylin;
 
 // ----------------------- Override AlexaSkill request and intent handlers -----------------------
 
-ALotOfPilates.prototype.eventHandlers.onSessionStarted = function (sessionStartedRequest, session) {
+MyStylin.prototype.eventHandlers.onSessionStarted = function (sessionStartedRequest, session) {
     console.log("onSessionStarted requestId: " + sessionStartedRequest.requestId + ", sessionId: " + session.sessionId);
     // any initialization logic goes here
 };
 
-ALotOfPilates.prototype.eventHandlers.onLaunch = function (launchRequest, session, response) {
+MyStylin.prototype.eventHandlers.onLaunch = function (launchRequest, session, response) {
     console.log("onLaunch requestId: " + launchRequest.requestId + ", sessionId: " + session.sessionId);
     session.attributes.stage = 0;
     handleWelcomeRequest(response);
 };
 
-ALotOfPilates.prototype.eventHandlers.onSessionEnded = function (sessionEndedRequest, session) {
+MyStylin.prototype.eventHandlers.onSessionEnded = function (sessionEndedRequest, session) {
     console.log("onSessionEnded requestId: " + sessionEndedRequest.requestId + ", sessionId: " + session.sessionId);
   
 };
@@ -72,13 +78,23 @@ ALotOfPilates.prototype.eventHandlers.onSessionEnded = function (sessionEndedReq
 /**
  * override intentHandlers to map intent handling functions.
  */
-ALotOfPilates.prototype.intentHandlers = {
-    "OneshotStartPilatesClassIntent": function (intent, session, response) {       
-        handleOneshotStartPilatesClassRequest(intent, session, response);
+MyStylin.prototype.intentHandlers = {
+    "OneshotGetDealsIntent": function (intent, session, response) {
+        handleOneshotDealsRequest(intent, session, response);
     },
 
-    "AMAZON.StartOverIntent": function (intent, session, response) {
-        handleStartOverRequest(response);
+    "DialogDealsIntent": function (intent, session, response) {
+        // Determine if this turn is for city, for date, or an error.
+        // We could be passed slots with values, no slots, slots with no value.
+        var zipSlot = intent.slots.Zip;
+        var treatmentSlot = intent.slots.Treatment;
+        if (zipSlot && zipSlot.value) {
+            handleZipSlotDialogRequest(intent, session, response);
+        } else if (treatmentSlot && treatmentSlot.value) {
+            handleTreatmentSlotDialogRequest(intent, session, response);
+        } else {
+            handleNoSlotDialogRequest(intent, session, response);
+        }
     },
 
     "AMAZON.StopIntent": function (intent, session, response) {
@@ -92,7 +108,7 @@ ALotOfPilates.prototype.intentHandlers = {
     },
 
     "AMAZON.YesIntent": function (intent, session, response) {
-        handleOneshotStartPilatesClassRequest(intent, session, response);
+        handleOneshotGetDealsClassRequest(intent, session, response);
     },
 
     "AMAZON.HelpIntent": function (intent, session, response) {
@@ -106,27 +122,25 @@ ALotOfPilates.prototype.intentHandlers = {
     }
 };
 
-// -------------------------- ALotOfPilates Domain Specific Business Logic --------------------------
+// -------------------------- MyStylin Domain Specific Business Logic --------------------------
 
 
 function handleWelcomeRequest(response) {
    
         var speechOutput = {            
-            speech: "<speak>Welcome to A Lot Of Pilates - Get ready to feel great! " +
+            speech: "<speak>Welcome to MyStylin Deals." +
             ".<break time=\"0.7s\" /> " + 
-            "Get your mat ready on the floor." + 
-            ".<break time=\"1s\" /> " +
-            "Are you ready to start the class?" + 
+            "Which zip code would you like to retrieve deals?" + 
             "</speak>",
             type: AlexaSkill.speechOutputType.SSML
         },
         repromptOutput = {
-            speech:  "<speak> I can lead you through a pilates sequence " +
+            speech:  "<speak> I can provide you with MyStylin deals " +
             "<break time=\"0.2s\" /> " +
             " You can also "+
-            " visit ALotOfPilates.com and take a video instructed class. " +
+            " visit MyStylin app for iOS or Android to get more deals. " +
             ".<break time=\"0.7s\" /> " +           
-            "Just say start class when ready. Should I start?" + 
+            " Which zip code would you like to retrieve deals?" + 
             "</speak>",
             type: AlexaSkill.speechOutputType.SSML
         };
@@ -135,26 +149,165 @@ function handleWelcomeRequest(response) {
 }
 
 function handleEndClassRequest(){
-    return "Good job! You are all done. Hope you feel as great as me! Visit ALotOfPilates.com for video classes.";
+    return "That is it. Check back for more deals or visit MyStylin app.";
 }
 
-function handleStartOverRequest(response) {
-    var repromptText = "Do you want to start the class?";
-    var speechOutput = "I can lead you through a pilates sequence " + "Or you can say exit. " + repromptText;
-
-    response.ask(speechOutput, repromptText);
-}
 
 /**
  * This handles the one-shot interaction, where the user utters a phrase like:
  * 'Alexa, start a Pilates class'.
  * If there is an error in a slot, this will guide the user to the dialog approach.
  */
-function handleOneshotStartPilatesClassRequest(intent, session, response) {
-    var duration = 2;
-    var type = 2;
-    getPilatesSequenceResponse(duration, type, response, session);
+function handleOneshotGetDealsClassRequest(intent, session, response) {
+     // Look up AWS DynamoDB for user location
+     var locationStation = getCityStationFromIntent(intent, true),
+        repromptText,
+        speechOutput;
+
+    getFinalDealsResponse(duration, type, response, session);
 }
+
+/**
+ * Handles the dialog step where the user provides a zip code
+ * Gets Location information
+ */
+function handleZipSlotDialogRequest(intent, session, response) {
+
+    var locationStation = getLocationFromIntent(intent, false),
+        repromptText,
+        speechOutput;
+
+    if (zipStation.error) {
+        repromptText = "Check back another time ";
+        // if we received a value for the incorrect city, repeat it to the user, otherwise we received an empty slot
+        speechOutput = locationStation.zip ? "I'm sorry, I don't have any deals for " + locationStation.zip + ". " + repromptText : repromptText;
+        response.ask(speechOutput, repromptText);
+        return;
+    }
+
+    // if we don't have a treatment yet, go to treatment. If we have a treatment, we perform the final request
+    if (session.attributes.treatment) {
+        getFinalDealsResponse(locationStation, session.attributes.treatment, response);
+    } else {
+        // set city in session and prompt for date
+        session.attributes.zip = locationStation;
+        speechOutput = "For which treatment?";
+        repromptText = "For which treatment would you like deals information for " + locationStation.zip + "?";
+
+        response.ask(speechOutput, repromptText);
+    }
+}
+
+/**
+ * Handles the dialog step where the user provides a treatment service type
+ */
+function handleTreatmentSlotDialogRequest(intent, session, response) {
+
+    var treatmentStation = getTreatmentFromIntent(intent),
+        repromptText,
+        speechOutput;
+
+    if (!treatmentStation) {
+        repromptText = "Please try again saying a treatment type such as . " + getAllTreatmentText()
+            + "For which treatment would you like deals?";
+        speechOutput = "I'm sorry, I didn't understand that treatment type. " + repromptText;
+
+        response.ask(speechOutput, repromptText);
+        return;
+    }
+
+    // if we don't have a zip yet, go to zip. If we have a zip, we perform the final request
+    if (session.attributes.zip) {
+        getFinalTideResponse(session.attributes.zip, treatmentStation.treatment, response);
+    } else {
+        // The user provided a date out of turn. Set date in session and prompt for zip
+        session.attributes.treatment = treatmentStation.treatment;
+        speechOutput = "For which zip would you like tide information for " + treatmentStation.treatment + "?";
+        repromptText = "For which zip?";
+
+        response.ask(speechOutput, repromptText);
+    }
+}
+
+/* Call API to return treatment types *
+ * Save treatment list to session */
+
+function getAllTreatmentText() {
+    var TREATMENTS = ['hair','spa','nails','massage'];
+    var lists = '';
+    for (var list in TREATMENTS) {
+        lists += station + ", ";
+    }
+    session.attributes.list = lists;
+    return lists;
+}
+
+/**
+ * Gets the date from the intent, defaulting to today if none provided,
+ * or returns an error
+ */
+function getTreatmentFromIntent(intent) {
+
+    var treatmentSlot = intent.slots.treatment;
+    // slots can be missing, or slots can be provided but with empty value.
+    // must test for both.
+    if (!treatmentSlot || !treatmentSlot.value) {
+        // default to today
+        return {
+            treatment: "Hair"
+        };
+    } else {
+        var treat = treatmentSlot.value;       
+        return {
+            treatment: treat
+        }
+    }
+}
+
+/**
+ * Gets the zip from the intent, or returns an error
+ * Get lat and long for zip
+ * 
+ */
+function getLocationFromIntent(intent, assignDefault) {
+
+    var zipSlot = intent.slots.zip;
+    // slots can be missing, or slots can be provided but with empty value.
+    // must test for both.
+    if (!zipSlot || !zipSlot.value) {
+        if (!assignDefault) {
+            return {
+                error: true
+            };
+        } else {
+            // Look up AWS DynamoDB for user location
+            return {
+                zip: '44124',
+                lat: 42.8888,
+                log: 83.333
+            }
+        }
+    } else {
+        // lookup the city. Sample skill uses well known mapping of a few known cities to station id.
+        // Look up AWS DynamoDB for user location
+        var zip = zipSlot.value;
+        var userId = session.userId;
+        //Query DynamoDB table by userId
+        if (true) {
+            return {
+                zip: zip,
+                lat: 42.8888,
+                log: 83.333
+            }
+        } else {
+            return {
+                error: true,
+                zip: zip
+            }
+        }
+    }
+}
+
 
 /**
  * This handles the Help intent:
@@ -172,7 +325,7 @@ function handleHelpRequest(intent, session, response) {
           
             default:
                 speechText = "If you are not familiar with this exercise, " +                            
-                            " visit ALotOfPilates.com and take a video instructed class. " +
+                            " visit MyStylin.com and take a video instructed class. " +
                             "To start a new class, just say go, or you can say exit.";
         }
 
@@ -192,28 +345,27 @@ function handleHelpRequest(intent, session, response) {
  * Both the one-shot and dialog based paths lead to this method to issue the request, and
  * respond to the user with the final answer.
  */
-function getPilatesSequenceResponse(duration, type, response, session) {
+function getFinalDealsResponse(location, treatment, response, session) {
     //console.log("GET Pilates Sequence");
     // Issue the request, and respond to the user
-    makeALOPRequest(duration, type, function alopResponseCallback(err, alopAPIResponse) {
+    makeMyStylinRequest(location, treatment, function alopResponseCallback(err, myStylinAPIResponse) {
         var speechOutput;
         
         if (err) {
             speechOutput = {
-                speech:"Sorry, the A Lot Of Pilates service is experiencing a problem. Please access ALotOfPilates.com to take video classes now.",
+                speech:"Sorry, the MyStylin service is experiencing a problem. Please access MyStylin app to lookup deals",
                 type: AlexaSkill.speechOutputType.PLAIN_TEXT
-            };     
+            };
             response.tell(speechOutput);
         } else {
 
-            if(alopAPIResponse.poses.length > 0){ 
-                console.log("SUCESSFUL Get on Pilates Sequence"); 
+            if(myStylinAPIResponse.deals.length > 0){  
                  //The stage variable tracks the phase of the dialogue.    
                 session.attributes.stage = 1;                
-                teachClass(alopAPIResponse, response, session);        
+                advertiseDeals(myStylinAPIResponse, response, session);        
             }else{
                 speechOutput = {
-                    speech:"Sorry, the A Lot Of Pilates service is experiencing a problem. Please access ALotOfPilates.com to take video classes now.",
+                    speech:"Sorry, the MyStylin service is experiencing a problem. Please access MyStylin.com to lookup deals.",
                      type: AlexaSkill.speechOutputType.PLAIN_TEXT
                 };
                 response.tell(speechOutput);
@@ -228,21 +380,15 @@ function getPilatesSequenceResponse(duration, type, response, session) {
  * At this point, the user is at stage 1 of the session.
  */
 
-function teachClass(alopAPIResponse, response, session){      
+function advertiseDeals(myStylinAPIResponse, response, session){      
     var speechPoseOutput ="";
-   
+    speechPoseOutput += "There are a few deals available around you. ";       
+    speechPoseOutput += "See if you like these.";
 
-    for(var i = 0; i < alopAPIResponse.poses.length; i++){
-        var pose = alopAPIResponse.poses[i];      
-        if( i === 0 ){
-            speechPoseOutput += "Get ready on your mat for the " + pose.name;       
-        }else{
-            speechPoseOutput += "Next exercise is " + pose.name;
-        }
-        
-        speechPoseOutput += ". <break time=\"0.2s\" />. " + pose.repetition;  
-        speechPoseOutput += ". <break time=\"1s\" />. ";
-        speechPoseOutput += handleExerciseTimings(pose, session);
+    for(var i = 0; i < myStylinAPIResponse.deals.length; i++){
+        var deal = myStylinAPIResponse.deals[i];              
+        speechPoseOutput += " <break time=\"0.2s\" />. " + deal.dealTitle;  
+        speechPoseOutput += " <break time=\"1s\" />. ";       
     }
     speechPoseOutput += handleEndClassRequest();
     //console.log(speechPoseOutput);
@@ -256,123 +402,60 @@ function teachClass(alopAPIResponse, response, session){
     response.tell(speechOutput);
 }
 
-function handleExerciseTimings(pose, session){
-    var speechExerciseOutput ="";
-        var sideLegSeriesPoseIdArray = [431,432,434,435,326];
-        var plankPosesIdArray = [133,564];
-        var otherSuppotedPoses =[160,266,291,310,327,499,511,528,529,541,547];
 
-        if (plankPosesIdArray.indexOf(pose.id) > -1){//Planks - Hold it for 20 to 30 seconds
-            speechExerciseOutput += "Get in position for the " + pose.name;
-            speechExerciseOutput += "<break time=\"3s\" />. ";
-            speechExerciseOutput += "Start holding the plank";
-            speechExerciseOutput += "<break time=\"2s\" />. ";
-            speechExerciseOutput += "Imagine a straight line from the crown of the head down to the toes.";
-            speechExerciseOutput += "<break time=\"7s\" />. ";
-            speechExerciseOutput += "10 seconds";
-            speechExerciseOutput += "Breath in through the nose, out through the mouth.";
-            speechExerciseOutput += ".<break time=\"8s\" />. ";
-            speechExerciseOutput += "Engage your legs by squeezing an imaginary ball between them";
-            speechExerciseOutput += ".<break time=\"5s\" />. ";
-            speechExerciseOutput += "Almost done";
-            speechExerciseOutput += ".<break time=\"3s\" />. ";
-            speechExerciseOutput += "you are  ";
-            speechExerciseOutput += ".<break time=\"0.1s\" />. ";
-            speechExerciseOutput += "done. Relax ";
-            speechExerciseOutput += ".<break time=\"10s\" />. ";
-        }else if (sideLegSeriesPoseIdArray.indexOf(pose.id) > -1){//Side Leg Series
-            speechExerciseOutput += "Lie on one side with bottom arm bent for head to lay on.";
-            speechExerciseOutput += ".<break time=\"2s\" />";
-            speechExerciseOutput += "Position the legs about 45 degrees in front of the body";  
-            speechExerciseOutput += ".<break time=\"2s\" />";     
-            speechExerciseOutput += "Start";
-            speechExerciseOutput += ".<break time=\"10s\" />";
-            speechExerciseOutput += "<break time=\"10s\" /> ";
-            speechExerciseOutput += "<break time=\"10s\" />. ";
-            speechExerciseOutput += "<break time=\"10s\" />. ";
-            speechExerciseOutput += "<break time=\"10s\" />. ";
-            speechExerciseOutput += "Switch sides";
-            speechExerciseOutput += ".<break time=\"5s\" /> ";
-            speechExerciseOutput += "Start";
-            speechExerciseOutput += ".<break time=\"10s\" /> ";
-            speechExerciseOutput += ".<break time=\"10s\" /> ";
-            speechExerciseOutput += ".<break time=\"10s\" /> ";
-            speechExerciseOutput += ".<break time=\"10s\" /> ";
-            speechExerciseOutput += ".<break time=\"10s\" /> ";
-        }else if (otherSuppotedPoses.indexOf(pose.id) > -1){
-
-         speechExerciseOutput +=  getExerciseInfo(pose.id,session);
-        
-       
-        }else{  //Generic timining   
-            //console.log("Exercise duration " + pose.duration + " formatted " + getFormattedDuration(pose.duration));
-            speechExerciseOutput += ". Go. ";
-            //var duration = getFormattedDuration(pose.duration);      
-            for(var i = 0; i < 10; i++){
-                speechExerciseOutput += "<break time=\"5s\" />. ";
-            }
-        }
-    return speechExerciseOutput;
-}
 
 
 /**
- * This function retrieves the exercise information from the exercise.js module
- * It feeds back to the function and set the session parameters necessary to be used by HelpIntent
- */
-function getExerciseInfo(id, session){
-    var desc = exercises[id].exerciseDescription;
-    session.attributes.exerciseName = exercises[id].exerciseName;   
-    session.attributes.exerciseDescription = desc;
-    return desc;
-}
-/**
- * Uses ALOP API, triggered by GET on /workouts API with category and duration querystrings.
+ * Uses MyStylin API, triggered by GET on /deals/search API with category and duration querystrings.
  * https://api-2445581417326.apicast.io:443/api/
  */
-function makeALOPRequest(duration, type, alopResponseCallback) {
+function makeMyStylinRequest(zip, treatment, myStylinResponseCallback) {
        
     
      // An object of options to indicate where to post to    
     var post_options = {
       hostname: 'api-2445581417326.apicast.io',
       port: 443,
-      path: '/api/v1/workouts/530', //680, 649, 530, 688
+      path: '/v1/deals/search',
       method: 'GET',
       headers: {
-        'Content-Type': 'application/json',
-        'api_key': config.api_key ///I store the APP_ID in a config file instead of global variable (API_KEY)
+        'Content-Type': 'application/json'
+       
       }
     };
 
-    //console.log("makeALOPRequest");
-    var req = https.request(post_options, function(res) {
+    var endpoint = 'http://developer.stylinme.com/v1/deals/search';
+    var queryString = '?' 
+    queryString += 'treatment=' + treatment;
+    queryString += '&zip=' + zip + '&units=english&time_zone=lst_ldt&format=json';
+
+    http.get(endpoint + queryString, function (res) {    
         console.log('STATUS: ' + res.statusCode);       
         res.setEncoding('utf8');
-        var alopResponseString = '';
+        var myStylinResponseString = '';
 
         if (res.statusCode != 200) {
-            alopResponseCallback(new Error("Non 200 Response"));
+            myStylinResponseCallback(new Error("Non 200 Response"));
         }
 
         res.on('data', function (data) {
-            alopResponseString += data;
+            myStylinResponseString += data;
         });
 
         res.on('end', function () {
-            var alopResponseObject = JSON.parse(alopResponseString);
+            var myStylinResponseObject = JSON.parse(myStylinResponseString);
 
-            if (alopResponseObject.error) {
-                alopResponseCallback(new Error(alopResponseObject.error.message));
+            if (myStylinResponseObject.error) {
+                myStylinResponseCallback(new Error(myStylinResponseObject.error.message));
             } else {
-                console.log('Workout name: ' + alopResponseObject.title);
-                alopResponseCallback(null, alopResponseObject);
+                //console.log('Workout name: ' + myStylinResponseObject.title);
+                myStylinResponseCallback(null, myStylinResponseObject);
             }
         });
 
     }).on('error', function (e) {
         console.log("Communications error: " + e.message);
-        alopResponseCallback(new Error(e.message));
+        myStylinResponseCallback(new Error(e.message));
     });
 
 req.end();
@@ -382,6 +465,6 @@ req.end();
 
 // Create the handler that responds to the Alexa Request.
 exports.handler = function (event, context) {
-    var alop = new ALotOfPilates();
-    alop.execute(event, context);
+    var mystylin = new MyStylin();
+    mystylin.execute(event, context);
 };
