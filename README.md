@@ -1,7 +1,8 @@
 # Node.js Alexa Skills For My Stylin App
 
 ##MYSTYLIN Alexa Skills Documentation
-Get Salon and Spa deals from Alexa. Alexa will search for MyStylin deals in your area and let you know.
+Get Salon and Spa deals from Alexa. Alexa search for MyStylin deals in your area.
+MyStylin is a mobile app that introduces a better way of getting Health and Beauty deals to customers. 
 
 If you are a business owner, visit members.mystylin.com to start adding deals
 
