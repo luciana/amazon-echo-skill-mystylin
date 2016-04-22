@@ -1,8 +1,7 @@
 
 /**
- * A Lot Of Pilates Alexa Skills
+ * My Stylin Alexa Skills
  *
- * Start a pilates class from Amazon Echo. This code communicates with A Lot Of Pilates(ALOP) API to start a pilates class. One slot is available where you can specify the duration of the class. Get fit with Amazon Alexa!
  *
  * Author: Luciana Bruscino
  * Copywrite 2016 MyStylin.com
@@ -21,21 +20,10 @@
  *  Alexa: "You can have 50% off haircut from Shawn K's spa. This is good until today!"
  */
 
-/**
- * App ID for the skill
- * Find it at : https://console.aws.amazon.com/lambda/home
- */
-var APP_ID = ''; //get an APP ID - i.e amzn1.echo-sdk-ams.app.xxxxxx
-
-/**
- * Get an API_KEY from MyStylin 
- * curl "https://api-2445581417326.apicast.io:443/api/v1/deals/search" -H'api_key: <your alop_api_key>'
- **/
- var API_KEY =''; //get an api key from https://a-lot-of-pilates.3scale.net/docs and store in a config.js file
-
 
 var https = require('https'),
-    config = require('./config')
+    http = require('http'),
+    config = require('./config');
 
 
 /**
@@ -80,7 +68,7 @@ MyStylin.prototype.eventHandlers.onSessionEnded = function (sessionEndedRequest,
  */
 MyStylin.prototype.intentHandlers = {
     "OneshotGetDealsIntent": function (intent, session, response) {
-        handleOneshotDealsRequest(intent, session, response);
+        handleOneshotGetDealsRequest(intent, session, response);
     },
 
     "DialogDealsIntent": function (intent, session, response) {
@@ -100,15 +88,6 @@ MyStylin.prototype.intentHandlers = {
     "AMAZON.StopIntent": function (intent, session, response) {
         var speechOutput = "Goodbye";
         response.tell(speechOutput);
-    },
-
-    "AMAZON.NoIntent": function (intent, session, response) {
-        var speechOutput = "Ok. Hope you find a better time to start the class. Goodbye!";
-        response.tell(speechOutput);
-    },
-
-    "AMAZON.YesIntent": function (intent, session, response) {
-        handleOneshotGetDealsClassRequest(intent, session, response);
     },
 
     "AMAZON.HelpIntent": function (intent, session, response) {
@@ -158,13 +137,17 @@ function handleEndClassRequest(){
  * 'Alexa, start a Pilates class'.
  * If there is an error in a slot, this will guide the user to the dialog approach.
  */
-function handleOneshotGetDealsClassRequest(intent, session, response) {
+function handleOneshotGetDealsRequest(intent, session, response) {
      // Look up AWS DynamoDB for user location
-     var locationStation = getCityStationFromIntent(intent, true),
+     var locationStation = getLocationFromIntent(intent, true),
         repromptText,
         speechOutput;
 
-    getFinalDealsResponse(duration, type, response, session);
+     var treatmentStation = getTreatmentFromIntent(intent),
+        repromptText,
+        speechOutput;
+
+    getFinalDealsResponse(locationStation.zip, treatmentStation.treatment, response, session);
 }
 
 /**
@@ -195,6 +178,26 @@ function handleZipSlotDialogRequest(intent, session, response) {
         repromptText = "For which treatment would you like deals information for " + locationStation.zip + "?";
 
         response.ask(speechOutput, repromptText);
+    }
+}
+
+/**
+ * Handle no slots, or slot(s) with no values.
+ * In the case of a dialog based skill with multiple slots,
+ * when passed a slot with no value, we cannot have confidence
+ * it is the correct slot type so we rely on session state to
+ * determine the next turn in the dialog, and reprompt.
+ */
+function handleNoSlotDialogRequest(intent, session, response) {
+    if (session.attributes.city) {
+        // get date re-prompt
+        var repromptText = "Please try again saying a treatment type, for example, Nails. ";
+        var speechOutput = repromptText;
+
+        response.ask(speechOutput, repromptText);
+    } else {
+        // get city re-prompt
+        handleSupportedCitiesRequest(intent, session, response);
     }
 }
 
@@ -348,7 +351,7 @@ function handleHelpRequest(intent, session, response) {
 function getFinalDealsResponse(location, treatment, response, session) {
     //console.log("GET Pilates Sequence");
     // Issue the request, and respond to the user
-    makeMyStylinRequest(location, treatment, function alopResponseCallback(err, myStylinAPIResponse) {
+    makeMyStylinRequest("44077", "hair", function alopResponseCallback(err, myStylinAPIResponse) {
         var speechOutput;
         
         if (err) {
@@ -358,8 +361,8 @@ function getFinalDealsResponse(location, treatment, response, session) {
             };
             response.tell(speechOutput);
         } else {
-
-            if(myStylinAPIResponse.deals.length > 0){  
+            console.log("myStylinAPIResponse",myStylinAPIResponse);
+            if(myStylinAPIResponse.results.length > 0){  
                  //The stage variable tracks the phase of the dialogue.    
                 session.attributes.stage = 1;                
                 advertiseDeals(myStylinAPIResponse, response, session);        
@@ -385,10 +388,10 @@ function advertiseDeals(myStylinAPIResponse, response, session){
     speechPoseOutput += "There are a few deals available around you. ";       
     speechPoseOutput += "See if you like these.";
 
-    for(var i = 0; i < myStylinAPIResponse.deals.length; i++){
-        var deal = myStylinAPIResponse.deals[i];              
-        speechPoseOutput += " <break time=\"0.2s\" />. " + deal.dealTitle;  
-        speechPoseOutput += " <break time=\"1s\" />. ";       
+    for(var i = 0; i < myStylinAPIResponse.results.length; i++){
+        var deal = myStylinAPIResponse.results[i];              
+        speechPoseOutput += " <break time=\"0.2s\" />. " + deal.deal_description;  
+        speechPoseOutput += " <break time=\"0.1s\" /> in " + deal.salon_city;       
     }
     speechPoseOutput += handleEndClassRequest();
     //console.log(speechPoseOutput);
@@ -407,7 +410,7 @@ function advertiseDeals(myStylinAPIResponse, response, session){
 
 /**
  * Uses MyStylin API, triggered by GET on /deals/search API with category and duration querystrings.
- * https://api-2445581417326.apicast.io:443/api/
+ * curl -v -X GET "http://developer.mystylin.com/v1/deals/search?treatment=hair&distance=50&zip=44077"
  */
 function makeMyStylinRequest(zip, treatment, myStylinResponseCallback) {
        
@@ -424,12 +427,12 @@ function makeMyStylinRequest(zip, treatment, myStylinResponseCallback) {
       }
     };
 
-    var endpoint = 'http://developer.stylinme.com/v1/deals/search';
+    var endpoint = 'http://developer.mystylin.com/v1/deals/search';
     var queryString = '?' 
     queryString += 'treatment=' + treatment;
     queryString += '&zip=' + zip + '&units=english&time_zone=lst_ldt&format=json';
 
-    http.get(endpoint + queryString, function (res) {    
+    var req = http.get(endpoint + queryString, function (res) {    
         console.log('STATUS: ' + res.statusCode);       
         res.setEncoding('utf8');
         var myStylinResponseString = '';

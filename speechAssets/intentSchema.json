@@ -4,16 +4,12 @@
 "intent": "OneshotGetDealsIntent",
 "slots": [
 {
-"name": "Type",
+"name": "zip",
 "type": "LIST_OF_ZIPS"
 },
 {
-"name": "Duration",
+"name": "treatment",
 "type": "LIST_OF_TREATMENTS"
-},
-{
-"name": "Date",
-"type": "AMAZON.DATE"
 }
 ]
 },
@@ -21,16 +17,12 @@
 "intent": "DialogDealsIntent",
 "slots": [
 {
-"name": "Duration",
+"name": "treatment",
 "type": "LIST_OF_TREATMENTS"
 },
 {
-"name": "Type",
+"name": "zip",
 "type": "LIST_OF_ZIPS"
-},
-{
-"name": "Date",
-"type": "AMAZON.DATE"
 }
 ]
 },
