@@ -74,8 +74,8 @@ MyStylin.prototype.intentHandlers = {
     "DialogDealsIntent": function (intent, session, response) {
         // Determine if this turn is for city, for date, or an error.
         // We could be passed slots with values, no slots, slots with no value.
-        var zipSlot = intent.slots.Zip;
-        var treatmentSlot = intent.slots.Treatment;
+        var zipSlot = intent.slots.zip;
+        var treatmentSlot = intent.slots.treatment;
         if (zipSlot && zipSlot.value) {
             handleZipSlotDialogRequest(intent, session, response);
         } else if (treatmentSlot && treatmentSlot.value) {
@@ -127,7 +127,7 @@ function handleWelcomeRequest(response) {
     response.ask(speechOutput, repromptOutput);
 }
 
-function handleEndClassRequest(){
+function handleEndRequest(){
     return "That is it. Check back for more deals or visit MyStylin app.";
 }
 
@@ -139,11 +139,11 @@ function handleEndClassRequest(){
  */
 function handleOneshotGetDealsRequest(intent, session, response) {
      // Look up AWS DynamoDB for user location
-     var locationStation = getLocationFromIntent(intent, true),
+     var locationStation = getLocationFromIntent(intent, true, session),
         repromptText,
         speechOutput;
 
-     var treatmentStation = getTreatmentFromIntent(intent),
+     var treatmentStation = getTreatmentFromIntent(intent, session),
         repromptText,
         speechOutput;
 
@@ -156,11 +156,11 @@ function handleOneshotGetDealsRequest(intent, session, response) {
  */
 function handleZipSlotDialogRequest(intent, session, response) {
 
-    var locationStation = getLocationFromIntent(intent, false),
+    var locationStation = getLocationFromIntent(intent, false, session),
         repromptText,
         speechOutput;
 
-    if (zipStation.error) {
+    if (locationStation.error) {
         repromptText = "Check back another time ";
         // if we received a value for the incorrect city, repeat it to the user, otherwise we received an empty slot
         speechOutput = locationStation.zip ? "I'm sorry, I don't have any deals for " + locationStation.zip + ". " + repromptText : repromptText;
@@ -189,7 +189,7 @@ function handleZipSlotDialogRequest(intent, session, response) {
  * determine the next turn in the dialog, and reprompt.
  */
 function handleNoSlotDialogRequest(intent, session, response) {
-    if (session.attributes.city) {
+    if (session.attributes.treatment) {
         // get date re-prompt
         var repromptText = "Please try again saying a treatment type, for example, Nails. ";
         var speechOutput = repromptText;
@@ -197,7 +197,7 @@ function handleNoSlotDialogRequest(intent, session, response) {
         response.ask(speechOutput, repromptText);
     } else {
         // get city re-prompt
-        handleSupportedCitiesRequest(intent, session, response);
+        handleSupportedTreatmentRequest(intent, session, response);
     }
 }
 
@@ -206,7 +206,7 @@ function handleNoSlotDialogRequest(intent, session, response) {
  */
 function handleTreatmentSlotDialogRequest(intent, session, response) {
 
-    var treatmentStation = getTreatmentFromIntent(intent),
+    var treatmentStation = getTreatmentFromIntent(intent, session),
         repromptText,
         speechOutput;
 
@@ -221,27 +221,39 @@ function handleTreatmentSlotDialogRequest(intent, session, response) {
 
     // if we don't have a zip yet, go to zip. If we have a zip, we perform the final request
     if (session.attributes.zip) {
-        getFinalTideResponse(session.attributes.zip, treatmentStation.treatment, response);
+        getFinalDealsResponse(session.attributes.zip, treatmentStation.treatment, response);
     } else {
         // The user provided a date out of turn. Set date in session and prompt for zip
         session.attributes.treatment = treatmentStation.treatment;
-        speechOutput = "For which zip would you like tide information for " + treatmentStation.treatment + "?";
+        speechOutput = "For which zip would you like " + treatmentStation.treatment + " deals?";
         repromptText = "For which zip?";
 
         response.ask(speechOutput, repromptText);
     }
 }
 
+/**
+ * Handles the case where the user asked or for, or is otherwise being with supported cities
+ */
+function handleSupportedTreatmentRequest(intent, session, response) {
+    // get city re-prompt
+    var repromptText = "Which treatment type would you like deals for?";
+    var speechOutput = "Currently, I know deals for these treatment types: " + getAllTreatmentText()
+        + repromptText;
+
+    response.ask(speechOutput, repromptText);
+}
+
 /* Call API to return treatment types *
  * Save treatment list to session */
 
 function getAllTreatmentText() {
-    var TREATMENTS = ['hair','spa','nails','massage'];
+    var TREATMENTS = ['Hair','Massage','Spa','Nails','Products','Tanning'];
     var lists = '';
-    for (var list in TREATMENTS) {
-        lists += station + ", ";
-    }
-    session.attributes.list = lists;
+    for(var i = 0; i < TREATMENTS.length ; i++) {
+        lists += TREATMENTS[i] + ", ";
+    }   
+    console.log("Treatment list " + lists);
     return lists;
 }
 
@@ -249,7 +261,7 @@ function getAllTreatmentText() {
  * Gets the date from the intent, defaulting to today if none provided,
  * or returns an error
  */
-function getTreatmentFromIntent(intent) {
+function getTreatmentFromIntent(intent, session) {
 
     var treatmentSlot = intent.slots.treatment;
     // slots can be missing, or slots can be provided but with empty value.
@@ -260,7 +272,8 @@ function getTreatmentFromIntent(intent) {
             treatment: "Hair"
         };
     } else {
-        var treat = treatmentSlot.value;       
+        var treat = treatmentSlot.value; 
+         session.attributes.treatment = treat;      
         return {
             treatment: treat
         }
@@ -272,7 +285,7 @@ function getTreatmentFromIntent(intent) {
  * Get lat and long for zip
  * 
  */
-function getLocationFromIntent(intent, assignDefault) {
+function getLocationFromIntent(intent, assignDefault, session) {
 
     var zipSlot = intent.slots.zip;
     // slots can be missing, or slots can be provided but with empty value.
@@ -321,15 +334,11 @@ function handleHelpRequest(intent, session, response) {
    console.log("User asked for help at stage " + session.attributes.stage);
         switch (session.attributes.stage) {
             case 0: //haven't retrieve the class yet
-                speechText = "Pilates classes are great way to feel wonderful. " +
-                    "If you are not familiar with the exercises visit a lot pilates dot com. " +
-                    "If you are ready to start say go or you can say exit.";
+                speechText = "help text";
                 break;
           
             default:
-                speechText = "If you are not familiar with this exercise, " +                            
-                            " visit MyStylin.com and take a video instructed class. " +
-                            "To start a new class, just say go, or you can say exit.";
+                speechText = "help text.";
         }
 
         var speechOutput = {
@@ -349,9 +358,9 @@ function handleHelpRequest(intent, session, response) {
  * respond to the user with the final answer.
  */
 function getFinalDealsResponse(location, treatment, response, session) {
-    //console.log("GET Pilates Sequence");
+       
     // Issue the request, and respond to the user
-    makeMyStylinRequest("44077", "hair", function alopResponseCallback(err, myStylinAPIResponse) {
+    makeMyStylinRequest("44077", treatment, function alopResponseCallback(err, myStylinAPIResponse) {
         var speechOutput;
         
         if (err) {
@@ -363,8 +372,8 @@ function getFinalDealsResponse(location, treatment, response, session) {
         } else {
             console.log("myStylinAPIResponse",myStylinAPIResponse);
             if(myStylinAPIResponse.results.length > 0){  
-                 //The stage variable tracks the phase of the dialogue.    
-                session.attributes.stage = 1;                
+                   
+                     
                 advertiseDeals(myStylinAPIResponse, response, session);        
             }else{
                 speechOutput = {
@@ -384,18 +393,18 @@ function getFinalDealsResponse(location, treatment, response, session) {
  */
 
 function advertiseDeals(myStylinAPIResponse, response, session){      
-    var speechPoseOutput ="";
-    speechPoseOutput += "There are a few deals available around you. ";       
-    speechPoseOutput += "See if you like these.";
+    var speechDealOutput ="";
+    speechDealOutput += "There are a few deals available around you. ";       
+    speechDealOutput += "See if you like these.";
 
     for(var i = 0; i < myStylinAPIResponse.results.length; i++){
         var deal = myStylinAPIResponse.results[i];              
-        speechPoseOutput += " <break time=\"0.2s\" />. " + deal.deal_description;  
-        speechPoseOutput += " <break time=\"0.1s\" /> in " + deal.salon_city;       
+        speechDealOutput += " <break time=\"0.2s\" />. " + deal.deal_description;  
+        speechDealOutput += " <break time=\"0.1s\" /> in the city of " + deal.salon_city;     
+        speechDealOutput += " <break time=\"1s\" />";
     }
-    speechPoseOutput += handleEndClassRequest();
-    //console.log(speechPoseOutput);
-    var speechText ="<speak>" + speechPoseOutput + "</speak>";
+    speechDealOutput += handleEndRequest();
+    var speechText ="<speak>" + speechDealOutput + "</speak>";
         var speechOutput = {
             speech: speechText,
             type: AlexaSkill.speechOutputType.SSML
@@ -414,23 +423,13 @@ function advertiseDeals(myStylinAPIResponse, response, session){
  */
 function makeMyStylinRequest(zip, treatment, myStylinResponseCallback) {
        
-    
-     // An object of options to indicate where to post to    
-    var post_options = {
-      hostname: 'api-2445581417326.apicast.io',
-      port: 443,
-      path: '/v1/deals/search',
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json'
-       
-      }
-    };
 
     var endpoint = 'http://developer.mystylin.com/v1/deals/search';
     var queryString = '?' 
     queryString += 'treatment=' + treatment;
-    queryString += '&zip=' + zip + '&units=english&time_zone=lst_ldt&format=json';
+    queryString += '&zip=' + zip + '&distance=50';
+
+    console.log("Request API data for treatment type " + treatment + " and zip " + zip);
 
     var req = http.get(endpoint + queryString, function (res) {    
         console.log('STATUS: ' + res.statusCode);       
