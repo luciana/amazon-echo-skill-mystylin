@@ -5,7 +5,7 @@
 "slots": [
 {
 "name": "zip",
-"type": "LIST_OF_ZIPS"
+"type": "NUMBER"
 },
 {
 "name": "treatment",
@@ -22,7 +22,7 @@
 },
 {
 "name": "zip",
-"type": "LIST_OF_ZIPS"
+"type": "NUMBER"
 }
 ]
 },

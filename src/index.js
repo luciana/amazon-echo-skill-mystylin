@@ -23,13 +23,16 @@
 
 var https = require('https'),
     http = require('http'),
-    config = require('./config');
+    config = require('./config'),
+    dataHelper = require('./dataHelper');
 
 
 /**
  * The AlexaSkill prototype and helper functions
  */
 var AlexaSkill = require('./AlexaSkill');
+
+var data = new dataHelper();
 
 /**
  * MyStylin is a child of AlexaSkill.
@@ -72,11 +75,16 @@ MyStylin.prototype.intentHandlers = {
     },
 
     "DialogDealsIntent": function (intent, session, response) {
-        // Determine if this turn is for city, for date, or an error.
-        // We could be passed slots with values, no slots, slots with no value.
+       
+        //identifies slots for location and treatment
         var zipSlot = intent.slots.zip;
         var treatmentSlot = intent.slots.treatment;
-        if (zipSlot && zipSlot.value) {
+
+        // if no zip slot value provided check data store
+        // pass session user id to retrieve data
+        if (!zipSlot || !zipSlot.value){
+            handleNoZipSlotDialogRequest(session.userId);
+        }else if (zipSlot && zipSlot.value) {
             handleZipSlotDialogRequest(intent, session, response);
         } else if (treatmentSlot && treatmentSlot.value) {
             handleTreatmentSlotDialogRequest(intent, session, response);
@@ -94,7 +102,6 @@ MyStylin.prototype.intentHandlers = {
         handleHelpRequest(intent, session, response);
     },
     
-    
     "AMAZON.CancelIntent": function (intent, session, response) {
         var speechOutput = "Goodbye";
         response.tell(speechOutput);
@@ -102,7 +109,6 @@ MyStylin.prototype.intentHandlers = {
 };
 
 // -------------------------- MyStylin Domain Specific Business Logic --------------------------
-
 
 function handleWelcomeRequest(response) {
    
@@ -143,11 +149,42 @@ function handleOneshotGetDealsRequest(intent, session, response) {
         repromptText,
         speechOutput;
 
+        console.log("location" + locationStation.zip);
+        var dataObject ={location: {zip: locationStation.zip}};
+        data.storeMyStylinData(session.user, dataObject);
+
      var treatmentStation = getTreatmentFromIntent(intent, session),
         repromptText,
         speechOutput;
 
+         console.log("treatment" + treatmentStation.treatment);
+
     getFinalDealsResponse(locationStation.zip, treatmentStation.treatment, response, session);
+}
+
+
+/**
+ * Handles the dialog step where the user does not provides a zip code
+ * Zip is read from nosql table
+ */
+function handleNoZipSlotDialogRequest (userId){
+    // read information from datastore
+    var info = data.readMyStylinData(userId);
+
+    if (info){
+        // if we don't have a treatment yet, go to treatment. If we have a treatment, we perform the final request
+        if (session.attributes.treatment) {
+            getFinalDealsResponse(info.location.zip, session.attributes.treatment, response);
+        } else {
+            // set zip in session and prompt for treatment
+            session.attributes.zip = info.location.zip;
+            speechOutput = "For which treatment?";
+            repromptText = "For which treatment would you like deals information for " + locationStation.zip + "?";
+            response.ask(speechOutput, repromptText);
+        }
+    } else{
+        handleZipSlotDialogRequest(intent, session, response);
+    }
 }
 
 /**
@@ -160,6 +197,8 @@ function handleZipSlotDialogRequest(intent, session, response) {
         repromptText,
         speechOutput;
 
+        console.log("location" + locationStation.zip);
+
     if (locationStation.error) {
         repromptText = "Check back another time ";
         // if we received a value for the incorrect city, repeat it to the user, otherwise we received an empty slot
@@ -168,11 +207,14 @@ function handleZipSlotDialogRequest(intent, session, response) {
         return;
     }
 
+    var dataObject ={location: {zip: locationStation.zip}};
+    data.storeMyStylinData(session.user, dataObject);
+
     // if we don't have a treatment yet, go to treatment. If we have a treatment, we perform the final request
     if (session.attributes.treatment) {
-        getFinalDealsResponse(locationStation, session.attributes.treatment, response);
+        getFinalDealsResponse(locationStation.zip, session.attributes.treatment, response);
     } else {
-        // set city in session and prompt for date
+        // set zip in session and prompt for treatment
         session.attributes.zip = locationStation;
         speechOutput = "For which treatment?";
         repromptText = "For which treatment would you like deals information for " + locationStation.zip + "?";
@@ -180,6 +222,10 @@ function handleZipSlotDialogRequest(intent, session, response) {
         response.ask(speechOutput, repromptText);
     }
 }
+
+
+
+
 
 /**
  * Handle no slots, or slot(s) with no values.
@@ -298,7 +344,7 @@ function getLocationFromIntent(intent, assignDefault, session) {
         } else {
             // Look up AWS DynamoDB for user location
             return {
-                zip: '44124',
+                zip: zipSlot.value,
                 lat: 42.8888,
                 log: 83.333
             }
@@ -360,7 +406,7 @@ function handleHelpRequest(intent, session, response) {
 function getFinalDealsResponse(location, treatment, response, session) {
        
     // Issue the request, and respond to the user
-    makeMyStylinRequest("44077", treatment, function alopResponseCallback(err, myStylinAPIResponse) {
+    makeMyStylinRequest(location, treatment, function alopResponseCallback(err, myStylinAPIResponse) {
         var speechOutput;
         
         if (err) {
