@@ -24,7 +24,7 @@
 var https = require('https'),
     http = require('http'),
     config = require('./config'),
-    dataHelper = require('./dataHelper');
+    data = require('./storage');
 
 
 /**
@@ -32,7 +32,7 @@ var https = require('https'),
  */
 var AlexaSkill = require('./AlexaSkill');
 
-var data = new dataHelper();
+//var data = new dataHelper();
 
 /**
  * MyStylin is a child of AlexaSkill.
@@ -83,7 +83,7 @@ MyStylin.prototype.intentHandlers = {
         // if no zip slot value provided check data store
         // pass session user id to retrieve data
         if (!zipSlot || !zipSlot.value){
-            handleNoZipSlotDialogRequest(session.userId);
+            handleNoZipSlotDialogRequest(intent, session, response);
         }else if (zipSlot && zipSlot.value) {
             handleZipSlotDialogRequest(intent, session, response);
         } else if (treatmentSlot && treatmentSlot.value) {
@@ -149,9 +149,13 @@ function handleOneshotGetDealsRequest(intent, session, response) {
         repromptText,
         speechOutput;
 
-        console.log("location" + locationStation.zip);
+        console.log("location from handleOneshotGetDealsRequest " + locationStation.zip);
         var dataObject ={location: {zip: locationStation.zip}};
-        data.storeMyStylinData(session.user, dataObject);
+        data.newStorage(session, dataObject).save(function () {
+            //response.ask('New game started without players, who do you want to add first?', 'Who do you want to add first?');
+            console.log("save");
+        });
+       // data.storeMyStylinData(session.user, dataObject);
 
      var treatmentStation = getTreatmentFromIntent(intent, session),
         repromptText,
@@ -167,10 +171,15 @@ function handleOneshotGetDealsRequest(intent, session, response) {
  * Handles the dialog step where the user does not provides a zip code
  * Zip is read from nosql table
  */
-function handleNoZipSlotDialogRequest (userId){
-    // read information from datastore
-    var info = data.readMyStylinData(userId);
-
+function handleNoZipSlotDialogRequest (intent, session, response){
+    var userId = session.user.userId;
+    console.log("handleNoZipSlotDialogRequest for " + userId);
+   
+     var info =   data.read(session,function (session) {
+            //response.ask('New game started without players, who do you want to add first?', 'Who do you want to add first?');
+            console.log("read");
+        });
+     console.log("info" +info);
     if (info){
         // if we don't have a treatment yet, go to treatment. If we have a treatment, we perform the final request
         if (session.attributes.treatment) {
@@ -193,11 +202,11 @@ function handleNoZipSlotDialogRequest (userId){
  */
 function handleZipSlotDialogRequest(intent, session, response) {
 
-    var locationStation = getLocationFromIntent(intent, false, session),
+    var locationStation = getLocationFromIntent(intent, true, session),
         repromptText,
         speechOutput;
 
-        console.log("location" + locationStation.zip);
+        console.log("location " + locationStation.zip);
 
     if (locationStation.error) {
         repromptText = "Check back another time ";
@@ -208,7 +217,7 @@ function handleZipSlotDialogRequest(intent, session, response) {
     }
 
     var dataObject ={location: {zip: locationStation.zip}};
-    data.storeMyStylinData(session.user, dataObject);
+    //data.storeMyStylinData(session.user.userId, dataObject);
 
     // if we don't have a treatment yet, go to treatment. If we have a treatment, we perform the final request
     if (session.attributes.treatment) {
@@ -334,6 +343,8 @@ function getTreatmentFromIntent(intent, session) {
 function getLocationFromIntent(intent, assignDefault, session) {
 
     var zipSlot = intent.slots.zip;
+
+    console.log("what is zip slot when not given " + zipSlot);
     // slots can be missing, or slots can be provided but with empty value.
     // must test for both.
     if (!zipSlot || !zipSlot.value) {
@@ -343,17 +354,18 @@ function getLocationFromIntent(intent, assignDefault, session) {
             };
         } else {
             // Look up AWS DynamoDB for user location
+              console.log("getLocationFromIntent 2 " );
             return {
-                zip: zipSlot.value,
+                zip: '44123',
                 lat: 42.8888,
                 log: 83.333
             }
         }
     } else {
-        // lookup the city. Sample skill uses well known mapping of a few known cities to station id.
         // Look up AWS DynamoDB for user location
         var zip = zipSlot.value;
-        var userId = session.userId;
+         console.log("getLocationFromIntent 3 " );
+        var userId = session.user.userId;
         //Query DynamoDB table by userId
         if (true) {
             return {

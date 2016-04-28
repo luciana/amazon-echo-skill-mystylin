@@ -1,0 +1,13 @@
+{
+  "name": "mystylin",
+  "version": "1.0.0",
+  "description": "alexa helps you find deals!",
+  "main": "index.js",
+  "author": "luciana bruscino",
+  "license": "",
+  "dependencies": {
+    "alexa-app": "^2.3.2",
+    "dynasty": "^0.2.4",
+    "lodash": "^4.3.0"
+  }
+}
