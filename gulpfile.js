@@ -55,7 +55,7 @@ gulp.task('deploy', function(){
 gulp.task('checkin', function() {
 	gutil.log('check in to git branch', gutil.colors.magenta(localConfig.branch));
 	return gulp.src('/src')
-		.pipe(deploy({repository: 'https://github.com/luciana/amazon-echo-skill-my-stylin.git',
+		.pipe(deploy({repository: 'https://github.com/luciana/amazon-echo-skill-mystylin.git',
 						branches:   [localConfig.branch]}));
 	
 });
