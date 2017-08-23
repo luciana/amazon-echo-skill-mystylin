@@ -1,7 +1,0 @@
-DialogDealsIntent for {treatment} deals
-DialogDealsIntent for {treatment} deals in {zip}
-DialogDealsIntent for top deals in {zip}
-DialogDealsIntent for deals in {zip}
-
-OneshotGetDealsIntent for deals
-OneshotGetDealsIntent for top deals

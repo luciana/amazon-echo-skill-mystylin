@@ -5,9 +5,12 @@
   "main": "index.js",
   "author": "luciana bruscino",
   "license": "",
+  "scripts": {
+    "prebuild": "npm run clean",
+    "build-dev": "gulp --env dev --branch develop",
+    "build-prod": "gulp --env prod --branch master"
+  },
   "dependencies": {
     "alexa-app": "^2.3.2",
-    "dynasty": "^0.2.4",
-    "lodash": "^4.3.0"
   }
 }

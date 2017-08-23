@@ -1,39 +1,33 @@
 {
-"intents": [
-{
-"intent": "OneshotGetDealsIntent",
-"slots": [
-{
-"name": "zip",
-"type": "NUMBER"
-},
-{
-"name": "treatment",
-"type": "LIST_OF_TREATMENTS"
-}
-]
-},
-{
-"intent": "DialogDealsIntent",
-"slots": [
-{
-"name": "treatment",
-"type": "LIST_OF_TREATMENTS"
-},
-{
-"name": "zip",
-"type": "NUMBER"
-}
-]
-},
-{
-"intent": "AMAZON.HelpIntent"
-},
-{
-"intent": "AMAZON.StopIntent"
-},
-{
-"intent": "AMAZON.CancelIntent"
-}
-]
+  "intents": [
+    {
+      "name": "AMAZON.CancelIntent",
+      "samples": [
+        "I am done"
+      ]
+    },
+    {
+      "name": "AMAZON.HelpIntent",
+      "samples": [
+        "What does it mean",
+        "Need help"
+      ]
+    },
+    {
+      "name": "AMAZON.StopIntent",
+      "samples": [
+        "Stop",
+        "I am done"
+      ]
+    },
+    {
+      "name": "OneshotGetDealsIntent",
+      "samples": [
+        "find deals",
+        "for deals",
+        "for top deals"
+      ],
+      "slots": []
+    }
+  ]
 }
