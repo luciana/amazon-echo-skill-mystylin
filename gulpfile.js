@@ -13,13 +13,14 @@ var localConfig = {
   cwd: process.cwd() + '/src'
 };
 
+
 gulp.task('setup', function(){
 	var env, i = process.argv.indexOf("--env");
 	if(i>-1) {
 		env = process.argv[i+1];
 
 	}else {
-		env = 'development';
+		env = 'dev';
 	}
 
 	var branch, j = process.argv.indexOf("--branch");
@@ -46,10 +47,14 @@ gulp.task('copy', function () {
 
 gulp.task('deploy', function(){
 	gutil.log('package to lambda', localConfig.func);
+	var opts = {
+		profile: 'default', //alotofpilates account
+		region: 'us-east-1'
+	};
 	gulp.src('**/*', {cwd: localConfig.cwd})
 		.pipe(zip(localConfig.src + '.zip'))
 		.pipe(gulp.dest(localConfig.dest))
-		.pipe(lambda(localConfig.func, {profile: 'default'}));
+		.pipe(lambda(localConfig.func, opts));
 });
 
 gulp.task('checkin', function() {

@@ -6,9 +6,9 @@
   "author": "luciana bruscino",
   "license": "",
   "scripts": {
-    "prebuild": "npm run clean",
-    "build-dev": "gulp --env dev --branch develop",
-    "build-prod": "gulp --env prod --branch master"
+    "prebuild": "npm run clean",    
+    "build": "gulp --env dev",
+    "deploy": "gulp deploy --env prod"
   },
   "dependencies": {
     "alexa-app": "^2.3.2",

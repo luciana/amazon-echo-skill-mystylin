@@ -8,7 +8,9 @@
  *
  * Example:
  * One-shot model:
- *  User:  "Alexa, ask MyStylin for Hair deals in Cleveland Ohio"
+ *  User:  "Alexa, ask MyStylin for deals in 44124"
+ *  Alexa: "You can have 50% off haircut from Shawn K's spa. This is good until today!"
+ *  User:  "Alexa, ask MyStylin for hair deals in 44124"
  *  Alexa: "You can have 50% off haircut from Shawn K's spa. This is good until today!"
 
  * Dialog model:
@@ -19,16 +21,53 @@
  *  User:  "Hair"
  *  Alexa: "You can have 50% off haircut from Shawn K's spa. This is good until today!"
  */
-var Alexa = require('alexa-sdk');
+var Alexa = require('alexa-sdk'),
+    Deal = require('deal'),
+    Speech = require('speech');
 
 
 var handlers = {
-
-    'HelloWorldIntent': function () {
-        this.emit(':tell', 'Hello World!');
+    'OneshotGetDealsIntent': function () {
+        var deal = new Deal();
+        Deal.get()          
+            .then((data) => initialize(data, deal))
+            .catch((err) => console.error("ERR LAUNCH ACTION",err))
+            .then((deal) => speachDealText(deal))
+            .catch((err) => console.error("ERR WITH SPEECH",err));
     }
-
 };
+
+function speachDealText(deal){
+    // var speechOutput = "Welcome to My Stylin";        
+    var speechOutput = "We have great deals for you.";
+        speechOutput += "How about ";
+    var dealText = "You can have 50% off haircut from Shawn K's spa. This is good until today!";
+        speechOutput += dealText;
+    var cardTitle = 'MyStylin Deals';
+    var cardContent = dealText;
+    var imageObj = {
+        smallImageUrl: 'https://imgs.xkcd.com/comics/standards.png',
+        largeImageUrl: 'https://imgs.xkcd.com/comics/standards.png'
+    };
+       this.emit(':tellWithCard', speechOutput, cardTitle, cardContent, imageObj);
+}
+
+function initialize(data, deal){
+    if ((typeof data != "undefined") || (Object.keys(data).length !== 0) ){
+        var data1 = data[0];
+        try {
+            deal.id = data1.id;
+            deal.name = data1.name;
+            deal.description = data1.description;
+            deal.imageUrl = data1.imageUrl;
+            deal.treatment = data1.treatment;
+            deal.expireDateTime = data1.expireDateTime;
+        }catch(e){
+            console.log("ERROR INITIALIZING DEAL DATA");
+        }
+    }
+    return deal;
+}
 
 exports.handler = function(event, context, callback){
     var alexa = Alexa.handler(event, context, callback);

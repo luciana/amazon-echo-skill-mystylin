@@ -15,3 +15,10 @@ To run this skill on your Echo device, you must setup the following accounts:
 * you can also check the logs via AWS Cloud Watch (no need for any setup here). 
 * get an API key for MyStyline API 
 
+
+## Locally
+run gulp --env dev to send to development environment in AWS Lambda
+run gulp --end prod to send to production environment in AWS Lamdda
+
+
+
