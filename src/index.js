@@ -23,6 +23,7 @@
  */
 var Alexa = require('alexa-sdk'),
     Deal = require('deal'),
+    config = require('./config'),
     Speech = require('speech');
 
 
