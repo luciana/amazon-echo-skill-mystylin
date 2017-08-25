@@ -36,8 +36,22 @@ var handlers = {
         var deal = new Deal();
         deal.get()     
             .then((data) => initialize(data, deal))
-            .then((deal) => this.speechDealText(deal))
+            .then((deal) => speechDealText(deal))
             .catch((err) => console.error("ERR WITH DEAL",err));
+
+        var  speechDealText = function(deal){
+            var speechOutput = "We have great deals for you.";
+            speechOutput += "How about ";
+            var dealText = "You can have 50% off haircut from Shawn K's spa. This is good until today!";
+                speechOutput += dealText;
+            var cardTitle = 'MyStylin Deals';
+            var cardContent = dealText;
+            var imageObj = {
+                smallImageUrl: 'https://imgs.xkcd.com/comics/standards.png',
+                largeImageUrl: 'https://imgs.xkcd.com/comics/standards.png'
+            };
+              this.emit(':tellWithCard', speechOutput, cardTitle, cardContent, imageObj);
+        }
     },
     'AMAZON.HelpIntent': function() {
         var message = 'We can find you deals for Health and Beauty products. Do you want me to tell you about a deal?';
@@ -64,6 +78,8 @@ var handlers = {
            this.emit(':tellWithCard', speechOutput, cardTitle, cardContent, imageObj);
         }
 };
+
+
 
 function initialize(data, deal){
     if ((typeof data != "undefined") || (Object.keys(data).length !== 0) ){
