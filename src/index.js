@@ -65,8 +65,9 @@ var newSessionHandler = {
         this.emit('OneshotGetDealsIntent');
     },
     'Unhandled': function () {
-        var speechOutput = 'Say yes to continue, or no to end the game.';
-        this.emit(':ask', message, message);
+        //var speechOutput = 'Say yes to continue, or no to end the game.';
+        //this.emit(':ask', speechOutput, speechOutput);
+         this.emit('OneshotGetDealsIntent');
     }
 };
 
