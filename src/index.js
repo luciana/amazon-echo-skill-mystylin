@@ -27,30 +27,6 @@ var Alexa = require('alexa-sdk'),
     Handlers = require('./handlers');
 
 
-
-
-
-
-function initialize(data, deal){
-    if ((typeof data != "undefined") || (Object.keys(data).length !== 0) ){
-        var data1 = data[0];       
-       
-
-        try {
-            deal.id = data1.id;
-            deal.name = data1.name;
-            deal.description = data1.description;
-            deal.imageUrl = data1.imageUrl;
-            deal.treatment = data1.treatment;
-            deal.expireDateTime = data1.expireDateTime;
-        }catch(e){
-            console.log("ERROR INITIALIZING DEAL DATA");
-        }
-    }
-     console.log("data1",deal);
-    return deal;
-}
-
 exports.handler = function(event, context, callback){
     var alexa = Alexa.handler(event, context, callback);
     alexa.appId = config.app_id;

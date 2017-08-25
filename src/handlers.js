@@ -58,6 +58,24 @@ var oneshotGetDealsIntent = function () {
             };
               self.emit(':tellWithCard', speechOutput, cardTitle, cardContent, imageObj);
         };
+
+        var initialize = function(data, deal){
+		    if ((typeof data != "undefined") || (Object.keys(data).length !== 0) ){
+		        var data1 = data[0];
+		        try {
+		            deal.id = data1.id;
+		            deal.name = data1.name;
+		            deal.description = data1.description;
+		            deal.imageUrl = data1.imageUrl;
+		            deal.treatment = data1.treatment;
+		            deal.expireDateTime = data1.expireDateTime;
+		        }catch(e){
+		            console.log("ERROR INITIALIZING DEAL DATA");
+		        }
+		    }
+		     console.log("data1",deal);
+		    return deal;
+		};
 };
 
 var unhandledRequestHandler = function() {
