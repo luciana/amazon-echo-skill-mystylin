@@ -39,6 +39,7 @@ Deal.prototype.get = function(){
             res.on('end', function () {
               try{
                   a=JSON.parse(body);
+                  a = a[0];
               }catch(e){
                   console.log("ERROR GETTING DEALS API RESPONSE",e);
                   a = [];
