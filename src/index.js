@@ -27,7 +27,7 @@ var Alexa = require('alexa-sdk'),
     Speech = require('speech');
 
 
-var handlers = {
+var newSessionHandler = {
     'LaunchRequest': function () {
         var speechOutput = "Welcome to My Stylin";
         this.emit(speechOutput);
@@ -43,6 +43,7 @@ var handlers = {
 
         var  speechDealText = function(deal){
             console.log('deal', deal);
+            console.log("device id", self.event.context.System.device.deviceId);
             var speechOutput = "We have great deals for you.";
             speechOutput += "How about ";
             var dealText = "You can have 50% off haircut from Shawn K's spa. This is good until today!";
@@ -94,6 +95,6 @@ function initialize(data, deal){
 exports.handler = function(event, context, callback){
     var alexa = Alexa.handler(event, context, callback);
     alexa.appId = config.app_id;
-    alexa.registerHandlers(handlers);
+    alexa.registerHandlers(newSessionHandler);
     alexa.execute();
 };
