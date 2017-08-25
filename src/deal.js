@@ -14,7 +14,7 @@ Deal.prototype.get = function(){
 	var self = this;
     return new Promise(function(resolve, reject) {
         var options = {
-              hostname: config.host,
+              hostname: config.host_name,
               path: '/api/Deals',
               method: 'GET',
               headers: {

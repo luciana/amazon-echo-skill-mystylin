@@ -37,7 +37,7 @@ var handlers = {
         deal.get()     
             .then((data) => initialize(data, deal))
             .catch((err) => console.error("ERR LAUNCH ACTION",err))
-            .then((deal) => speachDealText(deal))
+            .then((deal) => speechDealText(this, deal))
             .catch((err) => console.error("ERR WITH SPEECH",err));
     },
     'AMAZON.HelpIntent': function() {
@@ -53,7 +53,7 @@ var handlers = {
     }
 };
 
-function speachDealText(deal){
+function speechDealText(this,deal){
         
     var speechOutput = "We have great deals for you.";
         speechOutput += "How about ";
