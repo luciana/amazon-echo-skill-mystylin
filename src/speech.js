@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * This file contains a map of messages used by the skill.
  */
@@ -28,7 +26,7 @@ const STOP = "There is nothing to stop. Did you mean to ask something else?";
 
 module.exports = {
     "WELCOME": WELCOME,
-    "WHAT_DO_YOU_WANT": WHAT_DO_YOU_WANT,
+    "DO_YOU_WANT_DEALS": DO_YOU_WANT_DEALS,
     "NOTIFY_MISSING_PERMISSIONS": NOTIFY_MISSING_PERMISSIONS,
     "NO_ADDRESS": NO_ADDRESS,
     "ADDRESS_AVAILABLE": ADDRESS_AVAILABLE,
