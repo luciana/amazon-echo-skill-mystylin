@@ -8,7 +8,7 @@ var AlexaDeviceAddressClient = require('./AlexaDeviceAddressClient'),
 	config = require('./config'),
 	Intents = require('./intents'),
 	Events = require('./events'),
-	Messages = require('./Messages');
+	Messages = require('./speech');
 
 var ALL_ADDRESS_PERMISSION = "read::alexa:device:all:address:country_and_postal_code";
 var PERMISSIONS = [ALL_ADDRESS_PERMISSION];
