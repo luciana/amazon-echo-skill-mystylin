@@ -22,7 +22,6 @@
  *  Alexa: "You can have 50% off haircut from Shawn K's spa. This is good until today!"
  */
 var Alexa = require('alexa-sdk'),
-    Deal = require('deal'),
     config = require('./config'),
     Handlers = require('./handlers');
 

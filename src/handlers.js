@@ -4,7 +4,7 @@
  * for the various events that we will be registering for.
  */
 var AlexaDeviceAddressClient = require('./AlexaDeviceAddressClient'),
-	Deal = require('deal'),
+	Deal = require('./deal'),
 	config = require('./config'),
 	Intents = require('./Intents'),
 	Events = require('./Events'),
