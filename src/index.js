@@ -35,7 +35,7 @@ var handlers = {
     'OneshotGetDealsIntent': function () {
         var deal = new Deal();
         deal.get()     
-            .then((data) => initialize(data))
+            .then((data) => initialize(data, deal))
             .then((deal) => speechDealText(deal))
             .catch((err) => console.error("ERR WITH DEAL",err));
     },
@@ -65,9 +65,9 @@ var handlers = {
         }
 };
 
-function initialize(data){
+function initialize(data, deal){
     if ((typeof data != "undefined") || (Object.keys(data).length !== 0) ){
-        var data1 = data;
+        var data1 = data[0];
         console.log("data",data);
         console.log("data1",data1);
 
