@@ -44,9 +44,9 @@ var handlers = {
         var  speechDealText = function(deal){
             var speechOutput = "We have great deals for you.";
             speechOutput += "How about ";
-            var dealText = "You can have 50% off haircut from Shawn K's spa. This is good until today!";
+            var dealText = deal.name;
                 speechOutput += dealText;
-            var cardTitle = 'MyStylin Deals';
+            var cardTitle = deal.name;
             var cardContent = dealText;
             var imageObj = {
                 smallImageUrl: 'https://imgs.xkcd.com/comics/standards.png',
