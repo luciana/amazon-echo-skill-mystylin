@@ -32,7 +32,7 @@ var AMAZON_CANCEL = "AMAZON.CancelIntent";
 var AMAZON_STOP = "AMAZON.StopIntent";
 
 module.exports = {
-    "GET_DEAL": GET_ADDRESS,
+    "GET_DEAL": GET_DEAL,
     "AMAZON_HELP": AMAZON_HELP,
     "AMAZON_CANCEL": AMAZON_CANCEL,
     "AMAZON_STOP": AMAZON_STOP
