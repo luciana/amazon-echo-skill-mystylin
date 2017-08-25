@@ -6,8 +6,8 @@
 var AlexaDeviceAddressClient = require('./AlexaDeviceAddressClient'),
 	Deal = require('./deal'),
 	config = require('./config'),
-	Intents = require('./Intents'),
-	Events = require('./Events'),
+	Intents = require('./intents'),
+	Events = require('./events'),
 	Messages = require('./Messages');
 
 var ALL_ADDRESS_PERMISSION = "read::alexa:device:all:address:country_and_postal_code";
