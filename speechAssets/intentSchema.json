@@ -23,9 +23,14 @@
     {
       "name": "OneshotGetDealsIntent",
       "samples": [
+        "start",
         "find deals",
         "for deals",
-        "for top deals"
+        "for top deals",
+        "for hair deals",
+        "to find deals",
+        "to find deals near me",
+        "for deals near me"
       ],
       "slots": []
     }

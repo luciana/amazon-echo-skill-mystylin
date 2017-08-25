@@ -48,7 +48,7 @@ gulp.task('copy', function () {
 gulp.task('deploy', function(){
 	gutil.log('package to lambda', localConfig.func);
 	var opts = {
-		profile: 'default', //alotofpilates account
+		profile: 'default', //alotofpilates account - for DEV account
 		region: 'us-east-1'
 	};
 	gulp.src('**/*', {cwd: localConfig.cwd})
