@@ -16,7 +16,7 @@ var PERMISSIONS = [ALL_ADDRESS_PERMISSION];
 
 /* New Session Handler */
 
-var newSessionHandler =  function(){
+var newSessionRequestHandler =  function(){
 	console.log("Starting newSessionHandler()");
 
 	if (this.event.request.type === Events.LAUNCH_REQUEST) {
@@ -63,7 +63,7 @@ var oneshotGetDealsIntent = function () {
 var unhandledRequestHandler = function() {
     console.info("Starting unhandledRequestHandler()");
     this.emit(":tell", Messages.UNHANDLED);
-    this.emit('OneshotGetDealsIntent');
+    // this.emit('OneshotGetDealsIntent');
     console.info("Ending unhandledRequestHandler()");
 };
 
