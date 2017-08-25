@@ -67,7 +67,10 @@ var handlers = {
 
 function initialize(data){
     if ((typeof data != "undefined") || (Object.keys(data).length !== 0) ){
-        var data1 = data[0];
+        var data1 = data;
+        console.log("data",data);
+        console.log("data1",data1);
+
         try {
             deal.id = data1.id;
             deal.name = data1.name;
