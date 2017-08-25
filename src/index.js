@@ -42,12 +42,13 @@ var handlers = {
 
 
         var  speechDealText = function(deal){
+            console.log('deal', deal);
             var speechOutput = "We have great deals for you.";
             speechOutput += "How about ";
-            var dealText = deal.name;
+            var dealText = "You can have 50% off haircut from Shawn K's spa. This is good until today!";
                 speechOutput += dealText;
             var cardTitle = deal.name;
-            var cardContent = dealText;
+            var cardContent = deal.description;
             var imageObj = {
                 smallImageUrl: 'https://imgs.xkcd.com/comics/standards.png',
                 largeImageUrl: 'https://imgs.xkcd.com/comics/standards.png'
@@ -65,29 +66,15 @@ var handlers = {
     'Unhandled': function () {
         var speechOutput = 'Say yes to continue, or no to end the game.';
         this.emit(':ask', message, message);
-    },
-    speechDealText: function(deal){
-        var speechOutput = "We have great deals for you.";
-        speechOutput += "How about ";
-        var dealText = "You can have 50% off haircut from Shawn K's spa. This is good until today!";
-            speechOutput += dealText;
-        var cardTitle = 'MyStylin Deals';
-        var cardContent = dealText;
-        var imageObj = {
-            smallImageUrl: 'https://imgs.xkcd.com/comics/standards.png',
-            largeImageUrl: 'https://imgs.xkcd.com/comics/standards.png'
-        };
-           this.emit(':tellWithCard', speechOutput, cardTitle, cardContent, imageObj);
-        }
+    }
 };
 
 
 
 function initialize(data, deal){
     if ((typeof data != "undefined") || (Object.keys(data).length !== 0) ){
-        var data1 = data[0];
-        console.log("data",data);
-        console.log("data1",data1);
+        var data1 = data[0];       
+       
 
         try {
             deal.id = data1.id;
@@ -100,6 +87,7 @@ function initialize(data, deal){
             console.log("ERROR INITIALIZING DEAL DATA");
         }
     }
+     console.log("data1",deal);
     return deal;
 }
 
