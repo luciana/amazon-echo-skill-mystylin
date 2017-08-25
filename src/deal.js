@@ -14,7 +14,7 @@ Deal.prototype.get = function(){
 	var self = this;
     return new Promise(function(resolve, reject) {
         var options = {
-              hostname: config.host_name,
+              hostname: config.host,
               path: '/api/Deals',
               method: 'GET',
               headers: {
@@ -25,11 +25,11 @@ Deal.prototype.get = function(){
             };
 
         var req = https.get(options, function(res) {
-            console.log('GET USER STATUS: ' + res.statusCode);
+            console.log('GET DEAL STATUS: ' + res.statusCode);
             res.setEncoding('utf8');
             
             if (res.statusCode < 200 || res.statusCode > 299) {
-                reject(new Error('Failed to load page, status code: ' + res.statusCode));
+                reject(new Error('FAILED TO LOAD API, STATUS CODE: ' + res.statusCode));
             }
 
             var body = [];
@@ -39,9 +39,8 @@ Deal.prototype.get = function(){
             res.on('end', function () {
               try{
                   a=JSON.parse(body);
-                  this.hasUser = true;
               }catch(e){
-                  console.log("ERROR getting Deals response",e);
+                  console.log("ERROR GETTING DEALS API RESPONSE",e);
                   a = [];
               }
               resolve(a);
