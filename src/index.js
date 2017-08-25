@@ -36,7 +36,7 @@ var handlers = {
         var deal = new Deal();
         deal.get()     
             .then((data) => initialize(data, deal))
-            .then((deal) => speechDealText(deal))
+            .then((deal) => this.speechDealText(deal))
             .catch((err) => console.error("ERR WITH DEAL",err));
     },
     'AMAZON.HelpIntent': function() {
