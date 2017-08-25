@@ -62,12 +62,12 @@ var oneshotGetDealsIntent = function () {
 
 var unhandledRequestHandler = function() {
     console.info("Starting unhandledRequestHandler()");
-    this.emit(":tell", Messages.UNHANDLED,);
+    this.emit(":tell", Messages.UNHANDLED);
     this.emit('OneshotGetDealsIntent');
     console.info("Ending unhandledRequestHandler()");
 };
 
-const amazonHelpHandler = function() {
+var amazonHelpHandler = function() {
     console.info("Starting amazonHelpHandler()");
     this.emit(":ask", Messages.HELP, Messages.HELP);
     console.info("Ending amazonHelpHandler()");
@@ -76,7 +76,7 @@ const amazonHelpHandler = function() {
 /**
  * This is the handler for the Amazon cancel built in intent.
  */
-const amazonCancelHandler = function() {
+var amazonCancelHandler = function() {
     console.info("Starting amazonCancelHandler()");
     this.emit(":tell", Messages.GOODBYE);
     console.info("Ending amazonCancelHandler()");
@@ -85,14 +85,14 @@ const amazonCancelHandler = function() {
 /**
  * This is the handler for the Amazon stop built in intent.
  */
-const amazonStopHandler = function() {
+var amazonStopHandler = function() {
     console.info("Starting amazonStopHandler()");
     this.emit(":ask", Messages.STOP, Messages.STOP);
     console.info("Ending amazonStopHandler()");
 };
 
 
-const handlers = {};
+var handlers = {};
 // Add event handlers
 handlers[Events.NEW_SESSION] = newSessionRequestHandler;
 handlers[Events.LAUNCH_REQUEST] = launchRequestHandler;
