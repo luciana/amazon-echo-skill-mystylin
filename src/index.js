@@ -24,52 +24,10 @@
 var Alexa = require('alexa-sdk'),
     Deal = require('deal'),
     config = require('./config'),
-    Speech = require('speech');
+    Handlers = require('./handlers');
 
 
-var newSessionHandler = {
-    'LaunchRequest': function () {
-        var speechOutput = "Welcome to My Stylin";
-        this.emit(speechOutput);
-    },
-    'OneshotGetDealsIntent': function () {
-        var deal = new Deal();
-        var self = this;
-        deal.get()     
-            .then((data) => initialize(data, deal))
-            .then((deal) => speechDealText(deal))
-            .catch((err) => console.error("ERR WITH DEAL",err));
 
-
-        var  speechDealText = function(deal){
-            console.log('deal', deal);
-            console.log("device id", self.event.context.System.device.deviceId);
-            var speechOutput = "We have great deals for you.";
-            speechOutput += "How about ";
-            var dealText = "You can have 50% off haircut from Shawn K's spa. This is good until today!";
-                speechOutput += dealText;
-            var cardTitle = deal.name;
-            var cardContent = deal.description;
-            var imageObj = {
-                smallImageUrl: 'https://imgs.xkcd.com/comics/standards.png',
-                largeImageUrl: 'https://imgs.xkcd.com/comics/standards.png'
-            };
-              self.emit(':tellWithCard', speechOutput, cardTitle, cardContent, imageObj);
-        };
-    },
-    'AMAZON.HelpIntent': function() {
-        var message = 'We can find you deals for Health and Beauty products. Do you want me to tell you about a deal?';
-        this.emit(':ask', message, message);
-    },
-    'AMAZON.YesIntent': function() {
-        this.emit('OneshotGetDealsIntent');
-    },
-    'Unhandled': function () {
-        //var speechOutput = 'Say yes to continue, or no to end the game.';
-        //this.emit(':ask', speechOutput, speechOutput);
-         this.emit('OneshotGetDealsIntent');
-    }
-};
 
 
 
@@ -96,6 +54,6 @@ function initialize(data, deal){
 exports.handler = function(event, context, callback){
     var alexa = Alexa.handler(event, context, callback);
     alexa.appId = config.app_id;
-    alexa.registerHandlers(newSessionHandler);
+    alexa.registerHandlers(Handlers);
     alexa.execute();
 };
