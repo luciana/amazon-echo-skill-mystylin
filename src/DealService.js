@@ -37,14 +37,16 @@ class DealService {
             console.log(`DealAPI responded with a status code of : ${response.statusCode}`);
 
             response.on('data', (data) => {
-                let responsePayloadObject = JSON.parse(data);
+                //var responsePayloadObject = JSON.parse(data);
+                var responsePayloadObject = data;
+
 
                 var dealResponse = {
                     statusCode: response.statusCode,
                     deal: responsePayloadObject
                 };
 
-                fulfill(deviceAddressResponse);
+                fulfill(dealResponse);
             });
         }).on('error', (e) => {
             console.error(e);

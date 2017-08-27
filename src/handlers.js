@@ -26,24 +26,39 @@ var newSessionRequestHandler =  function(){
 
 var launchRequestHandler = function() {
     console.log("Starting launchRequestHandler()");
-    this.emit(":ask", Messages.WELCOME, Messages.WELCOME);
+    this.emit(":ask", Messages.WELCOME, Messages.WELCOME + Messages.DO_YOU_WANT_DEALS);
     console.log("Ending launchRequestHandler()");
 };
 
 
 var getDealHandler = function () {
 	console.log("Starting getDealHandler()");
+
+
+	if (this.event.context.System.user){
+
+	}else
+	{
+		
+	}
+	//FIX: can not test this from the emulator - get error
+	// var consentToken = this.event.context.System.user.permissions.consentToken;
+	// if(!consentToken){
+	// 	this.emit(":tellWithPermissionCard", Messages.NOTIFY_MISSING_PERMISSIONS, PERMISSIONS);
+	// 	//TODO: what should we do if the user does not have location permission set?
+	// 	return;
+	// }
 	
-	const dealService = new DealService(apiEndpoint, deviceId, consentToken);
-    let dealRequest = dealService.getDeals();
+	var dealService = new DealService();
+    var dealRequest = dealService.getDeals();
 
     dealRequest.then((response) => {
         switch(response.statusCode) {
             case 200:
                 console.log("Deal successfully retrieved, now responding to user.");
-                const deal = response.deal;
+                var deal = response.deal;
 
-                const DEAL_MESSAGE = Messages.DEAL_AVAILABLE +
+                var DEAL_MESSAGE = Messages.DEAL_AVAILABLE +
                     `${deal['name']}`;
 
                 this.emit(":tell", DEAL_MESSAGE);

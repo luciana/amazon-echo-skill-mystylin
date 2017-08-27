@@ -4,7 +4,7 @@
 
 const WELCOME = "Welcome to MyStylin Deals Skill!";
 
-const DO_YOU_WANT_DEALS = "What do you want to ask about health and beauty deals around you?";
+const DO_YOU_WANT_DEALS = "Do you want to ask about health and beauty deals around you?";
 
 const NOTIFY_MISSING_PERMISSIONS = "Please enable Location permissions in the Amazon Alexa app.";
 
