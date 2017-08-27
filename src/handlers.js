@@ -72,8 +72,8 @@ var getDealHandler = function () {
 	}
 	
 	var dealService = new DealService();
-	var treatment = 'Hair';
-	var postalCode = "44077";
+	var treatment = 'nails';
+	var postalCode = address.postalCode;
     var dealRequest = dealService.searchDeal(postalCode, treatment);
 
     dealRequest.then((response) => {
@@ -83,7 +83,7 @@ var getDealHandler = function () {
                 var deal = response.deal;
 
                 var DEAL_MESSAGE = Messages.DEAL_AVAILABLE +
-                    `${deal['name']}`;
+                    `${deal['deal_title']}`;
 
                 this.emit(":tell", DEAL_MESSAGE);
                 break;
@@ -98,47 +98,6 @@ var getDealHandler = function () {
 
         console.info("Ending getAddressHandler()");
     });
-  //       var deal = new Deal();
-  //       var self = this;
-  //       deal.get()     
-  //           .then((data) => initialize(data, deal))
-  //           .then((deal) => speechDealText(deal))
-  //           .catch((err) => console.error("ERR WITH DEAL",err));
-
-
-  //       var  speechDealText = function(deal){
-  //           console.log('deal', deal);
-  //           console.log("device id", self.event.context.System.device.deviceId);
-  //           var speechOutput = "We have great deals for you.";
-  //           speechOutput += "How about ";
-  //           var dealText = "You can have 50% off haircut from Shawn K's spa. This is good until today!";
-  //               speechOutput += dealText;
-  //           var cardTitle = deal.name;
-  //           var cardContent = deal.description;
-  //           var imageObj = {
-  //               smallImageUrl: 'https://imgs.xkcd.com/comics/standards.png',
-  //               largeImageUrl: 'https://imgs.xkcd.com/comics/standards.png'
-  //           };
-  //             self.emit(':tellWithCard', speechOutput, cardTitle, cardContent, imageObj);
-  //       };
-
-  //       var initialize = function(data, deal){
-		//     if ((typeof data != "undefined") || (Object.keys(data).length !== 0) ){
-		//         var data1 = data[0];
-		//         try {
-		//             deal.id = data1.id;
-		//             deal.name = data1.name;
-		//             deal.description = data1.description;
-		//             deal.imageUrl = data1.imageUrl;
-		//             deal.treatment = data1.treatment;
-		//             deal.expireDateTime = data1.expireDateTime;
-		//         }catch(e){
-		//             console.log("ERROR INITIALIZING DEAL DATA");
-		//         }
-		//     }
-		//      console.log("data1",deal);
-		//     return deal;
-		// };
 		console.log("Ending getDealHandler()");
 };
 

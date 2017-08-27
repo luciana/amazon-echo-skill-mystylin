@@ -13,7 +13,7 @@ class DealService {
 
 
     searchDeal(postalCode, treatment){
-        var options = this.__getRequestOptions('/v1/deals/search?treatment=nails&distance=10&zip=44077',
+        var options = this.__getRequestOptions('/v1/deals/search?treatment=nails&distance=100&zip=44077',
             'developer.mystylin.com',
             '');
         return new Promise((fulfill, reject) => {
@@ -47,13 +47,13 @@ class DealService {
             console.log(`DealAPI responded with a status code of : ${response.statusCode}`);
 
             response.on('data', (data) => {
-                //var responsePayloadObject = JSON.parse(data);
-                var responsePayloadObject = data;
+                var responsePayloadObject = JSON.parse(data.join(''));
+              //var responsePayloadObject = data;
 
 
                 var dealResponse = {
                     statusCode: response.statusCode,
-                    deal: JSON.parse(responsePayloadObject)
+                    deal: responsePayloadObject
                 };
 
                 fulfill(dealResponse);
@@ -74,9 +74,9 @@ class DealService {
               path: path,
               method: 'GET',
               headers: {
-                'Content-Type': 'application/json',
+               // 'Content-Type': 'application/json',
                 'api_key': api_key,
-                'Accept': 'application/json'
+               // 'Accept': 'application/json'
               }
             };
     }
