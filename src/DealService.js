@@ -3,12 +3,23 @@ var config = require('./config'),
 
 /**
  * This is a small wrapper client for the Alexa Address API.
+ * curl -v -X GET "http://developer.mystylin.com/v1/deals/search?treatment=nails&distance=10&zip=44077";
  */
 class DealService {
     /**
      * Constructor method empty.
      */
     constructor() {}
+
+
+    searchDeal(postalCode, treatment){
+        var options = this.__getRequestOptions('/v1/deals/search?treatment=nails&distance=10&zip=44077',
+            'developer.mystylin.com',
+            '');
+        return new Promise((fulfill, reject) => {
+            this.__handleDealApiRequest(options, fulfill, reject);
+        });
+    }
     
     /**
      * This will make a request to the Deal API in azure
@@ -16,8 +27,7 @@ class DealService {
      * @return {Promise} promise for the request in flight.
      */
     getDeals() {
-        const options = this.__getRequestOptions(
-            `/api/Deals`);
+        const options = this.__getRequestOptions('/api/Deals', config.host_name, config.api_key);
 
         return new Promise((fulfill, reject) => {
             this.__handleDealApiRequest(options, fulfill, reject);
@@ -43,7 +53,7 @@ class DealService {
 
                 var dealResponse = {
                     statusCode: response.statusCode,
-                    deal: responsePayloadObject
+                    deal: JSON.parse(responsePayloadObject)
                 };
 
                 fulfill(dealResponse);
@@ -58,14 +68,14 @@ class DealService {
      * Private helper method for retrieving request options.
      * @private
      */
-    __getRequestOptions(path) {
+    __getRequestOptions(path, host_name, api_key) {
         return {
-              hostname: config.host_name,
+              hostname: host_name,
               path: path,
               method: 'GET',
               headers: {
                 'Content-Type': 'application/json',
-                'api_key':config.api_key,
+                'api_key': api_key,
                 'Accept': 'application/json'
               }
             };
