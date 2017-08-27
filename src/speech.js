@@ -1,5 +1,5 @@
 /**
- * This file contains a map of messages used by the skill.
+ * This file contains a map of messages used by the skill to speak to the user.
  */
 
 const WELCOME = "Welcome to MyStylin Deals Skill!";
@@ -10,11 +10,13 @@ const NOTIFY_MISSING_PERMISSIONS = "Please enable Location permissions in the Am
 
 const NO_ADDRESS = "It looks like you don't have an address set. You can set your address from the companion app.";
 
-const ADDRESS_AVAILABLE = "Here is your full address: ";
+const DEAL_AVAILABLE = "Here is a deal for you ";
+
+const NO_DEAL = "We haven't found any deals for you. Check out the MyStylin mobile app";
 
 const ERROR = "Uh Oh. Looks like something went wrong.";
 
-const LOCATION_FAILURE = "There was an error with the Device Address API. Please try again.";
+const LOCATION_FAILURE = "There was an error with the Deals API. Please try again.";
 
 const GOODBYE = "Bye! Thanks for using the Sample Device Address API Skill!";
 
@@ -29,7 +31,8 @@ module.exports = {
     "DO_YOU_WANT_DEALS": DO_YOU_WANT_DEALS,
     "NOTIFY_MISSING_PERMISSIONS": NOTIFY_MISSING_PERMISSIONS,
     "NO_ADDRESS": NO_ADDRESS,
-    "ADDRESS_AVAILABLE": ADDRESS_AVAILABLE,
+    "DEAL_AVAILABLE": DEAL_AVAILABLE,
+    "NO_DEAL": NO_DEAL,
     "ERROR": ERROR,
     "LOCATION_FAILURE": LOCATION_FAILURE,
     "GOODBYE": GOODBYE,

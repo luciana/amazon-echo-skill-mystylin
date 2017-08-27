@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * This file contains all the events that we'll be
  * interested in outside of a normal intent.
@@ -15,14 +13,11 @@ var NEW_SESSION = "NewSession";
 /**
  * Your service receives a LaunchRequest when the user invokes the skill with the
  * invocation name, but does not provide any command mapping to an intent.
- * Refer to the following URL for documentation:
- * https://developer.amazon.com/public/solutions/alexa/alexa-skills-kit/docs/handling-requests-sent-by-alexa#launchrequest
- */
+*/
 var LAUNCH_REQUEST = "LaunchRequest";
 
 /**
  * Your service receives a SessionEndedRequest when a currently open session is closed.
- * https://developer.amazon.com/public/solutions/alexa/alexa-skills-kit/docs/handling-requests-sent-by-alexa#sessionendedrequest
  */
 var SESSION_ENDED = "SessionEndedRequest";
 
