@@ -1,4 +1,5 @@
-src/config/
+./src/config
 node_modules/
 dist/
 environment/
+src/config.js

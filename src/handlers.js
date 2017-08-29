@@ -79,8 +79,8 @@ var getDealHandler = function () {
     dealRequest.then((response) => {
         switch(response.statusCode) {
             case 200:
-                console.log("Deal successfully retrieved", response.deal);
-                var deal = response.deal;
+                console.log("Deal successfully retrieved", response.deal.results[0]);
+                var deal = response.deal.results[0];
 
                 var DEAL_MESSAGE = Messages.DEAL_AVAILABLE +
                     `${deal['deal_title']}`;
@@ -88,8 +88,6 @@ var getDealHandler = function () {
                 this.emit(":tell", DEAL_MESSAGE);
                 break;
             case 204:
-                // This likely means that the user didn't have their address set via the companion app.
-                console.log("Successfully requested from the device address API, but no address was returned.");
                 this.emit(":tell", Messages.NO_DEAL);
                 break;
             default:

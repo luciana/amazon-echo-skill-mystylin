@@ -13,7 +13,8 @@ class DealService {
 
 
     searchDeal(postalCode, treatment){
-        var options = this.__getRequestOptions('/v1/deals/search?treatment=nails&distance=100&zip=44077',
+        var url = '/v1/deals/search?treatment='+treatment+'&distance=100&zip='+postalCode;
+        var options = this.__getRequestOptions(url,
             'developer.mystylin.com',
             '');
         return new Promise((fulfill, reject) => {
@@ -43,24 +44,36 @@ class DealService {
      * @private
      */
     __handleDealApiRequest(requestOptions, fulfill, reject) {
-        https.get(requestOptions, (response) => {
-            console.log(`DealAPI responded with a status code of : ${response.statusCode}`);
+        var req = https.get(requestOptions, function(res) {
+            console.log('GET DEAL STATUS: ' + res.statusCode);
+            res.setEncoding('utf8');
+            
+            if (res.statusCode < 200 || res.statusCode > 299) {
+                reject(new Error('FAILED TO LOAD API, STATUS CODE: ' + res.statusCode));
+            }
 
-            response.on('data', (data) => {
-                var responsePayloadObject = JSON.parse(data.join(''));
-              //var responsePayloadObject = data;
-
-
-                var dealResponse = {
-                    statusCode: response.statusCode,
-                    deal: responsePayloadObject
-                };
-
-                fulfill(dealResponse);
+            var body = [];
+            var dealResponse ={};
+            res.on('data', function (data){
+                body.push(data);
             });
-        }).on('error', (e) => {
-            console.error(e);
-            reject();
+            res.on('end', function () {
+              try{
+                  var responsePayloadObject = body;
+                  dealResponse = {
+                        statusCode: res.statusCode,
+                        deal: JSON.parse(body)
+                    };
+              }catch(e){
+                  console.log("ERROR GETTING DEALS API RESPONSE",e);
+                  dealResponse = {};
+              }
+              fulfill(dealResponse);
+            });
+        });
+
+        req.on('error', function (err) {
+            reject(err);
         });
     }
 
