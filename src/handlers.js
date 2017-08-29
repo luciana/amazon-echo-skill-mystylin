@@ -72,7 +72,7 @@ var getDealHandler = function () {
 	}
 	
 	var dealService = new DealService();
-	var treatment = 'nails';
+	var treatment = '*';
 	var postalCode = address.postalCode;
     var dealRequest = dealService.searchDeal(postalCode, treatment);
 
@@ -82,8 +82,9 @@ var getDealHandler = function () {
                 console.log("Deal successfully retrieved", response.deal.results[0]);
                 var deal = response.deal.results[0];
 
-                var DEAL_MESSAGE = Messages.DEAL_AVAILABLE +
-                    `${deal['deal_title']}`;
+                var DEAL_MESSAGE =  `${deal['salon_title']}` + Messages.SALON_OFFER +
+                    `${deal['deal_title']}` + Messages.DEAL_GOOD_UNTIL + 
+                    `${deal['deal_expiration_date']}`
 
                 this.emit(":tell", DEAL_MESSAGE);
                 break;

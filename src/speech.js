@@ -10,7 +10,11 @@ const NOTIFY_MISSING_PERMISSIONS = "Please enable Location permissions in the Am
 
 const NO_ADDRESS = "It looks like you don't have an address set. You can set your address from the companion app.";
 
-const DEAL_AVAILABLE = "Here is a deal for you ";
+const DEAL_AVAILABLE = "";
+
+const DEAL_GOOD_UNTIL =". This offer is good until ";
+
+const SALON_OFFER = " offers you ";
 
 const NO_DEAL = "We haven't found any deals for you. Check out the MyStylin mobile app";
 
@@ -32,6 +36,8 @@ module.exports = {
     "NOTIFY_MISSING_PERMISSIONS": NOTIFY_MISSING_PERMISSIONS,
     "NO_ADDRESS": NO_ADDRESS,
     "DEAL_AVAILABLE": DEAL_AVAILABLE,
+    "DEAL_GOOD_UNTIL": DEAL_GOOD_UNTIL,
+    "SALON_OFFER": SALON_OFFER,
     "NO_DEAL": NO_DEAL,
     "ERROR": ERROR,
     "LOCATION_FAILURE": LOCATION_FAILURE,

@@ -8,18 +8,18 @@
  *
  * Example:
  * One-shot model:
- *  User:  "Alexa, ask MyStylin for deals in 44124"
- *  Alexa: "You can have 50% off haircut from Shawn K's spa. This is good until today!"
- *  User:  "Alexa, ask MyStylin for hair deals in 44124"
- *  Alexa: "You can have 50% off haircut from Shawn K's spa. This is good until today!"
-
+ *  User:  "Alexa, ask MyStylin for deals near me"
+ *  Alexa: "Salon K offers you 50% off haircut from Shawn K's spa. This is good until today!"
+ *  User:  "Alexa, ask MyStylin for hair deals near me"
+ *  Alexa: "Salon K offers you 50% off haircut from Shawn K's spa. This is good until today!"
+ *  User: Alexa, ask MyStylin for hair deals near me
+ *  Alexa: I can't identify your location. Please enable it from the Alexa App. 
+ 
  * Dialog model:
- *  User:  "Alexa, ask MyStylin for deals"
- *  Alexa: "Welcome to MyStylin. Which zip code would you like to retrieve deals?"
- *  User:  "44124"
- *  Alexa: "What type of service treatment are you looking for? You can say spa, hair, nails"
- *  User:  "Hair"
- *  Alexa: "You can have 50% off haircut from Shawn K's spa. This is good until today!"
+ *  User: Alexa, open MyStylin
+ * Alexa: Welcome to MyStylin. You can get health and beauty deals? Do you want learn about a deal?
+ * User: Yes
+ * Alexa: Get 10 percent off hair products from salon K.
  */
 var Alexa = require('alexa-sdk'),
     config = require('./config'),
