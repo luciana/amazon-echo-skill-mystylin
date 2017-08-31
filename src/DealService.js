@@ -13,7 +13,14 @@ class DealService {
 
 
     searchDeal(postalCode, treatment){
-        var url = '/v1/deals/search?treatment='+treatment+'&distance=100&zip='+postalCode;
+        var url = '/v1/deals/search?distance=100&';
+        if (treatment){
+            url += treatment;
+        }
+        if (postalCode){
+            url += '&zip='+postalCode;
+        }
+        var url = '/v1/deals/search?treatment=nails&distance=100&zip=44124';
         var options = this.__getRequestOptions(url,
             'developer.mystylin.com',
             '');

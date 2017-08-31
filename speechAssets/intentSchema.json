@@ -21,18 +21,86 @@
       ]
     },
     {
+      "name": "GetAddress",
+      "samples": [
+        "where am I located",
+        "GetAddress where do I live",
+        "GetAddress whats my address",
+        "GetAddress whats my location"
+      ],
+      "slots": []
+    },
+    {
       "name": "OneshotGetDealsIntent",
       "samples": [
         "start",
         "find deals",
         "for deals",
         "for top deals",
-        "for hair deals",
         "to find deals",
         "to find deals near me",
-        "for deals near me"
+        "for deals near me",
+        "for {treatment} deals",
+        "for {treatment} deals near me",
+        "what is a good {treatment} deal today",
+        "for top {treatment} deal"
       ],
-      "slots": []
+      "slots": [
+        {
+          "name": "treatment",
+          "type": "Treatment",
+          "samples": []
+        }
+      ]
+    }
+  ],
+  "types": [
+    {
+      "name": "Treatment",
+      "values": [
+        {
+          "id": null,
+          "name": {
+            "value": "Hair",
+            "synonyms": []
+          }
+        },
+        {
+          "id": null,
+          "name": {
+            "value": "Massage",
+            "synonyms": []
+          }
+        },
+        {
+          "id": null,
+          "name": {
+            "value": "Spa",
+            "synonyms": []
+          }
+        },
+        {
+          "id": null,
+          "name": {
+            "value": "Nails",
+            "synonyms": []
+          }
+        },
+        {
+          "id": null,
+          "name": {
+            "value": "Tanning",
+            "synonyms": []
+          }
+        },
+        {
+          "id": null,
+          "name": {
+            "value": "Products",
+            "synonyms": []
+          }
+        }
+      ]
     }
   ]
 }

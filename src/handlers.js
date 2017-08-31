@@ -3,11 +3,11 @@
  * This class contains all handler function definitions
  * for the various events that we will be registering for.
  */
-var AlexaDeviceAddressClient = require('./AlexaDeviceAddressClient'),
-	DealService = require('./DealService'),
+var DealService = require('./DealService'),
 	config = require('./config'),
 	Intents = require('./intents'),
 	Events = require('./events'),
+	Helpers = require('./helpers'),
 	Messages = require('./speech');
 
 var ALL_ADDRESS_PERMISSION = "read::alexa:device:all:address:country_and_postal_code";
@@ -33,47 +33,13 @@ var launchRequestHandler = function() {
 
 var getDealHandler = function () {
 	console.log("Starting getDealHandler()");
-
-
-	if (this.event.context.System.user.permissions){
-		var consentToken = this.event.context.System.user.permissions.consentToken;
-		if(!consentToken){
-			this.emit(":tellWithPermissionCard", Messages.NOTIFY_MISSING_PERMISSIONS, PERMISSIONS);
-			//TODO: what should we do if the user does not have location permission set?
-			return;
-		}
-		var deviceId = this.event.context.System.device.deviceId;
-		var apiEndpoint = this.event.context.System.apiEndpoint;
-
-		var alexaDeviceAddressClient = new AlexaDeviceAddressClient(apiEndpoint, deviceId, consentToken);
-		var addressRequest = alexaDeviceAddressClient.getCountryAndPostalCode();
-
-		addressRequest.then((addressResponse) => {
-			switch(addressResponse.statusCode){
-				case 200:
-					console.log("Address successfully retrieved, now responding to user.");
-	                var address = addressResponse.address;
-	                var ADDRESS_MESSAGE = Messages.ADDRESS_AVAILABLE +
-	                    `${address['postalCode']}, ${address['countryCode']}}`;
-	                this.emit(":tell", ADDRESS_MESSAGE);
-					break;
-				case 204:
-					break;
-				case 403:
-					break;
-				default:
-					this.emit(":ask", Messages.LOCATION_FAILURE, Messages.LOCATION_FAILURE);
-			}
-		});
-
-	}else {
-		//testing from Service Simulator
-		address = { "countryCode" : "US","postalCode" : "44124"};
-	}
-	
-	var dealService = new DealService();
-	var treatment = '*';
+	var request = this.event.request;
+	var treatment = Helpers.getSlot(request, "treatment");
+	var address = Helpers.getAddress(this.event.context);
 	var postalCode = address.postalCode;
+	console.log("deal search for ", treatment, postalCode);
+
+	var dealService = new DealService();
     var dealRequest = dealService.searchDeal(postalCode, treatment);
 
     dealRequest.then((response) => {
