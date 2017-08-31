@@ -4,21 +4,39 @@
  */
 var AlexaDeviceAddressClient = require('./AlexaDeviceAddressClient');
 
-var getSlot = function(request, name) {
-    var slot = request.intent.slots[name];
+
+var getTreatmetSlot = function(request) {
+    var slot = request.intent.slots["treatment"];
     var slotValue;
     if (slot && slot.value){
         if(slot.value.toLowerCase()){
             return request.intent.slots.treatment.value;
         }
-    	return treatment;
     }else{
-    	return false;
+        //TODO: currently treatment is a required value in the API     
+        return "hair";
 	}
 };
 
+var getCitySlot = function(request) {
+    var slot = request.intent.slots["city"];
+    var slotValue;
+    if (slot && slot.value){
+        if(slot.value.toLowerCase()){
+            return request.intent.slots.city.value;
+        }
+    }else{
+        //TODO: currently treatment is a required value in the API     
+        return "Solon, OH";
+    }
+};
+
 var getAddress = function(context){
-    var defaultAddress = { "countryCode" : "US","postalCode" : "44124"};
+    var ALL_ADDRESS_PERMISSION = "read::alexa:device:all:address:country_and_postal_code";
+    var PERMISSIONS = [ALL_ADDRESS_PERMISSION];
+
+    //TODO: currently zip is a required value in the API  
+    var defaultAddress = { "countryCode" : "US","postalCode" : "44122"};
     if (context.System.user.permissions){
         var consentToken = context.System.user.permissions.consentToken;
         if(!consentToken){
@@ -56,6 +74,7 @@ var getAddress = function(context){
 
 
 module.exports = {
-	"getSlot": getSlot,
+	"getTreatmetSlot": getTreatmetSlot,
+    "getCitySlot":getCitySlot,
     "getAddress": getAddress
 };

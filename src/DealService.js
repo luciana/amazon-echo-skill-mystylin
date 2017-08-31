@@ -13,7 +13,7 @@ class DealService {
 
 
     searchDeal(postalCode, treatment){
-        var url = '/v1/deals/search?distance=100';
+        var url = '/v1/deals/search?distance=5000';
         if (treatment){
             url += '&treatment='+treatment;
         }
@@ -67,11 +67,19 @@ class DealService {
             });
             res.on('end', function () {
               try{
-                  var responsePayloadObject = body;
-                  dealResponse = {
+                console.log(' DEAL API RESPONSE : ' + body);
+                var responsePayloadObject = JSON.parse(body);
+                if(responsePayloadObject.status){
+                    dealResponse = {
                         statusCode: res.statusCode,
-                        deal: JSON.parse(body)
+                        deal: responsePayloadObject
                     };
+                }else{
+                    dealResponse = {
+                        statusCode: 204,
+                        deal: {}
+                    };
+                }
               }catch(e){
                   dealResponse = {
                         statusCode: 204,

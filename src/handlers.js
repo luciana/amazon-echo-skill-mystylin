@@ -10,9 +10,6 @@ var DealService = require('./DealService'),
 	Helpers = require('./helpers'),
 	Messages = require('./speech');
 
-var ALL_ADDRESS_PERMISSION = "read::alexa:device:all:address:country_and_postal_code";
-var PERMISSIONS = [ALL_ADDRESS_PERMISSION];
-
 var newSessionRequestHandler =  function(){
 	console.log("Starting newSessionHandler()");
 
@@ -34,13 +31,17 @@ var launchRequestHandler = function() {
 var getDealHandler = function () {
 	console.log("Starting getDealHandler()");
 	var request = this.event.request;
-	var treatment = Helpers.getSlot(request, "treatment");
+	//var treatment = Helpers.getSlot(request, "treatment");
 	var address = Helpers.getAddress(this.event.context);
-	var postalCode = address.postalCode;
-	console.log("deal search for ", treatment, postalCode);
+	//var postalCode = address.postalCode;
+	//console.log("deal search for ", treatment, postalCode);
+	var cityName = Helpers.getCitySlot(request);
+	console.log("deal search in city ", cityName);
 
 	var dealService = new DealService();
-    var dealRequest = dealService.searchDeal(postalCode, treatment);
+    var dealRequest = dealService.searchDeal(
+								    	address.postalCode, 
+								    	Helpers.getTreatmetSlot(request));
 
     dealRequest.then((response) => {
         switch(response.statusCode) {
