@@ -13,14 +13,15 @@ class DealService {
 
 
     searchDeal(postalCode, treatment){
-        var url = '/v1/deals/search?distance=100&';
+        var url = '/v1/deals/search?distance=100';
         if (treatment){
-            url += treatment;
+            url += '&treatment='+treatment;
         }
         if (postalCode){
             url += '&zip='+postalCode;
         }
-        var url = '/v1/deals/search?treatment=nails&distance=100&zip=44124';
+        //var url = '/v1/deals/search?treatment=nails&distance=100&zip=44124';
+        console.log("deal api url ", url);
         var options = this.__getRequestOptions(url,
             'developer.mystylin.com',
             '');
@@ -72,8 +73,10 @@ class DealService {
                         deal: JSON.parse(body)
                     };
               }catch(e){
-                  console.log("ERROR GETTING DEALS API RESPONSE",e);
-                  dealResponse = {};
+                  dealResponse = {
+                        statusCode: 204,
+                        deal: {}
+                    };
               }
               fulfill(dealResponse);
             });
