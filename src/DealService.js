@@ -52,10 +52,8 @@ class DealService {
      * @private
      */
     __handleDealApiRequest(requestOptions, fulfill, reject) {
-        var req = https.get(requestOptions, function(res) {
-            console.log('GET DEAL STATUS: ' + res.statusCode);
-            res.setEncoding('utf8');
-            
+        var req = https.get(requestOptions, function(res) {           
+            res.setEncoding('utf8');            
             if (res.statusCode < 200 || res.statusCode > 299) {
                 reject(new Error('FAILED TO LOAD API, STATUS CODE: ' + res.statusCode));
             }
@@ -65,24 +63,33 @@ class DealService {
                 body.push(data);
             });
             res.on('end', function () {
-              try{                                 
-                 if(body.status && typeof body.status===false){
+              try{                
+                var raw = JSON.parse(body);
+                console.log("DEAL API RAW RESPONSE", raw);
+                 if(raw.status == false){ //missing information
                     var dealResponse = {
-                        statusCode: 204,
-                        message: "Missing treatment or postal code",
-                        deal: results
+                        statusCode: 404,
+                        message: raw.message,
+                        deal: raw
                     };
                  }else{
                     var results = JSON.parse(body[0]).results[0];
                     console.log(' DEAL API RESPONSE RESULTS: ' + results);
-                    var dealResponse = {
+                    if (results){
+                        var dealResponse = {
                         statusCode: res.statusCode,
                         message: "",
                         deal: results
-                    };
-                 }
-                  
-                
+                        };
+                    }else{ //no deals found - no content
+                        var dealResponse = {
+                            statusCode: 204,
+                            message: "",
+                            deal: {}
+                        };
+                    }
+                    
+                 }   
               }catch(e){
                   var dealResponse = {
                         statusCode: 500,
@@ -90,7 +97,6 @@ class DealService {
                         deal: {}
                     };
               }
-              // console.log(' DEAL API RESPONSE OBJECT : ' + dealResponse);
               fulfill(dealResponse);
             });
         });

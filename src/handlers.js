@@ -55,7 +55,11 @@ var getDealHandler = function () {
 
                 this.emit(":tell", DEAL_MESSAGE);
                 break;
-            case 204:
+            case 404:
+            	var message = response.message;
+                this.emit(":tell", message + Messages.NO_DEAL);
+                break;
+            case 204:            	
                 this.emit(":tell", Messages.NO_DEAL);
                 break;
             default:
