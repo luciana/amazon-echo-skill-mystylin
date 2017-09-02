@@ -14,7 +14,7 @@ var getTreatmetSlot = function(request) {
         }
     }else{
         //TODO: currently treatment is a required value in the API     
-        return "hair";
+        return "nails";
 	}
 };
 
@@ -36,7 +36,7 @@ var getAddress = function(context){
     var PERMISSIONS = [ALL_ADDRESS_PERMISSION];
 
     //TODO: currently zip is a required value in the API  
-    var defaultAddress = { "countryCode" : "US","postalCode" : "44122"};
+    var defaultAddress = { "countryCode" : "US","postalCode" : "44124"};
     if (context.System.user.permissions){
         var consentToken = context.System.user.permissions.consentToken;
         if(!consentToken){

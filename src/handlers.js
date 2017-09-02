@@ -44,11 +44,11 @@ var getDealHandler = function () {
 								    	Helpers.getTreatmetSlot(request));
 
     dealRequest.then((response) => {
+    	console.log(response);
         switch(response.statusCode) {
-            case 200:
-                console.log("Deal successfully retrieved", response.deal.results[0]);
-                var deal = response.deal.results[0];
-
+            case 200:              
+                var deal = response.deal;
+                console.log("Deal object", deal);
                 var DEAL_MESSAGE =  `${deal['salon_title']}` + Messages.SALON_OFFER +
                     `${deal['deal_title']}` + Messages.DEAL_GOOD_UNTIL + 
                     `${deal['deal_expiration_date']}`

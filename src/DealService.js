@@ -13,7 +13,7 @@ class DealService {
 
 
     searchDeal(postalCode, treatment){
-        var url = '/v1/deals/search?distance=5000';
+        var url = '/v1/deals/search?distance=5000&per_page=1&page=1';
         if (treatment){
             url += '&treatment='+treatment;
         }
@@ -60,32 +60,37 @@ class DealService {
                 reject(new Error('FAILED TO LOAD API, STATUS CODE: ' + res.statusCode));
             }
 
-            var body = [];
-            var dealResponse ={};
+            var body = [];          
             res.on('data', function (data){
                 body.push(data);
             });
             res.on('end', function () {
-              try{
-                console.log(' DEAL API RESPONSE : ' + body);
-                var responsePayloadObject = JSON.parse(body);
-                if(responsePayloadObject.status){
-                    dealResponse = {
+              try{                                 
+                 if(body.status && typeof body.status===false){
+                    var dealResponse = {
+                        statusCode: 204,
+                        message: "Missing treatment or postal code",
+                        deal: results
+                    };
+                 }else{
+                    var results = JSON.parse(body[0]).results[0];
+                    console.log(' DEAL API RESPONSE RESULTS: ' + results);
+                    var dealResponse = {
                         statusCode: res.statusCode,
-                        deal: responsePayloadObject
+                        message: "",
+                        deal: results
                     };
-                }else{
-                    dealResponse = {
-                        statusCode: 204,
-                        deal: {}
-                    };
-                }
+                 }
+                  
+                
               }catch(e){
-                  dealResponse = {
-                        statusCode: 204,
+                  var dealResponse = {
+                        statusCode: 500,
+                         message: e,
                         deal: {}
                     };
               }
+              // console.log(' DEAL API RESPONSE OBJECT : ' + dealResponse);
               fulfill(dealResponse);
             });
         });
@@ -105,9 +110,9 @@ class DealService {
               path: path,
               method: 'GET',
               headers: {
-               // 'Content-Type': 'application/json',
+                'Content-Type': 'application/json',
                 'api_key': api_key,
-               // 'Accept': 'application/json'
+                'Accept': 'application/json'
               }
             };
     }
