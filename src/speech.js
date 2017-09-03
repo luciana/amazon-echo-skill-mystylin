@@ -26,16 +26,16 @@ const DEAL_GOOD_UNTIL =". This offer is good until ";
 
 
 /**
- * This message is delivered when no deal was found
+ * These messages are delivered when no deal was found
  */
 const NO_DEAL = "We haven't found any deals for you. Check out the MyStylin mobile app";
+
+const LOCATION_FAILURE = "We were unable to locate a deal near you. Please try again.";
 
 /**
  * These messages are delivered on standard situations for the Stop, Cancel, Unhandled intents or API errors. 
  */
 const ERROR = "Uh Oh. Looks like something went wrong.";
-
-const LOCATION_FAILURE = "There was an error with the Deals API. Please try again.";
 
 const GOODBYE = "Bye!";
 

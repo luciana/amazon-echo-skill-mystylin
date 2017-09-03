@@ -14,7 +14,7 @@ var getTreatmetSlot = function(request) {
         }
     }else{
         //TODO: currently treatment is a required value in the API     
-        return "nails";
+        return "hair";
 	}
 };
 
@@ -26,24 +26,25 @@ var getCitySlot = function(request) {
             return request.intent.slots.city.value;
         }
     }else{
-        //TODO: currently treatment is a required value in the API     
+        //TODO: currently location is a required value in the API     
         return "Solon, OH";
     }
 };
 
 var getAddress = function(context){
-    var ALL_ADDRESS_PERMISSION = "read::alexa:device:all:address:country_and_postal_code";
-    var PERMISSIONS = [ALL_ADDRESS_PERMISSION];
-
+    
     //TODO: currently zip is a required value in the API  
-    var defaultAddress = { "countryCode" : "US","postalCode" : 44124};
+    var defaultAddress = { "countryCode" : "US","postalCode" : 44139};
+    console.log("Is permission user permission", context.System.user.permissions);
     if (context.System.user.permissions){
+        console.log("Looking for user permissions");
         var consentToken = context.System.user.permissions.consentToken;
         if(!consentToken){
-            //this.emit(":tellWithPermissionCard", Messages.NOTIFY_MISSING_PERMISSIONS, PERMISSIONS);
             //TODO: what should we do if the user does not have location permission set?
-            return defaultAddress;
+            console.log("User does not consent to look at location, use default");
+            return false;
         }
+        console.log("User consent to look at location, get device location");
         var deviceId = context.System.device.deviceId;
         var apiEndpoint = context.System.apiEndpoint;
 
@@ -55,19 +56,14 @@ var getAddress = function(context){
                 case 200:
                     console.log("Address successfully retrieved, now responding to user.");
                     return addressResponse.address;
-                    //var ADDRESS_MESSAGE = Messages.ADDRESS_AVAILABLE +`${address['postalCode']}, ${address['countryCode']}}`;
-                   // this.emit(":tell", ADDRESS_MESSAGE);
-                    break;
-                case 204:
-                    break;
-                case 403:
-                    break;
+                    break;               
                 default:
                     //this.emit(":ask", Messages.LOCATION_FAILURE, Messages.LOCATION_FAILURE);
             }
         });
     }else{
         //testing from Service Simulator
+        console.log("Default Address returned");
         return defaultAddress;
     }
 };

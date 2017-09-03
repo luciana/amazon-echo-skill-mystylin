@@ -31,12 +31,15 @@ var launchRequestHandler = function() {
 var getDealHandler = function () {
 	console.log("Starting getDealHandler()");
 	var request = this.event.request;
-	//var treatment = Helpers.getSlot(request, "treatment");
 	var address = Helpers.getAddress(this.event.context);
-	//var postalCode = address.postalCode;
-	//console.log("deal search for ", treatment, postalCode);
+	if (!address){
+		var ALL_ADDRESS_PERMISSION = "read::alexa:device:all:address:country_and_postal_code";
+		var PERMISSIONS = [ALL_ADDRESS_PERMISSION];
+		this.emit(":tellWithPermissionCard", Messages.NOTIFY_MISSING_PERMISSIONS, PERMISSIONS);
+	}
+
 	var cityName = Helpers.getCitySlot(request);
-	console.log("deal search in city ", cityName);
+	//console.log("deal search in city ", cityName);
 
 	var dealService = new DealService();
     var dealRequest = dealService.searchDeal(
@@ -56,8 +59,9 @@ var getDealHandler = function () {
                 this.emit(":tell", DEAL_MESSAGE);
                 break;
             case 404:
-            	var message = response.message;
-                this.emit(":tell", message + Messages.NO_DEAL);
+            	//var message = response.message;
+            	this.emit(":ask", Messages.LOCATION_FAILURE, Messages.LOCATION_FAILURE);
+                //this.emit(":tell", Messages.NO_DEAL);
                 break;
             case 204:            	
                 this.emit(":tell", Messages.NO_DEAL);
