@@ -2,7 +2,8 @@
  * This class contains all helper function definitions
  * 
  */
-var AlexaDeviceAddressClient = require('./AlexaDeviceAddressClient');
+var AlexaDeviceAddressClient = require('./AlexaDeviceAddressClient'),
+    GoogleMapAddressClient = require('./GoogleMapAddressClient');
 
 
 var getTreatmetSlot = function(request) {
@@ -25,16 +26,14 @@ var getCitySlot = function(request) {
         if(slot.value.toLowerCase()){
             return request.intent.slots.city.value;
         }
-    }else{
-        //TODO: currently location is a required value in the API     
-        return "Solon, OH";
     }
+    return false;
 };
 
-var getAddress = function(context){
+var getAlexaAddress = function(context){
     
     //TODO: currently zip is a required value in the API  
-    var defaultAddress = { "countryCode" : "US","postalCode" : 44139};
+    //var defaultAddress = { "countryCode" : "US","postalCode" : 44139, "lat": 41.3897764, "lng":-81.44122589999999};
     console.log("Is permission user permission", context.System.user.permissions);
     if (context.System.user.permissions){
         console.log("Looking for user permissions");
@@ -64,13 +63,30 @@ var getAddress = function(context){
     }else{
         //testing from Service Simulator
         console.log("Default Address returned");
-        return defaultAddress;
+        return false;
     }
 };
 
+var getGoogleAddress = function(cityName){
+        var googleMapAddressClient = new GoogleMapAddressClient();
+        var addressRequest = googleMapAddressClient.getAddress(cityName);
+
+        addressRequest.then((addressResponse) => {
+            switch(addressResponse.statusCode){
+                case 200:
+                    console.log("Address successfully retrieved from google maps", addressResponse);
+                    return addressResponse.address;
+                    break;
+                default:
+                   return false;
+            }
+        });
+    
+};
 
 module.exports = {
 	"getTreatmetSlot": getTreatmetSlot,
     "getCitySlot":getCitySlot,
-    "getAddress": getAddress
+    "getGoogleAddress":getGoogleAddress,
+    "getAlexaAddress": getAlexaAddress
 };

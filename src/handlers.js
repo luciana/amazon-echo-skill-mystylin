@@ -31,27 +31,34 @@ var launchRequestHandler = function() {
 var getDealHandler = function () {
 	console.log("Starting getDealHandler()");
 	var request = this.event.request;
-	var address = Helpers.getAddress(this.event.context);
-	if (!address){
-		var ALL_ADDRESS_PERMISSION = "read::alexa:device:all:address:country_and_postal_code";
-		var PERMISSIONS = [ALL_ADDRESS_PERMISSION];
-		this.emit(":tellWithPermissionCard", Messages.NOTIFY_MISSING_PERMISSIONS, PERMISSIONS);
-	}
-
-	var cityName = Helpers.getCitySlot(request);
-	//console.log("deal search in city ", cityName);
-
 	var dealService = new DealService();
-    var dealRequest = dealService.searchDeal(
-								    	address.postalCode, 
-								    	Helpers.getTreatmetSlot(request));
+	var cityName = Helpers.getCitySlot(request);
+	var defaultAddress = { "countryCode" : "US","postalCode" : 44139, "lat": 41.3897764, "lng":-81.44122589999999};
+	var address ={};
+	if(cityName){
+		console.log("recognized city name", cityName);
+		address = Helpers.getGoogleAddress(cityName);
+	}else{
+		console.log("attempt to get device location ");
+		address = Helpers.getAlexaAddress(this.event.context);
+		if (!address){
+			var ALL_ADDRESS_PERMISSION = "read::alexa:device:all:address:country_and_postal_code";
+			var PERMISSIONS = [ALL_ADDRESS_PERMISSION];
+			this.emit(":tellWithPermissionCard", Messages.NOTIFY_MISSING_PERMISSIONS, PERMISSIONS);
+		}
+	}
+	if(!address){
+		address = defaultAddress;
+	}
+	
+	console.log("Address object ", address);
+    var dealRequest = dealService.searchDeal(address, Helpers.getTreatmetSlot(request));
 
     dealRequest.then((response) => {
     	console.log(response);
         switch(response.statusCode) {
             case 200:              
-                var deal = response.deal;
-                console.log("Deal object", deal);
+                var deal = response.deal;                
                 var DEAL_MESSAGE =  `${deal['salon_title']}` + Messages.SALON_OFFER +
                     `${deal['deal_title']}` + Messages.DEAL_GOOD_UNTIL + 
                     `${deal['deal_expiration_date']}`

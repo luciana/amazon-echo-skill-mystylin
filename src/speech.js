@@ -13,7 +13,7 @@ const DO_YOU_WANT_DEALS = "Do you want to ask about health and beauty deals near
 /**
  * These messages are delivered when user has not given permission to access location of the Alexa device.
  */
-const NOTIFY_MISSING_PERMISSIONS = "Please enable Location permissions in the Amazon Alexa app.";
+const NOTIFY_MISSING_PERMISSIONS = "Please enable Location permissions in the Amazon Alexa app. Or ask MyStylin for deals in your city.";
 
 const NO_ADDRESS = "It looks like you don't have an address set. You can set your address from the companion app.";
 
@@ -30,7 +30,7 @@ const DEAL_GOOD_UNTIL =". This offer is good until ";
  */
 const NO_DEAL = "We haven't found any deals for you. Check out the MyStylin mobile app";
 
-const LOCATION_FAILURE = "We were unable to locate a deal near you. Please try again.";
+const LOCATION_FAILURE = "We were unable to locate a deal near you. How about if you ask MyStylin for deals in your city?";
 
 /**
  * These messages are delivered on standard situations for the Stop, Cancel, Unhandled intents or API errors. 

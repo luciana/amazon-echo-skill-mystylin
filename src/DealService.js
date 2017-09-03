@@ -12,13 +12,16 @@ class DealService {
     constructor() {}
 
 
-    searchDeal(postalCode, treatment){
+    searchDeal(address, treatment){
         var url = '/v1/deals/search?distance=5000&per_page=1&page=1';
         if (treatment){
             url += '&treatment='+treatment;
         }
-        if (postalCode){
-            url += '&zip='+postalCode;
+        if (address.postalCode){
+            url += '&zip='+address.postalCode;
+        }
+        if (address.lat && address.lng){
+            url += '&lat='+address.lat+'&lng='+address.lng;
         }
         //var url = '/v1/deals/search?treatment=nails&distance=100&zip=44124';
         console.log("deal api url ", url);
@@ -31,7 +34,7 @@ class DealService {
     }
     
     /**
-     * This will make a request to the Deal API in azure
+     * This will make a request to the Deal API 
      * It will retrieve a full list of deals.
      * @return {Promise} promise for the request in flight.
      */
@@ -52,7 +55,7 @@ class DealService {
      * @private
      */
     __handleDealApiRequest(requestOptions, fulfill, reject) {
-        var req = https.get(requestOptions, function(res) {           
+        var req = https.get(requestOptions, function(res) {
             res.setEncoding('utf8');            
             if (res.statusCode < 200 || res.statusCode > 299) {
                 reject(new Error('FAILED TO LOAD API, STATUS CODE: ' + res.statusCode));
@@ -74,7 +77,7 @@ class DealService {
                     };
                  }else{
                     var results = JSON.parse(body[0]).results[0];
-                    console.log(' DEAL API RESPONSE RESULTS: ' + results);
+                    //console.log(' DEAL API RESPONSE RESULTS: ' + results);
                     if (results){
                         var dealResponse = {
                         statusCode: res.statusCode,
