@@ -2,10 +2,16 @@
  * This class contains all helper function definitions
  * 
  */
-var AlexaDeviceAddressClient = require('./AlexaDeviceAddressClient'),
-    GoogleMapAddressClient = require('./GoogleMapAddressClient');
+var AlexaDeviceAddressService = require('./services/AlexaDeviceAddressService'),
+    GoogleMapAddressService = require('./services/GoogleMapAddressService'),
+    DealService = require('./services/DealService');
 
+var TREATMENTS="hair,products,nails,wellness,spa,products";
 
+/*  This function recognizes the treatment slot 
+*   If not treatment is recognized, the default returns all treatments
+*   @return string list (common separated default treatment) or single string of treatment.
+*/
 var getTreatmetSlot = function(request) {
     var slot = request.intent.slots["treatment"];
     var slotValue;
@@ -14,11 +20,14 @@ var getTreatmetSlot = function(request) {
             return request.intent.slots.treatment.value;
         }
     }else{
-        //TODO: currently treatment is a required value in the API     
-        return "hair";
+        return TREATMENTS;
 	}
 };
 
+/*  This function recognizes the city if spoken by the user
+*   If not city is recognized, returns false
+*   @return city slot or false
+*/
 var getCitySlot = function(request) {
     var slot = request.intent.slots["city"];
     var slotValue;
@@ -30,16 +39,41 @@ var getCitySlot = function(request) {
     return false;
 };
 
+/*  This function returns a object of address. 
+*   Address object contains countryCode, postaCode, lat, lng
+*   The address object is composed by information from Alexa Device address, Google Lat/Lng, or Default Address.
+*   If no address is recognized, return default address object.
+*   @return address object
+*/
+var getAddress = function(event) {
+    var cityName = getCitySlot(event.request);
+    var defaultAddress = { "countryCode" : "US","postalCode" : 44139, "lat": 41.3897764, "lng":-81.44122589999999};
+    var address ={};
+    if(cityName){
+        console.log("recognized city name", cityName);
+        address = getGoogleAddress(cityName);
+    }else{
+        console.log("attempt to get device location ");
+        address = getAlexaAddress(event.context);
+    }
+    if(!address){
+        address = defaultAddress;
+    }
+    return address;
+};
+
+
+/*  This function calls the AlexaDeviceAddress service to obtains the Alexa location.
+*   @return address object ( containing countryCode and postalCode )
+*   @return false if the user has not granted permission to identify location
+*   @return false if testing using Service Simulator
+*/
 var getAlexaAddress = function(context){
-    
-    //TODO: currently zip is a required value in the API  
-    //var defaultAddress = { "countryCode" : "US","postalCode" : 44139, "lat": 41.3897764, "lng":-81.44122589999999};
     console.log("Is permission user permission", context.System.user.permissions);
     if (context.System.user.permissions){
         console.log("Looking for user permissions");
         var consentToken = context.System.user.permissions.consentToken;
         if(!consentToken){
-            //TODO: what should we do if the user does not have location permission set?
             console.log("User does not consent to look at location, use default");
             return false;
         }
@@ -47,17 +81,17 @@ var getAlexaAddress = function(context){
         var deviceId = context.System.device.deviceId;
         var apiEndpoint = context.System.apiEndpoint;
 
-        var alexaDeviceAddressClient = new AlexaDeviceAddressClient(apiEndpoint, deviceId, consentToken);
-        var addressRequest = alexaDeviceAddressClient.getCountryAndPostalCode();
+        var alexaDeviceAddressService = new AlexaDeviceAddressService(apiEndpoint, deviceId, consentToken);
+        var addressRequest = alexaDeviceAddressService.getCountryAndPostalCode();
 
         addressRequest.then((addressResponse) => {
             switch(addressResponse.statusCode){
                 case 200:
                     console.log("Address successfully retrieved, now responding to user.");
                     return addressResponse.address;
-                    break;               
+                    break;
                 default:
-                    //this.emit(":ask", Messages.LOCATION_FAILURE, Messages.LOCATION_FAILURE);
+                    //TODO: ?
             }
         });
     }else{
@@ -67,9 +101,13 @@ var getAlexaAddress = function(context){
     }
 };
 
+/*  This function calls the GoogleMapAddress service to obtains the city lat and lng.
+*   @return address object
+*   @return false if can not recognized location
+*/
 var getGoogleAddress = function(cityName){
-        var googleMapAddressClient = new GoogleMapAddressClient();
-        var addressRequest = googleMapAddressClient.getAddress(cityName);
+        var googleMapAddressService = new GoogleMapAddressService();
+        var addressRequest = googleMapAddressService.getAddress(cityName);
 
         addressRequest.then((addressResponse) => {
             switch(addressResponse.statusCode){
@@ -87,6 +125,7 @@ var getGoogleAddress = function(cityName){
 module.exports = {
 	"getTreatmetSlot": getTreatmetSlot,
     "getCitySlot":getCitySlot,
+    "getAddress":getAddress,
     "getGoogleAddress":getGoogleAddress,
     "getAlexaAddress": getAlexaAddress
 };

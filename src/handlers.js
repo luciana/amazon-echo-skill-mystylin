@@ -3,7 +3,7 @@
  * This class contains all handler function definitions
  * for the various events that we will be registering for.
  */
-var DealService = require('./DealService'),
+var DealService = require('./services/DealService'),
 	config = require('./config'),
 	Intents = require('./intents'),
 	Events = require('./events'),
@@ -30,30 +30,16 @@ var launchRequestHandler = function() {
 
 var getDealHandler = function () {
 	console.log("Starting getDealHandler()");
-	var request = this.event.request;
 	var dealService = new DealService();
-	var cityName = Helpers.getCitySlot(request);
-	var defaultAddress = { "countryCode" : "US","postalCode" : 44139, "lat": 41.3897764, "lng":-81.44122589999999};
-	var address ={};
-	if(cityName){
-		console.log("recognized city name", cityName);
-		address = Helpers.getGoogleAddress(cityName);
-	}else{
-		console.log("attempt to get device location ");
-		address = Helpers.getAlexaAddress(this.event.context);
-		if (!address){
-			var ALL_ADDRESS_PERMISSION = "read::alexa:device:all:address:country_and_postal_code";
-			var PERMISSIONS = [ALL_ADDRESS_PERMISSION];
-			this.emit(":tellWithPermissionCard", Messages.NOTIFY_MISSING_PERMISSIONS, PERMISSIONS);
-		}
-	}
-	if(!address){
-		address = defaultAddress;
-	}
-	
+	var address = Helpers.getAddress(event);
 	console.log("Address object ", address);
-    var dealRequest = dealService.searchDeal(address, Helpers.getTreatmetSlot(request));
-
+	//TODO: this is never going to happen because Helper get Address returns default address
+	if(!address){
+		var ALL_ADDRESS_PERMISSION = "read::alexa:device:all:address:country_and_postal_code";
+        var PERMISSIONS = [ALL_ADDRESS_PERMISSION];
+        this.emit(":tellWithPermissionCard", Messages.NOTIFY_MISSING_PERMISSIONS, PERMISSIONS);
+	}
+    var dealRequest = dealService.searchDeal(Helpers.getAddress(event), Helpers.getTreatmetSlot(this.event.request));
     dealRequest.then((response) => {
     	console.log(response);
         switch(response.statusCode) {
@@ -63,21 +49,22 @@ var getDealHandler = function () {
                     `${deal['deal_title']}` + Messages.DEAL_GOOD_UNTIL + 
                     `${deal['deal_expiration_date']}`
 
+                //TODO: do a tell with Card so it shows on the Alexa app
+                //this.emit(':tellWithCard', speechOutput, cardTitle, cardContent, imageObj);
+                //this.emit(':tellWithCard', DEAL_MESSAGE, "Promotion", DEAL_MESSAGE, deal['salon_image']);
                 this.emit(":tell", DEAL_MESSAGE);
                 break;
             case 404:
+            	//TODO: this is never going to happen because Helper get Address returns default address
             	//var message = response.message;
             	this.emit(":ask", Messages.LOCATION_FAILURE, Messages.LOCATION_FAILURE);
-                //this.emit(":tell", Messages.NO_DEAL);
                 break;
-            case 204:            	
+            case 204:
                 this.emit(":tell", Messages.NO_DEAL);
                 break;
             default:
                 this.emit(":ask", Messages.LOCATION_FAILURE, Messages.LOCATION_FAILURE);
         }
-
-        console.info("Ending getAddressHandler()");
     });
 		console.log("Ending getDealHandler()");
 };
