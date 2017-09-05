@@ -40,14 +40,11 @@ class GoogleMapAddressService {
     __handleDeviceAddressApiRequest(requestOptions, fulfill, reject) {
         Https.get(requestOptions, (response) => {
             console.log(`Google maps responded with a status code of : ${response.statusCode}`);
-
-            var body = [];          
+            var body = [];
             response.on('data', function (data){
                 body.push(data);
             });
             response.on('end', function () {
-                //let responsePayloadObject = JSON.parse(body[0]);
-                //let responsePayloadObject = body[0];
                 try{
                     var googleAddressResponse = {
                         statusCode: response.statusCode,
@@ -60,7 +57,6 @@ class GoogleMapAddressService {
                         address: {}
                     };
                 }                
-                console.log("Google Maps", googleAddressResponse);
                 fulfill(googleAddressResponse);
             });
         }).on('error', (e) => {

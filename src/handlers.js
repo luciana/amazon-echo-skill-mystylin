@@ -3,7 +3,7 @@
  * This class contains all handler function definitions
  * for the various events that we will be registering for.
  */
-var DealService = require('./services/DealService'),
+var DealService = require('./DealService'),
 	config = require('./config'),
 	Intents = require('./intents'),
 	Events = require('./events'),
@@ -11,14 +11,14 @@ var DealService = require('./services/DealService'),
 	Messages = require('./speech');
 
 var newSessionRequestHandler =  function(){
-	console.log("Starting newSessionHandler()");
+	//console.log("Starting newSessionHandler()", this.event);
 
 	if (this.event.request.type === Events.LAUNCH_REQUEST) {
 		this.emit(Events.LAUNCH_REQUEST);
 	} else if (this.event.request.type === "IntentRequest") {
 		this.emit(this.event.request.intent.name);
     }
-    console.log("Ending newSessionHandler()");
+    //console.log("Ending newSessionHandler()");
 };
 
 var launchRequestHandler = function() {
@@ -29,9 +29,10 @@ var launchRequestHandler = function() {
 
 
 var getDealHandler = function () {
-	console.log("Starting getDealHandler()");
+	//console.log("Starting getDealHandler()", this.event);
+    var evt = this.event;
 	var dealService = new DealService();
-	var address = Helpers.getAddress(event);
+	var address = Helpers.getAddress(evt);
 	console.log("Address object ", address);
 	//TODO: this is never going to happen because Helper get Address returns default address
 	if(!address){
@@ -39,9 +40,9 @@ var getDealHandler = function () {
         var PERMISSIONS = [ALL_ADDRESS_PERMISSION];
         this.emit(":tellWithPermissionCard", Messages.NOTIFY_MISSING_PERMISSIONS, PERMISSIONS);
 	}
-    var dealRequest = dealService.searchDeal(Helpers.getAddress(event), Helpers.getTreatmetSlot(this.event.request));
+    var dealRequest = dealService.searchDeal(Helpers.getAddress(evt), Helpers.getTreatmetSlot(evt.request));
     dealRequest.then((response) => {
-    	console.log(response);
+        //console.log(response);
         switch(response.statusCode) {
             case 200:              
                 var deal = response.deal;                
@@ -55,9 +56,9 @@ var getDealHandler = function () {
                 this.emit(":tell", DEAL_MESSAGE);
                 break;
             case 404:
-            	//TODO: this is never going to happen because Helper get Address returns default address
-            	//var message = response.message;
-            	this.emit(":ask", Messages.LOCATION_FAILURE, Messages.LOCATION_FAILURE);
+                //TODO: this is never going to happen because Helper get Address returns default address
+                //var message = response.message;
+                this.emit(":ask", Messages.LOCATION_FAILURE, Messages.LOCATION_FAILURE);
                 break;
             case 204:
                 this.emit(":tell", Messages.NO_DEAL);
@@ -66,7 +67,13 @@ var getDealHandler = function () {
                 this.emit(":ask", Messages.LOCATION_FAILURE, Messages.LOCATION_FAILURE);
         }
     });
-		console.log("Ending getDealHandler()");
+	//console.log("Ending getDealHandler()");
+};
+
+var amazonYesHandler = function() {
+    console.info("Starting amazonYesHandler()");
+    this.emit(Intents.GET_DEAL);
+    console.info("Ending amazonYesHandler()");
 };
 
 var unhandledRequestHandler = function() {

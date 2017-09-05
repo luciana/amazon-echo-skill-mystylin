@@ -2,9 +2,8 @@
  * This class contains all helper function definitions
  * 
  */
-var AlexaDeviceAddressService = require('./services/AlexaDeviceAddressService'),
-    GoogleMapAddressService = require('./services/GoogleMapAddressService'),
-    DealService = require('./services/DealService');
+var AlexaDeviceAddressService = require('./AlexaDeviceAddressService'),
+    GoogleMapAddressService = require('./GoogleMapAddressService');
 
 var TREATMENTS="hair,products,nails,wellness,spa,products";
 
@@ -52,11 +51,14 @@ var getAddress = function(event) {
     if(cityName){
         console.log("recognized city name", cityName);
         address = getGoogleAddress(cityName);
+        console.log("Address successfully retrieved from google maps", address);
     }else{
         console.log("attempt to get device location ");
         address = getAlexaAddress(event.context);
+        console.log("Address successfully retrieved, from user alexa device", address);
     }
     if(!address){
+        console.log("Default Address returned");
         address = defaultAddress;
     }
     return address;
@@ -87,7 +89,6 @@ var getAlexaAddress = function(context){
         addressRequest.then((addressResponse) => {
             switch(addressResponse.statusCode){
                 case 200:
-                    console.log("Address successfully retrieved, now responding to user.");
                     return addressResponse.address;
                     break;
                 default:
@@ -95,8 +96,7 @@ var getAlexaAddress = function(context){
             }
         });
     }else{
-        //testing from Service Simulator
-        console.log("Default Address returned");
+        //testing from Service Simulator        
         return false;
     }
 };
@@ -112,7 +112,6 @@ var getGoogleAddress = function(cityName){
         addressRequest.then((addressResponse) => {
             switch(addressResponse.statusCode){
                 case 200:
-                    console.log("Address successfully retrieved from google maps", addressResponse);
                     return addressResponse.address;
                     break;
                 default:

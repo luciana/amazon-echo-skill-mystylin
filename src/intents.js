@@ -24,11 +24,17 @@ var AMAZON_CANCEL = "AMAZON.CancelIntent";
 /**
  * This is an Amazon built-in intent.
  */
+var AMAZON_YES = "AMAZON.YesIntent";
+
+/**
+ * This is an Amazon built-in intent.
+ */
 var AMAZON_STOP = "AMAZON.StopIntent";
 
 module.exports = {
     "GET_DEAL": GET_DEAL,
     "AMAZON_HELP": AMAZON_HELP,
     "AMAZON_CANCEL": AMAZON_CANCEL,
+    "AMAZON_YES": AMAZON_YES,
     "AMAZON_STOP": AMAZON_STOP
 };
