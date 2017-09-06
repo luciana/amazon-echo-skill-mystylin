@@ -52,14 +52,18 @@ var getAddress = function(event) {
         console.log("recognized city name", cityName);
         address = getGoogleAddress(cityName);
         console.log("Address successfully retrieved from google maps", address);
+        if(!address){
+            console.log("Default Address returned");
+            address = defaultAddress;
+        }
     }else{
         console.log("attempt to get device location ");
         address = getAlexaAddress(event.context);
         console.log("Address successfully retrieved, from user alexa device", address);
-    }
-    if(!address){
-        console.log("Default Address returned");
-        address = defaultAddress;
+        if(!address){
+            console.log("Default Address returned");
+            address = defaultAddress;
+        }
     }
     return address;
 };
@@ -103,7 +107,7 @@ var getAlexaAddress = function(context){
 
 /*  This function calls the GoogleMapAddress service to obtains the city lat and lng.
 *   @return address object
-*   @return false if can not recognized location
+*   @return {} if can not recognized location
 */
 var getGoogleAddress = function(cityName){
         var googleMapAddressService = new GoogleMapAddressService();
@@ -115,7 +119,7 @@ var getGoogleAddress = function(cityName){
                     return addressResponse.address;
                     break;
                 default:
-                   return false;
+                   return {};
             }
         });
     

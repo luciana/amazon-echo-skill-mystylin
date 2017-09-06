@@ -11,26 +11,26 @@ class DealService {
      */
     constructor() {}
 
-
     searchDeal(address, treatment){
         var url = '/v1/deals/search?distance=5000&per_page=1&page=1';
         if (treatment){
             url += '&treatment='+treatment;
         }
-        if (address.postalCode){
+        if(address){
+          if (address.lat && address.lng){
+              url += '&lat='+address.lat+'&lng='+address.lng;
+          }else if (address.postalCode){
             url += '&zip='+address.postalCode;
+          }          
+          //var url = '/v1/deals/search?treatment=nails&distance=100&zip=44124';
+          console.log("deal api url ", url);
+          var options = this.__getRequestOptions(url,
+              'developer.mystylin.com',
+              '');
+          return new Promise((fulfill, reject) => {
+              this.__handleDealApiRequest(options, fulfill, reject);
+          });
         }
-        if (address.lat && address.lng){
-            url += '&lat='+address.lat+'&lng='+address.lng;
-        }
-        //var url = '/v1/deals/search?treatment=nails&distance=100&zip=44124';
-        console.log("deal api url ", url);
-        var options = this.__getRequestOptions(url,
-            'developer.mystylin.com',
-            '');
-        return new Promise((fulfill, reject) => {
-            this.__handleDealApiRequest(options, fulfill, reject);
-        });
     }
     
     /**

@@ -40,7 +40,7 @@ var getDealHandler = function () {
         var PERMISSIONS = [ALL_ADDRESS_PERMISSION];
         this.emit(":tellWithPermissionCard", Messages.NOTIFY_MISSING_PERMISSIONS, PERMISSIONS);
 	}
-    var dealRequest = dealService.searchDeal(Helpers.getAddress(evt), Helpers.getTreatmetSlot(evt.request));
+    var dealRequest = dealService.searchDeal(address, Helpers.getTreatmetSlot(evt.request));
     dealRequest.then((response) => {
         //console.log(response);
         switch(response.statusCode) {
