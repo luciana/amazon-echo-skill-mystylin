@@ -44,43 +44,57 @@ var getCitySlot = function(request) {
 *   If no address is recognized, return default address object.
 *   @return address object
 */
-
 var getAddress = function(event){
      return new Promise((fulfill, reject) => {
-        var cityName = getCitySlot(event.request);                     
+        var cityName = getCitySlot(event.request);
+        console.log("Attempt to get google maps location ");
         var address = getGoogleAddress(cityName).then(
             (location) => {
                 try{
-                    console.log("Address successfully retrieved from google maps", location);
+                    //console.log("Address successfully retrieved from google maps", location);
                     return location;
                 }catch(e){
                     return false;
                 }
-            }, 
+            },
             (failure) => {
-                return false;
-            })
-            .then((data) => {
-                console.log("Tried to google map - default Address was returned", data);
-                if (! data ){
-                    console.log("Attempt to get device location ");
-                    var addr = getAlexaAddress(event.context).then(
-                            (location) => {
-                                try{
-                                    console.log("Address successfully retrieved, from user alexa device", location);
-                                    return location;
-                                }catch(e){
-                                    return false;
-                                }
-                            },
-                            (failure) => {
-                               return false;
+                console.log("Attempt to get device location ");
+                var addr = getAlexaAddress(event.context).then(
+                        (location) => {
+                            try{
+                                console.log("Address successfully retrieved, from user alexa device", location);
+                                return location;
+                            }catch(e){
+                                return false;
                             }
-                        );
-                    return addr;
-                }
-                return data;
+                        },
+                        (failure) => {
+                           return false;
+                        }
+                    );
+                return addr;
             });
+            // .then((data) => {
+            //     console.log("Tried to google map - default Address was returned", data);
+            //     if (! data ){
+            //         console.log("Attempt to get device location ");
+            //         var addr = getAlexaAddress(event.context).then(
+            //                 (location) => {
+            //                     try{
+            //                         console.log("Address successfully retrieved, from user alexa device", location);
+            //                         return location;
+            //                     }catch(e){
+            //                         return false;
+            //                     }
+            //                 },
+            //                 (failure) => {
+            //                    return false;
+            //                 }
+            //             );
+            //         return addr;
+            //     }
+            //     return data;
+            // });
         if (address){
             fulfill(address);
         }else{
@@ -165,10 +179,61 @@ var getGoogleAddress = function(cityName){
 
 };
 
+var convertDate = function(inputDate){
+    var expirationDate;
+    var today = new Date();
+    var input = new Date(inputDate);
+    var diff = input - today;
+
+    switch ( diff ){
+        case 0:
+            expirationDate = "today!";
+            break;
+        case 1:
+            expirationDate = "tomorrow";
+            break;
+        case 2:
+            expirationDate = "in two days";
+            break;
+        default:
+            expirationDate = "on " + formatDate(input);
+    }
+
+    return expirationDate;
+};
+
+var formatDate = function(currentDate){
+    var month_names = [];
+    month_names[month_names.length] = "January";
+    month_names[month_names.length] = "February";
+    month_names[month_names.length] = "March";
+    month_names[month_names.length] = "April";
+    month_names[month_names.length] = "May";
+    month_names[month_names.length] = "June";
+    month_names[month_names.length] = "July";
+    month_names[month_names.length] = "August";
+    month_names[month_names.length] = "September";
+    month_names[month_names.length] = "October";
+    month_names[month_names.length] = "November";
+    month_names[month_names.length] = "December";
+
+    var day_names = [];
+    day_names[day_names.length] = "Sunday";
+    day_names[day_names.length] = "Monday";
+    day_names[day_names.length] = "Tuesday";
+    day_names[day_names.length] = "Wednesday";
+    day_names[day_names.length] = "Thursday";
+    day_names[day_names.length] = "Friday";
+    day_names[day_names.length] = "Saturday";
+
+    return day_names[currentDate.getDay()] + "," +  month_names[currentDate.getMonth()] + " " + currentDate.getDate() + " " + currentDate.getFullYear();
+};
+
 module.exports = {
 	"getTreatmetSlot": getTreatmetSlot,
     "getCitySlot":getCitySlot,
     "getAddress":getAddress,
     "getGoogleAddress":getGoogleAddress,
-    "getAlexaAddress": getAlexaAddress
+    "getAlexaAddress": getAlexaAddress,
+    "convertDate": convertDate
 };

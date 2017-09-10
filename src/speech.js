@@ -20,9 +20,9 @@ const NO_ADDRESS = "It looks like you don't have an address set. You can set you
 /**
  * These messages are delivered when a deal is available from the API based on the treatment and zip code
  */
-const SALON_OFFER = " has a good deal. It offers ";
+const SALON_OFFER = " has a good deal.";
 
-const DEAL_GOOD_UNTIL =". This offer is good until ";
+const DEAL_EXPIRES =". This offer expires ";
 
 
 /** 
@@ -56,7 +56,7 @@ module.exports = {
     "NOTIFY_MISSING_PERMISSIONS": NOTIFY_MISSING_PERMISSIONS,
     "NO_ADDRESS": NO_ADDRESS,
     "DO_NOT_GET_DEAL": DO_NOT_GET_DEAL,
-    "DEAL_GOOD_UNTIL": DEAL_GOOD_UNTIL,
+    "DEAL_EXPIRES": DEAL_EXPIRES,
     "SALON_OFFER": SALON_OFFER,
     "NO_DEAL": NO_DEAL,
     "ERROR": ERROR,

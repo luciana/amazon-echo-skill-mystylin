@@ -50,7 +50,7 @@ class GoogleMapAddressService {
             });
             response.on('end', function () {
               try{
-                    console.log(' GOOGLE API RESPONSE RESULTS: ' + body);
+                    //console.log(' GOOGLE API RESPONSE RESULTS: ' + body);
                     var googleAddressResponse = {
                         statusCode: response.statusCode,
                         address: JSON.parse(body).results[0].geometry.location

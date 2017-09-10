@@ -14,7 +14,7 @@ class DealService {
     constructor() {}
 
     searchDeal(address, treatment){
-        var url = '/v1/deals/search?distance=5000&per_page=1&page=1';
+        var url = '/v1/deals/search?distance=100&per_page=1&page=1';
         if (treatment){
             url += '&treatment='+treatment;
         }

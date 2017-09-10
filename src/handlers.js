@@ -43,8 +43,7 @@ var getDealHandler = function () {
         });
 };
 
-var searchDealHandler = function(obj, location, treatment){
-    console.log("Starting searchDealHandler");
+var searchDealHandler = function(obj, location, treatment){    
     var dealService = new DealService();
     var dealRequest = dealService.searchDeal(location, treatment);
     if( dealRequest ) {
@@ -53,10 +52,13 @@ var searchDealHandler = function(obj, location, treatment){
             switch(response.statusCode) {
                 case 200:              
                     var deal = response.deal;
+                    console.log("exp date", deal['deal_expiration_date']);
+                    var expirationDate = Helpers.convertDate(deal['deal_expiration_date']);
+                    console.log("exp date converted", expirationDate);
                     var DEAL_MESSAGE =  `${deal['salon_title']}` + Messages.SALON_OFFER +
-                        `${deal['deal_description']}` + Messages.DEAL_GOOD_UNTIL + 
-                        `${deal['deal_expiration_date']}`
-                    obj.emit(':tellWithCard', DEAL_MESSAGE, "Promotion", DEAL_MESSAGE, deal['salon_image_url']);
+                        `${unescape(deal['deal_description'])}` + Messages.DEAL_EXPIRES + 
+                        expirationDate;
+                    obj.emit(':tellWithCard', DEAL_MESSAGE, "Promotion", DEAL_MESSAGE, deal['deal_image_url']);
                     break;
                 case 404:
                     //var message = response.message;
@@ -72,7 +74,6 @@ var searchDealHandler = function(obj, location, treatment){
     }else{
          obj.emit(":tell", Messages.NO_DEAL);
     }
-    console.log("Ending searchDealHandler");
 };
 
 var amazonYesHandler = function() {
