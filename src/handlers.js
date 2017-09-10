@@ -54,7 +54,7 @@ var searchDealHandler = function(obj, location, treatment){
                 case 200:              
                     var deal = response.deal;
                     var DEAL_MESSAGE =  `${deal['salon_title']}` + Messages.SALON_OFFER +
-                        `${deal['deal_title']}` + Messages.DEAL_GOOD_UNTIL + 
+                        `${deal['deal_description']}` + Messages.DEAL_GOOD_UNTIL + 
                         `${deal['deal_expiration_date']}`
                     obj.emit(':tellWithCard', DEAL_MESSAGE, "Promotion", DEAL_MESSAGE, deal['salon_image_url']);
                     break;

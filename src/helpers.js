@@ -52,7 +52,9 @@ var getAddress = function(event){
             (location) => {
                 try{
                     console.log("Address successfully retrieved from google maps", location);
-                    return location;
+                    console.log("getting lat and long" , location.results[0].geometry.location);
+                    
+                    return location.results[0].geometry.location;
                 }catch(e){
                     return false;
                 }
@@ -76,7 +78,7 @@ var getAddress = function(event){
                             (failure) => {
                                return false;
                             }
-                            );
+                        );
                     return addr;
                 }
                 return false;
@@ -151,6 +153,7 @@ var getGoogleAddress = function(cityName){
         var addressRequest = googleMapAddressService.getAddress(city);
 
         addressRequest.then((addressResponse) => {
+            console.log("get Google address response", addressResponse);
             switch(addressResponse.statusCode){
                 case 200:
                     fulfill(addressResponse.address);

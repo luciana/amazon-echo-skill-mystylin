@@ -39,6 +39,7 @@ class GoogleMapAddressService {
      */
     __handleDeviceAddressApiRequest(requestOptions, fulfill, reject) {
         Https.get(requestOptions, (response) => {
+            response.setEncoding('utf8');
             console.log(`Google maps responded with a status code of : ${response.statusCode}`);
             var body = [];
             response.on('data', function (data){
@@ -46,12 +47,14 @@ class GoogleMapAddressService {
             });
             response.on('end', function () {
                 try{
+                    //var results = JSON.parse(body[0]).results[0];
+                    console.log(' GOOGLE API RESPONSE RESULTS: ' + body[0]);
                     var googleAddressResponse = {
                         statusCode: response.statusCode,
                         address: body[0]
                     };
                 }catch(e){
-                    console.log("error with Google maps response parsing");
+                    console.log("error with Google maps response parsing", e);
                     var googleAddressResponse = {
                         statusCode: 500,
                         address: {}
@@ -77,7 +80,7 @@ class GoogleMapAddressService {
             path: path,
             method: 'GET',
             'headers': {
-                'Content-Type': 'application/json',
+                'Content-Type': 'application/json;',
                 'Accept': 'application/json'
             }
         };

@@ -4,6 +4,8 @@ var config = require('./config'),
 /**
  * This is a small wrapper client for the Alexa Address API.
  * curl -v -X GET "http://developer.mystylin.com/v1/deals/search?treatment=nails&distance=10&zip=44077";
+ * curl -v -X GET "http://developer.mystylin.com/v1/deals/search?treatment=massage&distance=10&lat=41.383063&lon=-81.4498717&per_page=1&page=1"\;
+ * curl -v -X GET "http://developer.mystylin.com/v1/deals/search?treatment=hair&distance=50000&lat=41.4932198&lon=--81.46085599999999&per_page=1&page=1"\;
  */
 class DealService {
     /**
@@ -57,7 +59,7 @@ class DealService {
      */
     __handleDealApiRequest(requestOptions, fulfill, reject) {
         var req = https.get(requestOptions, function(res) {
-            res.setEncoding('utf8');            
+            res.setEncoding('utf8');    
             if (res.statusCode < 200 || res.statusCode > 299) {
                 reject(new Error('FAILED TO LOAD API, STATUS CODE: ' + res.statusCode));
             }

@@ -20,7 +20,7 @@ const NO_ADDRESS = "It looks like you don't have an address set. You can set you
 /**
  * These messages are delivered when a deal is available from the API based on the treatment and zip code
  */
-const SALON_OFFER = " offers you ";
+const SALON_OFFER = " has a good deal. It offers ";
 
 const DEAL_GOOD_UNTIL =". This offer is good until ";
 
