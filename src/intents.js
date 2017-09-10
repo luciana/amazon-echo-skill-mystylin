@@ -29,6 +29,11 @@ var AMAZON_YES = "AMAZON.YesIntent";
 /**
  * This is an Amazon built-in intent.
  */
+var AMAZON_NO = "AMAZON.NoIntent";
+
+/**
+ * This is an Amazon built-in intent.
+ */
 var AMAZON_STOP = "AMAZON.StopIntent";
 
 module.exports = {
@@ -36,5 +41,6 @@ module.exports = {
     "AMAZON_HELP": AMAZON_HELP,
     "AMAZON_CANCEL": AMAZON_CANCEL,
     "AMAZON_YES": AMAZON_YES,
+    "AMAZON_NO": AMAZON_NO,
     "AMAZON_STOP": AMAZON_STOP
 };

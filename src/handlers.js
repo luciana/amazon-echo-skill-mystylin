@@ -11,14 +11,11 @@ var DealService = require('./DealService'),
 	Messages = require('./speech');
 
 var newSessionRequestHandler =  function(){
-	//console.log("Starting newSessionHandler()", this.event);
-
 	if (this.event.request.type === Events.LAUNCH_REQUEST) {
 		this.emit(Events.LAUNCH_REQUEST);
 	} else if (this.event.request.type === "IntentRequest") {
 		this.emit(this.event.request.intent.name);
     }
-    //console.log("Ending newSessionHandler()");
 };
 
 var launchRequestHandler = function() {
@@ -29,51 +26,65 @@ var launchRequestHandler = function() {
 
 
 var getDealHandler = function () {
-	//console.log("Starting getDealHandler()", this.event);
     var evt = this.event;
-	var dealService = new DealService();
-	var address = Helpers.getAddress(evt);
-	console.log("Address object ", address);
-	//TODO: this is never going to happen because Helper get Address returns default address
-	if(!address){
-		var ALL_ADDRESS_PERMISSION = "read::alexa:device:all:address:country_and_postal_code";
-        var PERMISSIONS = [ALL_ADDRESS_PERMISSION];
-        this.emit(":tellWithPermissionCard", Messages.NOTIFY_MISSING_PERMISSIONS, PERMISSIONS);
-	}
-    var dealRequest = dealService.searchDeal(address, Helpers.getTreatmetSlot(evt.request));
-    dealRequest.then((response) => {
-        //console.log(response);
-        switch(response.statusCode) {
-            case 200:              
-                var deal = response.deal;                
-                var DEAL_MESSAGE =  `${deal['salon_title']}` + Messages.SALON_OFFER +
-                    `${deal['deal_title']}` + Messages.DEAL_GOOD_UNTIL + 
-                    `${deal['deal_expiration_date']}`
+    Helpers.getAddress(evt).then(
+        (location) => {
+            try{
+                console.log("address returned from getaddress promise",location);
+                searchDealHandler(this, location, Helpers.getTreatmetSlot(evt.request));
+            }catch(e){
+               this.emit(":tell", Messages.ERROR, Messages.ERROR);
+            }            
+        },
+        (failure) => {
+            var ALL_ADDRESS_PERMISSION = "read::alexa:device:all:address:country_and_postal_code";
+            var PERMISSIONS = [ALL_ADDRESS_PERMISSION];
+            this.emit(":tellWithPermissionCard", Messages.NOTIFY_MISSING_PERMISSIONS, PERMISSIONS);
+        });
+};
 
-                //TODO: do a tell with Card so it shows on the Alexa app
-                //this.emit(':tellWithCard', speechOutput, cardTitle, cardContent, imageObj);
-                //this.emit(':tellWithCard', DEAL_MESSAGE, "Promotion", DEAL_MESSAGE, deal['salon_image']);
-                this.emit(":tell", DEAL_MESSAGE);
-                break;
-            case 404:
-                //TODO: this is never going to happen because Helper get Address returns default address
-                //var message = response.message;
-                this.emit(":ask", Messages.LOCATION_FAILURE, Messages.LOCATION_FAILURE);
-                break;
-            case 204:
-                this.emit(":tell", Messages.NO_DEAL);
-                break;
-            default:
-                this.emit(":ask", Messages.LOCATION_FAILURE, Messages.LOCATION_FAILURE);
-        }
-    });
-	//console.log("Ending getDealHandler()");
+var searchDealHandler = function(obj, location, treatment){
+    console.log("Starting searchDealHandler");
+    var dealService = new DealService();
+    var dealRequest = dealService.searchDeal(location, treatment);
+    if( dealRequest ) {
+        dealRequest.then((response) => {
+            console.log(response);
+            switch(response.statusCode) {
+                case 200:              
+                    var deal = response.deal;
+                    var DEAL_MESSAGE =  `${deal['salon_title']}` + Messages.SALON_OFFER +
+                        `${deal['deal_title']}` + Messages.DEAL_GOOD_UNTIL + 
+                        `${deal['deal_expiration_date']}`
+                    obj.emit(':tellWithCard', DEAL_MESSAGE, "Promotion", DEAL_MESSAGE, deal['salon_image_url']);
+                    break;
+                case 404:
+                    //var message = response.message;
+                    obj.emit(":ask", Messages.LOCATION_FAILURE, Messages.LOCATION_FAILURE);
+                    break;
+                case 204:
+                    obj.emit(":tell", Messages.NO_DEAL);
+                    break;
+                default:
+                    obj.emit(":tell", Messages.ERROR, Messages.ERROR);
+            }
+        });
+    }else{
+         obj.emit(":tell", Messages.NO_DEAL);
+    }
+    console.log("Ending searchDealHandler");
 };
 
 var amazonYesHandler = function() {
     console.info("Starting amazonYesHandler()");
     this.emit(Intents.GET_DEAL);
     console.info("Ending amazonYesHandler()");
+};
+
+var amazonNoHandler = function() {
+    console.info("Starting amazonNoHandler()");
+    this.emit(Intents.DO_NOT_GET_DEAL);
+    console.info("Ending amazonNoHandler()");
 };
 
 var unhandledRequestHandler = function() {
@@ -118,6 +129,8 @@ handlers[Events.UNHANDLED] = unhandledRequestHandler;
 handlers[Intents.GET_DEAL] = getDealHandler;
 handlers[Intents.AMAZON_CANCEL] = amazonCancelHandler;
 handlers[Intents.AMAZON_STOP] = amazonStopHandler;
+handlers[Intents.AMAZON_YES] = amazonYesHandler;
+handlers[Intents.AMAZON_NO] = amazonNoHandler;
 handlers[Intents.AMAZON_HELP] = amazonHelpHandler;
 
 module.exports = handlers;

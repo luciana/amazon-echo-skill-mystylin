@@ -18,10 +18,11 @@ class DealService {
         }
         if(address){
           if (address.lat && address.lng){
-              url += '&lat='+address.lat+'&lng='+address.lng;
-          }else if (address.postalCode){
+              url += '&lat='+address.lat+'&lon='+address.lng;
+          }
+          if (address.postalCode){
             url += '&zip='+address.postalCode;
-          }          
+          }
           //var url = '/v1/deals/search?treatment=nails&distance=100&zip=44124';
           console.log("deal api url ", url);
           var options = this.__getRequestOptions(url,

@@ -25,17 +25,22 @@ const SALON_OFFER = " offers you ";
 const DEAL_GOOD_UNTIL =". This offer is good until ";
 
 
+/** 
+* This message is delivered when the user says he/she doesn't want to search for deals anymore
+*/
+const DO_NOT_GET_DEAL = "No problem. You can also search for deals with MyStylin Mobile app.";
+
 /**
  * These messages are delivered when no deal was found
  */
 const NO_DEAL = "We haven't found any deals for you. Check out the MyStylin mobile app";
 
-const LOCATION_FAILURE = "We were unable to locate a deal near you. How about if you ask MyStylin for deals in your city?";
+const LOCATION_FAILURE = "We were unable to locate a deal near you. How about if you ask MyStylin for deals in your city? You can say Cleveland, OH.";
 
 /**
  * These messages are delivered on standard situations for the Stop, Cancel, Unhandled intents or API errors. 
  */
-const ERROR = "Uh Oh. Looks like something went wrong.";
+const ERROR = "Uh Oh. Looks like something went wrong.  Check out the MyStylin mobile app instead.";
 
 const GOODBYE = "Bye!";
 
@@ -43,20 +48,21 @@ const UNHANDLED = "We could not understand you, but I will give you a deal near 
 
 const HELP = "We can find you deals for Health and Beauty products. Do you want me to tell you about a deal near you?";
 
-const STOP = "There is nothing to stop.";
+const STOP = "Ok. Hope you come back. Goodbye!";
 
 module.exports = {
     "WELCOME": WELCOME,
     "DO_YOU_WANT_DEALS": DO_YOU_WANT_DEALS,
     "NOTIFY_MISSING_PERMISSIONS": NOTIFY_MISSING_PERMISSIONS,
     "NO_ADDRESS": NO_ADDRESS,
+    "DO_NOT_GET_DEAL": DO_NOT_GET_DEAL,
     "DEAL_GOOD_UNTIL": DEAL_GOOD_UNTIL,
     "SALON_OFFER": SALON_OFFER,
     "NO_DEAL": NO_DEAL,
     "ERROR": ERROR,
     "LOCATION_FAILURE": LOCATION_FAILURE,
     "GOODBYE": GOODBYE,
-    "UNHANDLED": UNHANDLED,
+    "UNHANDLED": UNHANDLED,    
     "HELP": HELP,
     "STOP": STOP
 };
