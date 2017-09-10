@@ -52,9 +52,7 @@ var getAddress = function(event){
             (location) => {
                 try{
                     console.log("Address successfully retrieved from google maps", location);
-                    console.log("getting lat and long" , location.results[0].geometry.location);
-                    
-                    return location.results[0].geometry.location;
+                    return location;
                 }catch(e){
                     return false;
                 }
@@ -81,11 +79,11 @@ var getAddress = function(event){
                         );
                     return addr;
                 }
-                return false;
+                return data;
             });
         if (address){
             fulfill(address);
-        }else{            
+        }else{
             reject();
         }
     });
@@ -147,15 +145,14 @@ var getGoogleAddress = function(cityName){
         if(!cityName){
              reject();
         }
-        var city = cityName.replace(/ /g,'');
+        var city = cityName.replace(/ /g,'+');
         console.log("recognized city name", city);
         var googleMapAddressService = new GoogleMapAddressService();
         var addressRequest = googleMapAddressService.getAddress(city);
 
         addressRequest.then((addressResponse) => {
-            console.log("get Google address response", addressResponse);
             switch(addressResponse.statusCode){
-                case 200:
+                case 200:                   
                     fulfill(addressResponse.address);
                     break;
                 default:
