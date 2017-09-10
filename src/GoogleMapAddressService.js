@@ -10,7 +10,7 @@ class GoogleMapAddressService {
     /**
      * Retrieve an instance of the Google Maps API client.
      */
-    constructor() {       
+    constructor() {
         this.endpoint = 'maps.google.com';
         this.key = 'AIzaSyCQQWWc5j1hxmuJoLlMThUFxlbcMo3yGxA';
     }

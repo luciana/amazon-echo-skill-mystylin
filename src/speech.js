@@ -25,6 +25,9 @@ const SALON_OFFER = " has a good deal.";
 const DEAL_EXPIRES =". This offer expires ";
 
 
+const ALL_DEALS_DELIVERED = "These are all the deals we could find at this time. You can also search for deals with MyStylin Mobile app.";
+
+
 /** 
 * This message is delivered when the user says he/she doesn't want to search for deals anymore
 */
@@ -57,12 +60,13 @@ module.exports = {
     "NO_ADDRESS": NO_ADDRESS,
     "DO_NOT_GET_DEAL": DO_NOT_GET_DEAL,
     "DEAL_EXPIRES": DEAL_EXPIRES,
+    "ALL_DEALS_DELIVERED": ALL_DEALS_DELIVERED,
     "SALON_OFFER": SALON_OFFER,
     "NO_DEAL": NO_DEAL,
     "ERROR": ERROR,
     "LOCATION_FAILURE": LOCATION_FAILURE,
     "GOODBYE": GOODBYE,
-    "UNHANDLED": UNHANDLED,    
+    "UNHANDLED": UNHANDLED,
     "HELP": HELP,
     "STOP": STOP
 };

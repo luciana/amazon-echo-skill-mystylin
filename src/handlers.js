@@ -10,6 +10,9 @@ var DealService = require('./DealService'),
 	Helpers = require('./helpers'),
 	Messages = require('./speech');
 
+var dealList = {};
+var activeDeal = 0;
+
 var newSessionRequestHandler =  function(){
 	if (this.event.request.type === Events.LAUNCH_REQUEST) {
 		this.emit(Events.LAUNCH_REQUEST);
@@ -43,22 +46,22 @@ var getDealHandler = function () {
         });
 };
 
-var searchDealHandler = function(obj, location, treatment){    
+var searchDealHandler = function(obj, location, treatment){
     var dealService = new DealService();
     var dealRequest = dealService.searchDeal(location, treatment);
     if( dealRequest ) {
         dealRequest.then((response) => {
             console.log(response);
+            dealList = response;
             switch(response.statusCode) {
-                case 200:              
-                    var deal = response.deal;
-                    console.log("exp date", deal['deal_expiration_date']);
-                    var expirationDate = Helpers.convertDate(deal['deal_expiration_date']);
-                    console.log("exp date converted", expirationDate);
-                    var DEAL_MESSAGE =  `${deal['salon_title']}` + Messages.SALON_OFFER +
-                        `${unescape(deal['deal_description'])}` + Messages.DEAL_EXPIRES + 
-                        expirationDate;
-                    obj.emit(':tellWithCard', DEAL_MESSAGE, "Promotion", DEAL_MESSAGE, deal['deal_image_url']);
+                case 200:
+                    var deal = response.deal[activeDeal];
+                    // var expirationDate = Helpers.convertDate(deal['deal_expiration_date']);
+                    // var DEAL_MESSAGE =  `${deal['salon_title']}` + Messages.SALON_OFFER +
+                    //     `${unescape(deal['deal_description'])}` + Messages.DEAL_EXPIRES + 
+                    //     expirationDate;
+                    deliverDeal(obj,deal);
+                    //obj.emit(':tellWithCard', DEAL_MESSAGE, "Promotion", DEAL_MESSAGE, deal['deal_image_url']);
                     break;
                 case 404:
                     //var message = response.message;
@@ -74,6 +77,14 @@ var searchDealHandler = function(obj, location, treatment){
     }else{
          obj.emit(":tell", Messages.NO_DEAL);
     }
+};
+
+var deliverDeal = function(obj,deal){
+    var expirationDate = Helpers.convertDate(deal['deal_expiration_date']);
+    var DEAL_MESSAGE =  `${deal['salon_title']}` + Messages.SALON_OFFER +
+        `${unescape(deal['deal_description'])}` + Messages.DEAL_EXPIRES + 
+        expirationDate;
+    obj.emit(':tellWithCard', DEAL_MESSAGE, "Promotion", DEAL_MESSAGE, deal['deal_image_url']);
 };
 
 var amazonYesHandler = function() {
@@ -116,6 +127,20 @@ var amazonStopHandler = function() {
     console.info("Starting amazonStopHandler()");
     this.emit(":ask", Messages.STOP, Messages.STOP);
     console.info("Ending amazonStopHandler()");
+};
+
+var amazonNextHandler = function() {
+    activeDeal += 1;
+    console.info("Starting amazonNextHandler()");
+    console.log("Deal List ", dealList);
+    console.log("Deal List count", dealList.length);
+    if(activeDeal <= dealList.length){
+        deliverDeal(this, dealList[activeDeal]);
+    }else{
+        this.emit(":tell", Messages.ALL_DEALS_DELIVERED);
+    }
+    
+    console.info("Ending amazonNextHandler()");
 };
 
 

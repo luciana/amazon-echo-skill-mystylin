@@ -14,7 +14,7 @@ class DealService {
     constructor() {}
 
     searchDeal(address, treatment){
-        var url = '/v1/deals/search?distance=100&per_page=1&page=1';
+        var url = '/v1/deals/search?distance=100&per_page=5&page=1';
         if (treatment){
             url += '&treatment='+treatment;
         }
@@ -79,7 +79,7 @@ class DealService {
                         deal: raw
                     };
                  }else{
-                    var results = JSON.parse(body[0]).results[0];
+                    var results = JSON.parse(body[0]).results;
                     //console.log(' DEAL API RESPONSE RESULTS: ' + results);
                     if (results){
                         var dealResponse = {
