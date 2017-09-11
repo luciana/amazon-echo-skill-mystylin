@@ -5,7 +5,6 @@
  */
 var Alexa = require('alexa-sdk'),
     DealService = require('./DealService'),
-	config = require('./config'),
 	Intents = require('./intents'),
 	Events = require('./events'),
 	Helpers = require('./helpers'),
@@ -25,12 +24,8 @@ var newSessionRequestHandler =  function(){
 	if (this.event.request.type === Events.LAUNCH_REQUEST) {
 		this.emit(Events.LAUNCH_REQUEST);
 	} else if (this.event.request.type === "IntentRequest") {
-        
         this.handler.state = STATES.STARTMODE;
-        console.log("handler state" , this.handler.state);
-        var intentName = this.event.request.intent.name;
-        console.log("INTENT", intentName);
-        this.emitWithState(intentName, true);
+        this.emitWithState(this.event.request.intent.name, true);
     }
 };
 

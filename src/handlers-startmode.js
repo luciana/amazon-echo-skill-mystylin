@@ -1,5 +1,5 @@
 var Helpers = require('./helpers'),
- 	DealService = require('./DealService'),	
+	DealService = require('./DealService'),
 	Messages = require('./speech');
 
 var getDealHandler = function() {
@@ -8,6 +8,7 @@ var getDealHandler = function() {
         (location) => {
             try{
                 console.log("address returned from getaddress promise",location);
+                console.log("attributes ", this.attributes);
                 searchDealHandler(this, location, Helpers.getTreatmetSlot(evt.request));
             }catch(e){
                this.emit(":tell", Messages.ERROR, Messages.ERROR);
