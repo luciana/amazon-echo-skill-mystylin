@@ -47,7 +47,7 @@ const ERROR = "Uh Oh. Looks like something went wrong.  Check out the MyStylin m
 
 const GOODBYE = "Bye!";
 
-const UNHANDLED = "We could not understand you, but I will give you a deal near you.";
+const UNHANDLED = "We could not understand you. We can help if you say Ask MyStylin for a deal near me.";
 
 const HELP = "We can find you deals for Health and Beauty products. Do you want me to tell you about a deal near you?";
 

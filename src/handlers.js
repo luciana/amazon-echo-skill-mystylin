@@ -3,20 +3,21 @@
  * This class contains all handler function definitions
  * for the various events that we will be registering for.
  */
-var DealService = require('./DealService'),
+var Alexa = require('alexa-sdk'),
+    DealService = require('./DealService'),
 	config = require('./config'),
 	Intents = require('./intents'),
 	Events = require('./events'),
 	Helpers = require('./helpers'),
-	Messages = require('./speech');
+	Messages = require('./speech'),
+    StartHandlers = require('./handlers-startmode');
 
-var state = {
+var STATES = {
     "STARTMODE": '_STARTMODE',
     "DEALMODE": '_DEALMODE'
 };
 
 var newSessionRequestHandler =  function(){
-    this.handler.state = state.STARTMODE;
     if(Object.keys(this.attributes).length === 0 ){
         this.attributes['dealList'] = {};
         this.attributes['activeDeal'] = 0;
@@ -24,7 +25,12 @@ var newSessionRequestHandler =  function(){
 	if (this.event.request.type === Events.LAUNCH_REQUEST) {
 		this.emit(Events.LAUNCH_REQUEST);
 	} else if (this.event.request.type === "IntentRequest") {
-		this.emit(this.event.request.intent.name);
+        
+        this.handler.state = STATES.STARTMODE;
+        console.log("handler state" , this.handler.state);
+        var intentName = this.event.request.intent.name;
+        console.log("INTENT", intentName);
+        this.emitWithState(intentName, true);
     }
 };
 
@@ -35,73 +41,16 @@ var launchRequestHandler = function() {
 };
 
 
-var getDealHandler = function () {
-    var evt = this.event;
-    Helpers.getAddress(evt).then(
-        (location) => {
-            try{
-                console.log("address returned from getaddress promise",location);
-                searchDealHandler(this, location, Helpers.getTreatmetSlot(evt.request));
-            }catch(e){
-               this.emit(":tell", Messages.ERROR, Messages.ERROR);
-            }            
-        },
-        (failure) => {
-            var ALL_ADDRESS_PERMISSION = "read::alexa:device:all:address:country_and_postal_code";
-            var PERMISSIONS = [ALL_ADDRESS_PERMISSION];
-            this.emit(":tellWithPermissionCard", Messages.NOTIFY_MISSING_PERMISSIONS, PERMISSIONS);
-        });
-};
-
-var searchDealHandler = function(obj, location, treatment){
-    var dealService = new DealService();
-    var dealRequest = dealService.searchDeal(location, treatment);
-    if( dealRequest ) {
-        dealRequest.then((response) => {
-            console.log(response);
-            this.attributes['dealList'] = response;
-            switch(response.statusCode) {
-                case 200:
-                    var deal = response.deal[this.attributes['activeDeal']];
-                    deliverDeal(obj,deal);
-                    break;
-                case 404:
-                    //var message = response.message;
-                    obj.emit(":ask", Messages.LOCATION_FAILURE, Messages.LOCATION_FAILURE);
-                    break;
-                case 204:
-                    obj.emit(":tell", Messages.NO_DEAL);
-                    break;
-                default:
-                    obj.emit(":tell", Messages.ERROR, Messages.ERROR);
-            }
-        });
-    }else{
-         obj.emit(":tell", Messages.NO_DEAL);
-    }
-};
-
-var deliverDeal = function(obj,deal){
-    var expirationDate = Helpers.convertDate(deal['deal_expiration_date']);
-    var DEAL_MESSAGE =  `${deal['salon_title']}` + Messages.SALON_OFFER +
-        `${unescape(deal['deal_description'])}` + Messages.DEAL_EXPIRES + 
-        expirationDate;
-    var imageObj = {
-                smallImageUrl: 'https://imgs.xkcd.com/comics/standards.png',
-                largeImageUrl: 'https://imgs.xkcd.com/comics/standards.png'
-            };
-    obj.emit(':tellWithCard', DEAL_MESSAGE, "Promotion", DEAL_MESSAGE, imageObj);
-};
-
 var amazonYesHandler = function() {
     console.info("Starting amazonYesHandler()");
-    this.emit(Intents.GET_DEAL);
+    this.handler.state = STATES.STARTMODE;
+    this.emitWithState(Intents.GET_DEAL, true);
     console.info("Ending amazonYesHandler()");
 };
 
 var amazonNoHandler = function() {
     console.info("Starting amazonNoHandler()");
-    this.emit(Intents.DO_NOT_GET_DEAL);
+    this.emit(Messages.DO_NOT_GET_DEAL);
     console.info("Ending amazonNoHandler()");
 };
 
@@ -135,35 +84,38 @@ var amazonStopHandler = function() {
     console.info("Ending amazonStopHandler()");
 };
 
-var amazonNextHandler = function() {
-    activeDeal += 1;
-    console.info("Starting amazonNextHandler()");
-    var dl = this.attributes['dealList'];
-    console.log("Deal List ", dl);
-    console.log("Deal List count", dl.length);
-    if(activeDeal <= dl.length){
-        deliverDeal(this, dl[activeDeal]);
-    }else{
-        this.emit(":tell", Messages.ALL_DEALS_DELIVERED);
-    }
-    
-    console.info("Ending amazonNextHandler()");
-};
+
+var newSessionHandlers = {};
+// Add event newSessionHandlers
+newSessionHandlers[Events.NEW_SESSION] = newSessionRequestHandler;
+newSessionHandlers[Events.LAUNCH_REQUEST] = launchRequestHandler;
+newSessionHandlers[Events.SESSION_ENDED] = sessionEndedRequestHandler;
+newSessionHandlers[Events.UNHANDLED] = unhandledRequestHandler;
+
+// Add intent newSessionHandlers
+//newSessionHandlers[Intents.GET_DEAL] = getDealHandler;
+newSessionHandlers[Intents.AMAZON_CANCEL] = amazonCancelHandler;
+newSessionHandlers[Intents.AMAZON_STOP] = amazonStopHandler;
+newSessionHandlers[Intents.AMAZON_YES] = amazonYesHandler;
+newSessionHandlers[Intents.AMAZON_NO] = amazonNoHandler;
+newSessionHandlers[Intents.AMAZON_HELP] = amazonHelpHandler;
 
 
-var handlers = {};
+var startHandlers = {};
+
 // Add event handlers
-handlers[Events.NEW_SESSION] = newSessionRequestHandler;
-handlers[Events.LAUNCH_REQUEST] = launchRequestHandler;
-handlers[Events.SESSION_ENDED] = sessionEndedRequestHandler;
-handlers[Events.UNHANDLED] = unhandledRequestHandler;
+startHandlers[Events.SESSION_ENDED] = StartHandlers.sessionEndedRequestHandler;
+startHandlers[Events.UNHANDLED] = StartHandlers.unhandledRequestHandler;
 
 // Add intent handlers
-handlers[Intents.GET_DEAL] = getDealHandler;
-handlers[Intents.AMAZON_CANCEL] = amazonCancelHandler;
-handlers[Intents.AMAZON_STOP] = amazonStopHandler;
-handlers[Intents.AMAZON_YES] = amazonYesHandler;
-handlers[Intents.AMAZON_NO] = amazonNoHandler;
-handlers[Intents.AMAZON_HELP] = amazonHelpHandler;
+startHandlers[Intents.GET_DEAL] = StartHandlers.getDealHandler;
+startHandlers[Intents.AMAZON_NEXT] = StartHandlers.amazonNextHandler;
+startHandlers[Intents.AMAZON_CANCEL] = StartHandlers.amazonCancelHandler;
+startHandlers[Intents.AMAZON_STOP] = StartHandlers.amazonStopHandler;
 
-module.exports = handlers;
+var startModeHandlers = Alexa.CreateStateHandler(STATES.STARTMODE,startHandlers);
+
+module.exports = {
+    "newSessionHandlers": newSessionHandlers,
+    "startModeHandlers": startModeHandlers
+};
