@@ -10,10 +10,17 @@ var DealService = require('./DealService'),
 	Helpers = require('./helpers'),
 	Messages = require('./speech');
 
-var dealList = {};
-var activeDeal = 0;
+var state = {
+    "STARTMODE": '_STARTMODE',
+    "DEALMODE": '_DEALMODE'
+};
 
 var newSessionRequestHandler =  function(){
+    this.handler.state = state.STARTMODE;
+    if(Object.keys(this.attributes).length === 0 ){
+        this.attributes['dealList'] = {};
+        this.attributes['activeDeal'] = 0;
+    }
 	if (this.event.request.type === Events.LAUNCH_REQUEST) {
 		this.emit(Events.LAUNCH_REQUEST);
 	} else if (this.event.request.type === "IntentRequest") {
@@ -52,16 +59,11 @@ var searchDealHandler = function(obj, location, treatment){
     if( dealRequest ) {
         dealRequest.then((response) => {
             console.log(response);
-            dealList = response;
+            this.attributes['dealList'] = response;
             switch(response.statusCode) {
                 case 200:
-                    var deal = response.deal[activeDeal];
-                    // var expirationDate = Helpers.convertDate(deal['deal_expiration_date']);
-                    // var DEAL_MESSAGE =  `${deal['salon_title']}` + Messages.SALON_OFFER +
-                    //     `${unescape(deal['deal_description'])}` + Messages.DEAL_EXPIRES + 
-                    //     expirationDate;
+                    var deal = response.deal[this.attributes['activeDeal']];
                     deliverDeal(obj,deal);
-                    //obj.emit(':tellWithCard', DEAL_MESSAGE, "Promotion", DEAL_MESSAGE, deal['deal_image_url']);
                     break;
                 case 404:
                     //var message = response.message;
@@ -84,7 +86,11 @@ var deliverDeal = function(obj,deal){
     var DEAL_MESSAGE =  `${deal['salon_title']}` + Messages.SALON_OFFER +
         `${unescape(deal['deal_description'])}` + Messages.DEAL_EXPIRES + 
         expirationDate;
-    obj.emit(':tellWithCard', DEAL_MESSAGE, "Promotion", DEAL_MESSAGE, deal['deal_image_url']);
+    var imageObj = {
+                smallImageUrl: 'https://imgs.xkcd.com/comics/standards.png',
+                largeImageUrl: 'https://imgs.xkcd.com/comics/standards.png'
+            };
+    obj.emit(':tellWithCard', DEAL_MESSAGE, "Promotion", DEAL_MESSAGE, imageObj);
 };
 
 var amazonYesHandler = function() {
@@ -132,10 +138,11 @@ var amazonStopHandler = function() {
 var amazonNextHandler = function() {
     activeDeal += 1;
     console.info("Starting amazonNextHandler()");
-    console.log("Deal List ", dealList);
-    console.log("Deal List count", dealList.length);
-    if(activeDeal <= dealList.length){
-        deliverDeal(this, dealList[activeDeal]);
+    var dl = this.attributes['dealList'];
+    console.log("Deal List ", dl);
+    console.log("Deal List count", dl.length);
+    if(activeDeal <= dl.length){
+        deliverDeal(this, dl[activeDeal]);
     }else{
         this.emit(":tell", Messages.ALL_DEALS_DELIVERED);
     }
