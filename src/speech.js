@@ -6,9 +6,9 @@
 /**
  * These messages are delivered when the user says Open MyStylin.
  */
-const WELCOME = "Welcome to MyStylin Skill!";
+const WELCOME = "Welcome to MyStylin!";
 
-const DO_YOU_WANT_DEALS = "Do you want to ask about health and beauty deals near you?";
+const DO_YOU_WANT_DEALS = "Let me get you some deals.";
 
 /**
  * These messages are delivered when user has not given permission to access location of the Alexa device.

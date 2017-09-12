@@ -2,8 +2,8 @@
  * This class contains all helper function definitions
  * 
  */
-var AlexaDeviceAddressService = require('./AlexaDeviceAddressService'),
-    GoogleMapAddressService = require('./GoogleMapAddressService');
+var AlexaDeviceAddressService = require('./alexaDeviceAddressService'),
+    GoogleMapAddressService = require('./googleMapAddressService');
 
 var TREATMENTS="hair,products,nails,wellness,spa,products";
 

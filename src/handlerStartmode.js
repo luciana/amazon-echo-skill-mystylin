@@ -1,5 +1,5 @@
 var Helpers = require('./helpers'),
-	DealService = require('./DealService'),
+	DealService = require('./dealService'),
 	Messages = require('./speech');
 
 var getDealHandler = function() {
@@ -8,8 +8,8 @@ var getDealHandler = function() {
         (location) => {
             try{
                 console.log("address returned from getaddress promise",location);
-                console.log("attributes ", this.attributes);
                 searchDealHandler(this, location, Helpers.getTreatmetSlot(evt.request));
+                console.log("getDealHandler attributes ", this.attributes);
             }catch(e){
                this.emit(":tell", Messages.ERROR, Messages.ERROR);
             }
@@ -52,16 +52,19 @@ var amazonStopHandler = function() {
 };
 
 var amazonNextHandler = function() {
-    var activeDeal = 1;
-    console.log("START MODE Starting amazonNextHandler()");
-    // var dl = this.attributes['dealList'];
-    // console.log("Deal List ", dl);
-    // console.log("Deal List count", dl.length);
-    // if(activeDeal <= dl.length){
-    //     deliverDeal(this, dl[activeDeal]);
-    // }else{
-    //     this.emit(":tell", Messages.ALL_DEALS_DELIVERED);
-    // }    
+	console.log("START MODE Starting amazonNextHandler()");
+	console.log("attributes ", this.attributes);
+    var activeDeal = this.attributes['activeDeal'];
+    activeDeal += 1;
+    console.log("Deal List activeDeal", activeDeal);
+    var dl = this.attributes['dealList'];
+    console.log("Deal List ", dl);
+    console.log("Deal List count", dl.length);
+    if(activeDeal <= dl.length){
+        deliverDeal(this, dl[activeDeal]);
+    }else{
+        this.emit(":tell", Messages.ALL_DEALS_DELIVERED);
+    }
     console.log("START MODE Ending amazonNextHandler()");
 };
 
@@ -73,7 +76,8 @@ var searchDealHandler = function(obj, location, treatment){
     if( dealRequest ) {
         dealRequest.then((response) => {
             console.log(response);
-            //this.attributes['dealList'] = response;
+            console.log("attributes ", obj.attributes);
+            obj.attributes['dealList'] = response;
             switch(response.statusCode) {
                 case 200:
                     var deal = response.deal[0];

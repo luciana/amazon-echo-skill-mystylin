@@ -16,15 +16,14 @@
  *  Alexa: I can't identify your location. Please enable it from the Alexa App. 
  
  * Dialog model:
- *  User: Alexa, open MyStylin
- * Alexa: Welcome to MyStylin. You can get health and beauty deals? Do you want learn about a deal?
+ * User: Alexa, open MyStylin
+ * Alexa: Welcome to MyStylin. You can get health and beauty deals. Do you want learn about a deal?
  * User: Yes
  * Alexa: Get 10 percent off hair products from salon K.
  */
 var Alexa = require('alexa-sdk'),
     config = require('./config'),
-    Handlers = require('./handlers'),
-    StartHandlers = require('./handlers-startmode');
+    Handlers = require('./handlers');
 
 
 exports.handler = function(event, context, callback){
