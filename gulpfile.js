@@ -2,7 +2,8 @@ var gulp = require('gulp'),
 	zip = require('gulp-zip'),
 	gutil = require('gulp-util'),
 	deploy = require('gulp-deploy-git'),
-	lambda = require('gulp-awslambda');
+	lambda = require('gulp-awslambda'),
+	webpack = require('gulp-webpack');
 
 var localConfig = {
   src: './src',
@@ -12,6 +13,9 @@ var localConfig = {
   config: 'environment/dev/config.js',
   cwd: process.cwd() + '/src'
 };
+
+var APP_BUILD = './build';
+var APP_DIST = './dist';
 
 
 gulp.task('setup', function(){
@@ -44,6 +48,11 @@ gulp.task('copy', function () {
         .pipe(gulp.dest('./src'));
 });
 
+gulp.task('bundle', function(){
+	return gulp.src('./src/index.js')
+  		.pipe(webpack( require('./webpack.config.js') ))
+  		.pipe(gulp.dest(APP_BUILD));
+});
 
 gulp.task('deploy', function(){
 	gutil.log('package to lambda', localConfig.func);
@@ -64,5 +73,5 @@ gulp.task('checkin', function() {
 						branches:   [localConfig.branch]}));
 	
 });
-
 gulp.task('default', ['setup', 'copy', 'deploy']);
+

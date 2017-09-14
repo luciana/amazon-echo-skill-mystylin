@@ -11,6 +11,9 @@
  */
 var GET_DEAL = "OneshotGetDealsIntent";
 
+
+var START = "MyStylinIntent";
+
 /**
  * This is an Amazon built-in intent.
  */
@@ -20,16 +23,6 @@ var AMAZON_HELP = "AMAZON.HelpIntent";
  * This is an Amazon built-in intent.
  */
 var AMAZON_CANCEL = "AMAZON.CancelIntent";
-
-/**
- * This is an Amazon built-in intent.
- */
-var AMAZON_YES = "AMAZON.YesIntent";
-
-/**
- * This is an Amazon built-in intent.
- */
-var AMAZON_NO = "AMAZON.NoIntent";
 
 /**
  * This is an Amazon built-in intent.
@@ -45,8 +38,6 @@ module.exports = {
     "GET_DEAL": GET_DEAL,
     "AMAZON_HELP": AMAZON_HELP,
     "AMAZON_CANCEL": AMAZON_CANCEL,
-    "AMAZON_YES": AMAZON_YES,
-    "AMAZON_NO": AMAZON_NO,
     "AMAZON_NEXT": AMAZON_NEXT,
     "AMAZON_STOP": AMAZON_STOP
 };

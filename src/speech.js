@@ -8,7 +8,7 @@
  */
 const WELCOME = "Welcome to MyStylin!";
 
-const DO_YOU_WANT_DEALS = "Let me get you some deals.";
+const DO_YOU_WANT_DEALS = "In what city are you looking for deals?";
 
 /**
  * These messages are delivered when user has not given permission to access location of the Alexa device.

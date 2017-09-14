@@ -17,8 +17,8 @@
  
  * Dialog model:
  * User: Alexa, open MyStylin
- * Alexa: Welcome to MyStylin. You can get health and beauty deals. Do you want learn about a deal?
- * User: Yes
+ * Alexa: Welcome to MyStylin. In what city are you looking for deals?
+ * User: Cleveland, Ohio
  * Alexa: Get 10 percent off hair products from salon K.
  */
 var Alexa = require('alexa-sdk'),

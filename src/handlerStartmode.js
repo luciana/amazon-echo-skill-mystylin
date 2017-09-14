@@ -3,6 +3,9 @@ var Helpers = require('./helpers'),
 	Messages = require('./speech');
 
 var getDealHandler = function() {
+    console.log("get deal handler", this.event);
+     console.log("current dialogState: "+this.event.request.dialogState);
+    console.log("slot" , this.event.request.intent.slots["city"]);
     var evt = this.event;
     Helpers.getAddress(evt).then(
         (location) => {

@@ -3,8 +3,7 @@
  * This class contains all handler function definitions
  * for the various events that we will be registering for.
  */
-var Helpers = require('./helpers'),
-    DealService = require('./dealService'),
+var DealService = require('./dealService'),
     Messages = require('./speech'),
     Events = require('./events'),
     Intents = require('./intents'),
@@ -18,15 +17,15 @@ var newSessionRequestHandler =  function(){
 	if (this.event.request.type === Events.LAUNCH_REQUEST) {
 		this.emit(Events.LAUNCH_REQUEST);
 	} else if (this.event.request.type === "IntentRequest") {
-        this.handler.state = Handlers.states.STARTMODE;
+        this.handler.state = '_STARTMODE';
         this.emitWithState(this.event.request.intent.name, true);
     }
 };
 
 var launchRequestHandler = function() {
     console.log("Starting launchRequestHandler()");
-    this.emit(":tell",  Messages.WELCOME + Messages.DO_YOU_WANT_DEALS, Messages.WELCOME + Messages.DO_YOU_WANT_DEALS);
-    this.handler.state = Handlers.states.STARTMODE;
+    this.emit(":ask",  Messages.WELCOME + Messages.DO_YOU_WANT_DEALS, Messages.WELCOME + Messages.DO_YOU_WANT_DEALS);
+    this.handler.state = '_STARTMODE';
     this.emitWithState(Intents.GET_DEAL, true);
     console.log("Ending launchRequestHandler()");
 };
@@ -70,6 +69,4 @@ module.exports = {
     "sessionEndedRequestHandler":sessionEndedRequestHandler,
     "amazonStopHandler": amazonStopHandler,
     "amazonCancelHandler": amazonCancelHandler,
-    
-   
 };
