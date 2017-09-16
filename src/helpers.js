@@ -29,6 +29,7 @@ var getTreatmetSlot = function(request) {
 */
 var getCitySlot = function(request) {
     var slot = request.intent.slots["city"];
+    console.log("getCitySlot slot value" , request.intent.slots.city.value);
     var slotValue;
     if (slot && slot.value){
         if(slot.value.toLowerCase()){
@@ -46,8 +47,10 @@ var getCitySlot = function(request) {
 */
 var getAddress = function(event){
      return new Promise((fulfill, reject) => {
+        console.log("get Address event" , event);
         var cityName = getCitySlot(event.request);
-        console.log("Attempt to get google maps location ");
+        console.log("Attempt to get google maps location ", cityName);
+        console.log("slot in get address" , event.request.intent.slots["city"]);
         var address = getGoogleAddress(cityName).then(
             (location) => {
                 try{
@@ -74,27 +77,6 @@ var getAddress = function(event){
                     );
                 return addr;
             });
-            // .then((data) => {
-            //     console.log("Tried to google map - default Address was returned", data);
-            //     if (! data ){
-            //         console.log("Attempt to get device location ");
-            //         var addr = getAlexaAddress(event.context).then(
-            //                 (location) => {
-            //                     try{
-            //                         console.log("Address successfully retrieved, from user alexa device", location);
-            //                         return location;
-            //                     }catch(e){
-            //                         return false;
-            //                     }
-            //                 },
-            //                 (failure) => {
-            //                    return false;
-            //                 }
-            //             );
-            //         return addr;
-            //     }
-            //     return data;
-            // });
         if (address){
             fulfill(address);
         }else{

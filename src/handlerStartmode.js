@@ -3,18 +3,16 @@ var Helpers = require('./helpers'),
 	Messages = require('./speech');
 
 var getDealHandler = function() {
-    console.log("get deal handler", this.event);
-     console.log("current dialogState: "+this.event.request.dialogState);
-    console.log("slot" , this.event.request.intent.slots["city"]);
+    console.log("get deal handler event", this.event);
     var evt = this.event;
     Helpers.getAddress(evt).then(
         (location) => {
             try{
-                console.log("address returned from getaddress promise",location);
+                console.log("address returned from getaddress promise",location);                
                 searchDealHandler(this, location, Helpers.getTreatmetSlot(evt.request));
                 console.log("getDealHandler attributes ", this.attributes);
             }catch(e){
-               this.emit(":tell", Messages.ERROR, Messages.ERROR);
+               this.emit(":tell", Messages.NO_DEAL, Messages.NO_DEAL);
             }
         },
         (failure) => {
@@ -22,6 +20,11 @@ var getDealHandler = function() {
             var PERMISSIONS = [ALL_ADDRESS_PERMISSION];
             this.emit(":tellWithPermissionCard", Messages.NOTIFY_MISSING_PERMISSIONS, PERMISSIONS);
         });
+};
+
+var newSessionRequestHandler = function(){
+    this.handler.state = '';
+    this.emit('NewSession');
 };
 
 var unhandledRequestHandler = function() {
@@ -80,7 +83,7 @@ var searchDealHandler = function(obj, location, treatment){
         dealRequest.then((response) => {
             console.log(response);
             console.log("attributes ", obj.attributes);
-            obj.attributes['dealList'] = response;
+            obj.attributes['dealList'] = response.deal;
             switch(response.statusCode) {
                 case 200:
                     var deal = response.deal[0];
@@ -108,15 +111,17 @@ var deliverDeal = function(obj,deal){
     var DEAL_MESSAGE =  `${deal['salon_title']}` + Messages.SALON_OFFER +
         `${unescape(deal['deal_description'])}` + Messages.DEAL_EXPIRES + 
         expirationDate;
+    var i = deal['deal_image_url'];
     var imageObj = {
-                smallImageUrl: 'https://imgs.xkcd.com/comics/standards.png',
-                largeImageUrl: 'https://imgs.xkcd.com/comics/standards.png'
+                smallImageUrl: 'https://s3.amazonaws.com/mystylin-alexa-skill-assets/mystylin_512.png',
+                largeImageUrl: 'https://s3.amazonaws.com/mystylin-alexa-skill-assets/mystylin_512.png'
             };
     obj.emit(':tellWithCard', DEAL_MESSAGE, "Promotion", DEAL_MESSAGE, imageObj);
 };
 
 
 module.exports = {
+    "newSessionRequestHandler": newSessionRequestHandler,
 	"getDealHandler": getDealHandler,
 	"unhandledRequestHandler": unhandledRequestHandler,
 	"amazonNextHandler": amazonNextHandler,

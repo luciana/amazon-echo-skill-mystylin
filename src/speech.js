@@ -36,7 +36,7 @@ const DO_NOT_GET_DEAL = "No problem. You can also search for deals with MyStylin
 /**
  * These messages are delivered when no deal was found
  */
-const NO_DEAL = "We haven't found any deals for you. Check out the MyStylin mobile app";
+const NO_DEAL = "We haven't found any deals near you. Check out the MyStylin mobile app";
 
 const LOCATION_FAILURE = "We were unable to locate a deal near you. How about if you ask MyStylin for deals in your city? You can say Cleveland, OH.";
 

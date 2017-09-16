@@ -10,23 +10,28 @@ var DealService = require('./dealService'),
     Handlers = require('./handlers');
 
 var newSessionRequestHandler =  function(){
+     console.log("Starting newSessionRequestHandler()");
+     console.log("newSessionRequestHandler event", this.event);
     if(Object.keys(this.attributes).length === 0 ){
         this.attributes['dealList'] = {};
         this.attributes['activeDeal'] = 0;
     }
+    this.handler.state = '_STARTMODE';
 	if (this.event.request.type === Events.LAUNCH_REQUEST) {
-		this.emit(Events.LAUNCH_REQUEST);
-	} else if (this.event.request.type === "IntentRequest") {
-        this.handler.state = '_STARTMODE';
+		//this.emit(Events.LAUNCH_REQUEST);
+         this.emit(":ask",  Messages.WELCOME + Messages.DO_YOU_WANT_DEALS, Messages.WELCOME + Messages.DO_YOU_WANT_DEALS);
+
+	} else if (this.event.request.type === "IntentRequest") {       
         this.emitWithState(this.event.request.intent.name, true);
     }
 };
 
 var launchRequestHandler = function() {
     console.log("Starting launchRequestHandler()");
+     console.log("launchRequestHandler event", this.event);
     this.emit(":ask",  Messages.WELCOME + Messages.DO_YOU_WANT_DEALS, Messages.WELCOME + Messages.DO_YOU_WANT_DEALS);
     this.handler.state = '_STARTMODE';
-    this.emitWithState(Intents.GET_DEAL, true);
+    //this.emitWithState(Intents.GET_DEAL, true);
     console.log("Ending launchRequestHandler()");
 };
 
