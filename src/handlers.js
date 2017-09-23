@@ -30,7 +30,7 @@ newSessionHandlers[Intents.AMAZON_HELP] = NewSessionHandlers.amazonHelpHandler;
 
 var startHandlers = {};
 // Add event handlers
-newSessionHandlers[Events.NEW_SESSION] = NewSessionHandlers.newSessionRequestHandler;
+//newSessionHandlers[Events.NEW_SESSION] = NewSessionHandlers.newSessionRequestHandler;
 startHandlers[Events.SESSION_ENDED] = StartHandlers.sessionEndedRequestHandler;
 startHandlers[Events.UNHANDLED] = StartHandlers.unhandledRequestHandler;
 // Add intent handlers

@@ -3,14 +3,19 @@ var Helpers = require('./helpers'),
 	Messages = require('./speech');
 
 var getDealHandler = function() {
-    console.log("get deal handler event", this.event);
+    //console.log("get deal handler event", this.event);
+    //   console.log("current dialogState: "+ JSON.stringify(this.event.request.dialogState));
+    var filledSlots = delegateSlotCollection.call(this);
+    console.log("current slots: "+JSON.stringify(filledSlots));
     var evt = this.event;
     Helpers.getAddress(evt).then(
         (location) => {
             try{
-                console.log("address returned from getaddress promise",location);                
-                searchDealHandler(this, location, Helpers.getTreatmetSlot(evt.request));
+                console.log("address returned from getaddress promise",location);
                 console.log("getDealHandler attributes ", this.attributes);
+                searchDealHandler(this, location, Helpers.getTreatmetSlot(evt.request));
+                
+                
             }catch(e){
                this.emit(":tell", Messages.NO_DEAL, Messages.NO_DEAL);
             }
@@ -22,9 +27,28 @@ var getDealHandler = function() {
         });
 };
 
-var newSessionRequestHandler = function(){
-    this.handler.state = '';
-    this.emit('NewSession');
+var delegateSlotCollection = function(){
+  console.log("in delegateSlotCollection");
+    console.log("current dialogState: "+ JSON.stringify(this.event.request.dialogState));
+    if (this.event.request.dialogState === "STARTED") {
+      console.log("in Beginning");
+      var updatedIntent=this.event.request.intent;
+       console.log(" STARTED updatedIntent: "+ JSON.stringify(updatedIntent));
+      //optionally pre-fill slots: update the intent object with slot values for which
+      //you have defaults, then return Dialog.Delegate with this updated intent
+      // in the updatedIntent property
+      this.emit(":delegate", updatedIntent);
+    } else if (this.event.request.dialogState !== "COMPLETED") {
+      console.log("in not COMPLETED");
+      // return a Dialog.Delegate directive with no updatedIntent property.
+      this.emit(":delegate");
+    } else {
+      console.log("in completed");
+      console.log("returning: "+ JSON.stringify(this.event.request.intent));
+      // Dialog is now complete and all required slots should be filled,
+      // so call your normal intent handler.
+      return this.event.request.intent;
+    }
 };
 
 var unhandledRequestHandler = function() {
@@ -81,47 +105,71 @@ var searchDealHandler = function(obj, location, treatment){
     var dealRequest = dealService.searchDeal(location, treatment);
     if( dealRequest ) {
         dealRequest.then((response) => {
-            console.log(response);
-            console.log("attributes ", obj.attributes);
-            obj.attributes['dealList'] = response.deal;
+            //console.log(response);
+            //console.log("attributes ", obj.attributes);
+            //obj.attributes['dealList'] = response.deal;
             switch(response.statusCode) {
                 case 200:
+                    console.log('response 200');
                     var deal = response.deal[0];
-                    deliverDeal(obj,deal);
-                    break;
-                case 404:
-                    //var message = response.message;
-                    obj.emit(":ask", Messages.LOCATION_FAILURE, Messages.LOCATION_FAILURE);
-                    break;
-                case 204:
-                    obj.emit(":tell", Messages.NO_DEAL);
-                    break;
-                default:
-                    obj.emit(":tell", Messages.ERROR, Messages.ERROR);
-            }
-        });
-    }else{
-         obj.emit(":tell", Messages.NO_DEAL);
-    }
-    console.log("START MODE Ending searchDealHandler()");
-};
-
-var deliverDeal = function(obj,deal){
-    var expirationDate = Helpers.convertDate(deal['deal_expiration_date']);
+                   // deliverDeal(obj,deal);
+                    var expirationDate = Helpers.convertDate(deal['deal_expiration_date']);
     var DEAL_MESSAGE =  `${deal['salon_title']}` + Messages.SALON_OFFER +
         `${unescape(deal['deal_description'])}` + Messages.DEAL_EXPIRES + 
         expirationDate;
     var i = deal['deal_image_url'];
+
+    var imageObj = {
+                smallImageUrl: 'https://s3.amazonaws.com/mystylin-alexa-skill-assets/mystylin_512.png',
+                largeImageUrl: 'https://s3.amazonaws.com/mystylin-alexa-skill-assets/mystylin_512.png'
+            };
+    //obj.emit(':tellWithCard', DEAL_MESSAGE, "Promotion", DEAL_MESSAGE, imageObj);
+            obj.response.speak(DEAL_MESSAGE);
+            obj.emit(":responseReady");
+    return DEAL_MESSAGE;
+                    break;
+                case 404:
+                    //var message = response.message;
+                    //obj.emit(":ask", Messages.LOCATION_FAILURE, Messages.LOCATION_FAILURE);
+                    return Messages.LOCATION_FAILURE;
+                    break;
+                case 204:
+                    //obj.emit(":tell", Messages.NO_DEAL);
+
+                    return Message.NO_DEAL;
+                    break;
+                default:
+                    return Messages.ERROR;
+                    //obj.emit(":tell", Messages.ERROR, Messages.ERROR);
+            }
+        });
+    }else{
+         //obj.emit(":tell", Messages.NO_DEAL);
+         return Message.NO_DEAL;
+    }
+    //console.log("START MODE Ending searchDealHandler()");
+};
+
+var deliverDeal = function(obj,deal){
+    console.log('deliverDeal');
+    var expirationDate = Helpers.convertDate(deal['deal_expiration_date']);
+    var DEAL_MESSAGE =  `${deal['salon_title']}` + Messages.SALON_OFFER +
+        `${unescape(deal['deal_description'])}` + Messages.DEAL_EXPIRES + 
+        expirationDate;
+    //var i = deal['deal_image_url'];
+    console.log(DEAL_MESSAGE);
     var imageObj = {
                 smallImageUrl: 'https://s3.amazonaws.com/mystylin-alexa-skill-assets/mystylin_512.png',
                 largeImageUrl: 'https://s3.amazonaws.com/mystylin-alexa-skill-assets/mystylin_512.png'
             };
     obj.emit(':tellWithCard', DEAL_MESSAGE, "Promotion", DEAL_MESSAGE, imageObj);
+  
 };
 
 
+
 module.exports = {
-    "newSessionRequestHandler": newSessionRequestHandler,
+    //"newSessionRequestHandler": newSessionRequestHandler,
 	"getDealHandler": getDealHandler,
 	"unhandledRequestHandler": unhandledRequestHandler,
 	"amazonNextHandler": amazonNextHandler,
