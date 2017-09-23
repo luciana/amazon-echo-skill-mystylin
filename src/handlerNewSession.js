@@ -30,10 +30,7 @@ var launchRequestHandler = function() {
      console.log("launchRequestHandler event", this.event);
      this.handler.state = '_STARTMODE';
      this.emit(":ask",  Messages.WELCOME + Messages.DO_YOU_WANT_DEALS, Messages.WELCOME + Messages.DO_YOU_WANT_DEALS);
-     //this.response.speak(Messages.WELCOME + Messages.DO_YOU_WANT_DEALS).listen();
-     //this.emit(':responseReady');
-    
-    //this.emitWithState(Intents.GET_DEAL, true);
+     this.emitWithState(Intents.GET_DEAL, true);
     console.log("Ending launchRequestHandler()");
 };
 
