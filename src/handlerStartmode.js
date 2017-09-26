@@ -1,5 +1,6 @@
 var Helpers = require('./helpers'),
 	DealService = require('./dealService'),
+    Events = require('./events'),
 	Messages = require('./speech');
 
 var getDealHandler = function() {
@@ -7,24 +8,22 @@ var getDealHandler = function() {
     //   console.log("current dialogState: "+ JSON.stringify(this.event.request.dialogState));
     var filledSlots = delegateSlotCollection.call(this);
     console.log("current slots: "+JSON.stringify(filledSlots));
-    var evt = this.event;
-    Helpers.getAddress(evt).then(
-        (location) => {
-            try{
-                console.log("address returned from getaddress promise",location);
-                console.log("getDealHandler attributes ", this.attributes);
-                searchDealHandler(this, location, Helpers.getTreatmetSlot(evt.request));
-                
-                
-            }catch(e){
-               this.emit(":tell", Messages.NO_DEAL, Messages.NO_DEAL);
-            }
-        },
-        (failure) => {
-            var ALL_ADDRESS_PERMISSION = "read::alexa:device:all:address:country_and_postal_code";
-            var PERMISSIONS = [ALL_ADDRESS_PERMISSION];
-            this.emit(":tellWithPermissionCard", Messages.NOTIFY_MISSING_PERMISSIONS, PERMISSIONS);
-        });
+    //var evt = this.event;
+    // Helpers.getAddress(evt).then(
+    //     (location) => {
+    //         try{
+    //             console.log("address returned from getaddress promise",location);
+    //             console.log("getDealHandler attributes ", this.attributes);
+    //             searchDealHandler(this, location, Helpers.getTreatmetSlot(evt.request));
+    //         }catch(e){
+    //            this.emit(":tell", Messages.NO_DEAL, Messages.NO_DEAL);
+    //         }
+    //     },
+    //     (failure) => {
+    //         var ALL_ADDRESS_PERMISSION = "read::alexa:device:all:address:country_and_postal_code";
+    //         var PERMISSIONS = [ALL_ADDRESS_PERMISSION];
+    //         this.emit(":tellWithPermissionCard", Messages.NOTIFY_MISSING_PERMISSIONS, PERMISSIONS);
+    //     });
 };
 
 var delegateSlotCollection = function(){
@@ -39,7 +38,7 @@ var delegateSlotCollection = function(){
       // in the updatedIntent property
       this.emit(":delegate", updatedIntent);
     } else if (this.event.request.dialogState !== "COMPLETED") {
-      console.log("in not COMPLETED");
+      console.log("in not COMPLETED", this.event.request.dialogState);
       // return a Dialog.Delegate directive with no updatedIntent property.
       this.emit(":delegate");
     } else {
@@ -47,8 +46,32 @@ var delegateSlotCollection = function(){
       console.log("returning: "+ JSON.stringify(this.event.request.intent));
       // Dialog is now complete and all required slots should be filled,
       // so call your normal intent handler.
-      return this.event.request.intent;
+      //return this.event.request.intent;
+      var evt = this.event;
+      var city = Helpers.getCitySlot(evt.request);
+      Helpers.getAddressFor(city).then(
+        (location) => {
+            try{
+                console.log("address returned from getaddress promise",location);
+                console.log("getDealHandler attributes ", this.attributes);
+                searchDealHandler(this, location, Helpers.getTreatmetSlot(evt.request));
+            }catch(e){              
+               this.emit(":tell", Messages.ERROR, Messages.ERROR);
+            }
+        },
+        (failure) => {
+            var ALL_ADDRESS_PERMISSION = "read::alexa:device:all:address:country_and_postal_code";
+            var PERMISSIONS = [ALL_ADDRESS_PERMISSION];
+            this.emit(":tellWithPermissionCard", Messages.NOTIFY_MISSING_PERMISSIONS, PERMISSIONS);
+        });
     }
+};
+
+var newSessionRequestHandler = function() {
+    console.log("START MODE Starting newSessionRequestHandler()");
+    this.handler.state = '';
+    this.emitWithState(Events.NEW_SESSION); // Equivalent to the Start Mode NewSession handler
+    console.log("START MODE Ending newSessionRequestHandler()");
 };
 
 var unhandledRequestHandler = function() {
@@ -103,46 +126,54 @@ var searchDealHandler = function(obj, location, treatment){
 	console.log("START MODE Starting searchDealHandler()");
     var dealService = new DealService();
     var dealRequest = dealService.searchDeal(location, treatment);
+     console.log("searchDealHandler");
     if( dealRequest ) {
+        console.log("searchDealHandler dealRequest");
         dealRequest.then((response) => {
-            //console.log(response);
-            //console.log("attributes ", obj.attributes);
-            //obj.attributes['dealList'] = response.deal;
+            console.log("response");
             switch(response.statusCode) {
                 case 200:
                     console.log('response 200');
                     var deal = response.deal[0];
                    // deliverDeal(obj,deal);
                     var expirationDate = Helpers.convertDate(deal['deal_expiration_date']);
-    var DEAL_MESSAGE =  `${deal['salon_title']}` + Messages.SALON_OFFER +
-        `${unescape(deal['deal_description'])}` + Messages.DEAL_EXPIRES + 
-        expirationDate;
-    var i = deal['deal_image_url'];
+                    var DEAL_MESSAGE =  `${deal['salon_title']}` + Messages.SALON_OFFER +
+                        `${unescape(deal['deal_description'])}` + Messages.DEAL_EXPIRES + 
+                        expirationDate;
+                    var i = deal['deal_image_url'];
 
-    var imageObj = {
-                smallImageUrl: 'https://s3.amazonaws.com/mystylin-alexa-skill-assets/mystylin_512.png',
-                largeImageUrl: 'https://s3.amazonaws.com/mystylin-alexa-skill-assets/mystylin_512.png'
-            };
-    //obj.emit(':tellWithCard', DEAL_MESSAGE, "Promotion", DEAL_MESSAGE, imageObj);
-            obj.response.speak(DEAL_MESSAGE);
-            obj.emit(":responseReady");
-    return DEAL_MESSAGE;
+                    var imageObj = {
+                                smallImageUrl: 'https://s3.amazonaws.com/mystylin-alexa-skill-assets/mystylin_512.png',
+                                largeImageUrl: 'https://s3.amazonaws.com/mystylin-alexa-skill-assets/mystylin_512.png'
+                    };
+                    //obj.emit(':tellWithCard', DEAL_MESSAGE, "Promotion", DEAL_MESSAGE, imageObj);
+                    obj.response.speak(DEAL_MESSAGE);
+                    obj.emit(":responseReady");
                     break;
                 case 404:
                     //var message = response.message;
-                    //obj.emit(":ask", Messages.LOCATION_FAILURE, Messages.LOCATION_FAILURE);
-                    return Messages.LOCATION_FAILURE;
+                    console.log('response 404');
+                    obj.response.speak(Messages.LOCATION_FAILURE);
+                    obj.emit(":responseReady");
                     break;
                 case 204:
-                    //obj.emit(":tell", Messages.NO_DEAL);
-
-                    return Message.NO_DEAL;
+                    obj.response.speak(Messages.NO_DEAL);
+                    obj.emit(":responseReady");
                     break;
                 default:
                     return Messages.ERROR;
-                    //obj.emit(":tell", Messages.ERROR, Messages.ERROR);
+                    obj.emit(":tell", Messages.ERROR, Messages.ERROR);
             }
+        }).catch(function (error) {
+            console.log("Promise Rejected", JSON.stringify(error));
+            if (error.response) {
+              console.log(error.response.data);
+              console.log(error.response.status);
+              console.log(error.response.headers);
+            }
+            obj.emit(":tell", Messages.ERROR, Messages.ERROR);
         });
+
     }else{
          //obj.emit(":tell", Messages.NO_DEAL);
          return Message.NO_DEAL;
@@ -169,7 +200,7 @@ var deliverDeal = function(obj,deal){
 
 
 module.exports = {
-    //"newSessionRequestHandler": newSessionRequestHandler,
+    "newSessionRequestHandler": newSessionRequestHandler,
 	"getDealHandler": getDealHandler,
 	"unhandledRequestHandler": unhandledRequestHandler,
 	"amazonNextHandler": amazonNextHandler,

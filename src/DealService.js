@@ -59,10 +59,10 @@ class DealService {
      */
     __handleDealApiRequest(requestOptions, fulfill, reject) {
         var req = https.get(requestOptions, function(res) {
-            res.setEncoding('utf8');    
-            if (res.statusCode < 200 || res.statusCode > 299) {
-                reject(new Error('FAILED TO LOAD API, STATUS CODE: ' + res.statusCode));
-            }
+            res.setEncoding('utf8');
+            // if (res.statusCode < 200 || res.statusCode > 299) {
+            //     reject(new Error('FAILED TO LOAD API, STATUS CODE: ' + res.statusCode));
+            // }
 
             var body = [];          
             res.on('data', function (data){
@@ -76,8 +76,9 @@ class DealService {
                     var dealResponse = {
                         statusCode: 404,
                         message: raw.message,
-                        deal: raw
+                        deal: {}
                     };
+                     reject(dealResponse);
                  }else{
                     var results = JSON.parse(body[0]).results;
                     //console.log(' DEAL API RESPONSE RESULTS: ' + results);
@@ -87,12 +88,14 @@ class DealService {
                         message: "",
                         deal: results
                         };
+                         fulfill(dealResponse);
                     }else{ //no deals found - no content
                         var dealResponse = {
                             statusCode: 204,
                             message: "",
                             deal: {}
                         };
+                         reject(dealResponse);
                     }
                     
                  }   
@@ -102,8 +105,9 @@ class DealService {
                          message: e,
                         deal: {}
                     };
+                     reject(dealResponse);
               }
-              fulfill(dealResponse);
+             
             });
         });
 

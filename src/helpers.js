@@ -38,6 +38,30 @@ var getCitySlot = function(request) {
     return false;
 };
 
+
+/*  This function returns a object of address from Google API from a particular city 
+*   If no address is recognized, return default address object.
+*   @return address object
+*/
+var getAddressFor = function(city){
+     return new Promise((fulfill, reject) => {
+        return getGoogleAddress(city).then(
+            (location) => {
+                try{
+                    console.log("Address successfully retrieved from google maps for " + city + " is " + location);
+                     fulfill(location);
+                }catch(e){
+                    reject();
+                }
+            },
+            (failure) => {
+                reject();
+            });
+    });
+
+};
+
+
 /*  This function returns a object of address. 
 *   Address object contains countryCode, postaCode, lat, lng
 *   The address object is composed by information from Alexa Device address, Google Lat/Lng, or Default Address.
@@ -51,7 +75,7 @@ var getAddress = function(event){
         var address = getGoogleAddress(cityName).then(
             (location) => {
                 try{
-                    console.log("Address successfully retrieved from google maps for " + cityName + " is " + location);
+                    console.log("Address successfully retrieved from google maps for " + cityName );
                     return location;
                 }catch(e){
                     return false;
@@ -209,6 +233,7 @@ var formatDate = function(currentDate){
 };
 
 module.exports = {
+    "getAddressFor":getAddressFor,
 	"getTreatmetSlot": getTreatmetSlot,
     "getCitySlot":getCitySlot,
     "getAddress":getAddress,

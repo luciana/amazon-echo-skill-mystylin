@@ -22,7 +22,7 @@ class GoogleMapAddressService {
      * @return {Promise} promise for the request in flight.
      */
     getAddress(cityName) {
-        const options = this.__getRequestOptions(`/maps/api/geocode/json?key=${this.key}&address=Solon,OH`);
+        const options = this.__getRequestOptions(`/maps/api/geocode/json?key=${this.key}&address=cityName`);
 
         return new Promise((fulfill, reject) => {
             this.__handleDeviceAddressApiRequest(options, fulfill, reject);

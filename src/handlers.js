@@ -23,14 +23,12 @@ newSessionHandlers[Events.UNHANDLED] = NewSessionHandlers.unhandledRequestHandle
 // Add intent newSessionHandlers
 newSessionHandlers[Intents.AMAZON_CANCEL] = NewSessionHandlers.amazonCancelHandler;
 newSessionHandlers[Intents.AMAZON_STOP] = NewSessionHandlers.amazonStopHandler;
-// newSessionHandlers[Intents.AMAZON_YES] = NewSessionHandlers.amazonYesHandler;
-// newSessionHandlers[Intents.AMAZON_NO] = NewSessionHandlers.amazonNoHandler;
 newSessionHandlers[Intents.AMAZON_HELP] = NewSessionHandlers.amazonHelpHandler;
 
 
 var startHandlers = {};
 // Add event handlers
-//newSessionHandlers[Events.NEW_SESSION] = NewSessionHandlers.newSessionRequestHandler;
+newSessionHandlers[Events.NEW_SESSION] = NewSessionHandlers.newSessionRequestHandler;
 startHandlers[Events.SESSION_ENDED] = StartHandlers.sessionEndedRequestHandler;
 startHandlers[Events.UNHANDLED] = StartHandlers.unhandledRequestHandler;
 // Add intent handlers
