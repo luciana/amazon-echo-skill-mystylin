@@ -13,7 +13,6 @@ var GET_DEAL = "OneshotGetDealsIntent";
 
 var GET_DEAL_NEAR_ME = "GetDealsNearMeIntent";
 
-
 /**
  * This is an Amazon built-in intent.
  */

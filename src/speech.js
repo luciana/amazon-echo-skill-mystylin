@@ -8,7 +8,7 @@
  */
 const WELCOME = "Welcome to MyStylin!";
 
-const DO_YOU_WANT_DEALS = "NEW SESSION In what city are you looking for deals?";
+const DO_YOU_WANT_DEALS = "In what city are you looking for deals?";
 
 /**
  * These messages are delivered when user has not given permission to access location of the Alexa device.
@@ -49,7 +49,7 @@ const GOODBYE = "Bye!";
 
 const UNHANDLED = "We could not understand you. We can help if you say Ask MyStylin for a deal near me.";
 
-const HELP = "We can find you deals for Health and Beauty products. Do you want me to tell you about a deal near you?";
+const HELP = "We can find you deals for Health and Beauty products. Ask MyStylin for a deal near you.";
 
 const STOP = "Ok. Hope you come back. Goodbye!";
 

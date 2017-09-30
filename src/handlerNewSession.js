@@ -7,14 +7,10 @@ var DealService = require('./dealService'),
     Messages = require('./speech'),
     Events = require('./events'),
     Intents = require('./intents'),
-    Handlers = require('./handlers'),
-    Alexa = require('alexa-sdk'),
-    makePlainText = Alexa.utils.TextUtils.makePlainText,
-    makeImage = Alexa.utils.ImageUtils.makeImage;
+    Handlers = require('./handlers');
 
 var newSessionRequestHandler =  function(){
-     console.log("Starting newSessionRequestHandler()");
-     console.log("newSessionRequestHandler event", this.event);
+     console.log("Starting newSessionRequestHandler REQUEST", this.event.request);
     if(Object.keys(this.attributes).length === 0 ){
         this.attributes['dealList'] = {};
         this.attributes['activeDeal'] = 0;
@@ -23,27 +19,21 @@ var newSessionRequestHandler =  function(){
 	if (this.event.request.type === Events.LAUNCH_REQUEST) {
 		this.emit(Events.LAUNCH_REQUEST);
 	} else if (this.event.request.type === "IntentRequest") {
-        this.handler.state = '_STARTMODE';
-        console.log("NEW SESSION directly to intent", this.event.request.intent.name);
-        this.emitWithState(this.event.request.intent.name, true);
+        if(Intents.GET_DEAL_NEAR_ME === this.event.request.intent.name ){
+            this.handler.state = '_DEALNEARMODE';
+            this.emitWithState(Intents.GET_DEAL_NEAR_ME, true);
+        }else{
+            this.handler.state = '_STARTMODE';
+            this.emitWithState(Intents.GET_DEAL, true);
+        }
     }
 };
 
 var launchRequestHandler = function() {
     console.log("Starting launchRequestHandler()", this.event);
-     this.emit(":ask",  Messages.WELCOME + Messages.DO_YOU_WANT_DEALS, Messages.DO_YOU_WANT_DEALS);
-     //var builder = new Alexa.templateBuilders.BodyTemplate1Builder();
-
-    //var template = builder.setTitle('My BodyTemplate1')
-                          // .setBackgroundImage(makeImage('http://url/to/my/img.png'))
-                          // .setTextContent(makePlainText('Text content for mystylin'))
-                          // .build();
-
-    //this.response.speak(Messages.WELCOME + Messages.DO_YOU_WANT_DEALS).listen(Messages.WELCOME + Messages.DO_YOU_WANT_DEALS)
-      //           .renderTemplate(template);
-    //this.emit(':responseReady');
-     this.handler.state = '_STARTMODE';
-     //this.emitWithState(Intents.GET_DEAL, true);
+    this.emit(":ask",  Messages.WELCOME + Messages.DO_YOU_WANT_DEALS, Messages.DO_YOU_WANT_DEALS);
+    this.handler.state = '_STARTMODE';
+    //this.emitWithState(Intents.GET_DEAL, true);
     console.log("Ending launchRequestHandler()");
 };
 

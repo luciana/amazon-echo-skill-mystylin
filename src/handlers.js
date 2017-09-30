@@ -7,11 +7,12 @@ var Alexa = require('alexa-sdk'),
 	Intents = require('./intents'),
 	Events = require('./events'),
     NewSessionHandlers = require('./handlerNewSession'),
-    StartHandlers = require('./handlerStartmode');
+    StartHandlers = require('./handlerStartmode'),
+    DealHandlers = require('./handlerDealmode');
 
 var STATES = {
     "STARTMODE": '_STARTMODE',
-    "DEALMODE": '_DEALMODE'
+    "DEALNEARMODE": '_DEALNEARMODE'
 };
 
 var newSessionHandlers = {};
@@ -28,7 +29,7 @@ newSessionHandlers[Intents.AMAZON_HELP] = NewSessionHandlers.amazonHelpHandler;
 
 var startHandlers = {};
 // Add event handlers
-newSessionHandlers[Events.NEW_SESSION] = NewSessionHandlers.newSessionRequestHandler;
+//startHandlers[Events.NEW_SESSION] = StartHandlers.newSessionRequestHandler;
 startHandlers[Events.SESSION_ENDED] = StartHandlers.sessionEndedRequestHandler;
 startHandlers[Events.UNHANDLED] = StartHandlers.unhandledRequestHandler;
 // Add intent handlers
@@ -38,7 +39,18 @@ startHandlers[Intents.AMAZON_CANCEL] = StartHandlers.amazonCancelHandler;
 startHandlers[Intents.AMAZON_STOP] = StartHandlers.amazonStopHandler;
 var startModeHandlers = Alexa.CreateStateHandler(STATES.STARTMODE,startHandlers);
 
+var dealHandlers = {};
+//dealHandlers[Events.NEW_SESSION] = DealHandlers.newSessionRequestHandler;
+dealHandlers[Events.SESSION_ENDED] = DealHandlers.sessionEndedRequestHandler;
+dealHandlers[Events.UNHANDLED] = DealHandlers.unhandledRequestHandler;
+dealHandlers[Intents.GET_DEAL_NEAR_ME] = DealHandlers.getDealModeHandler;
+
+dealHandlers[Intents.AMAZON_CANCEL] = DealHandlers.amazonCancelHandler;
+dealHandlers[Intents.AMAZON_STOP] = DealHandlers.amazonStopHandler;
+var dealModeHandlers = Alexa.CreateStateHandler(STATES.DEALNEARMODE,dealHandlers);
+
 module.exports = {
     "newSessionHandlers": newSessionHandlers,
-    "startModeHandlers": startModeHandlers
+    "startModeHandlers": startModeHandlers,
+    "dealModeHandlers": dealModeHandlers
 };

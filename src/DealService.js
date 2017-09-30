@@ -14,7 +14,7 @@ class DealService {
     constructor() {}
 
     searchDeal(address, treatment){
-        var url = '/v1/deals/search?distance=100&per_page=5&page=1';
+        var url = '/v1/deals/search?distance=1000&per_page=5&page=1';
         if (treatment){
             url += '&treatment='+treatment;
         }
@@ -25,7 +25,6 @@ class DealService {
           if (address.postalCode){
             url += '&zip='+address.postalCode;
           }
-          //var url = '/v1/deals/search?treatment=nails&distance=100&zip=44124';
           console.log("deal api url ", url);
           var options = this.__getRequestOptions(url,
               'developer.mystylin.com',
@@ -60,54 +59,45 @@ class DealService {
     __handleDealApiRequest(requestOptions, fulfill, reject) {
         var req = https.get(requestOptions, function(res) {
             res.setEncoding('utf8');
-            // if (res.statusCode < 200 || res.statusCode > 299) {
-            //     reject(new Error('FAILED TO LOAD API, STATUS CODE: ' + res.statusCode));
-            // }
 
-            var body = [];          
+            var body = [];
             res.on('data', function (data){
                 body.push(data);
             });
             res.on('end', function () {
-              try{                
+              try{ 
                 var raw = JSON.parse(body);
                 console.log("DEAL API RAW RESPONSE", raw);
-                 if(raw.status == false){ //missing information
+                 if(raw.status == false){ //missing information | no deals found 404
                     var dealResponse = {
-                        statusCode: 404,
+                        statusCode: res.statusCode,
                         message: raw.message,
-                        deal: {}
+                        deal: raw
                     };
-                     reject(dealResponse);
                  }else{
                     var results = JSON.parse(body[0]).results;
-                    //console.log(' DEAL API RESPONSE RESULTS: ' + results);
-                    if (results){
+                    if (results){ // 200
                         var dealResponse = {
                         statusCode: res.statusCode,
                         message: "",
                         deal: results
                         };
-                         fulfill(dealResponse);
-                    }else{ //no deals found - no content
+                    }else{ //no content 204
                         var dealResponse = {
-                            statusCode: 204,
+                            statusCode: res.statusCode,
                             message: "",
                             deal: {}
                         };
-                         reject(dealResponse);
-                    }
-                    
+                    }                    
                  }   
-              }catch(e){
+              }catch(e){ //500
                   var dealResponse = {
-                        statusCode: 500,
-                         message: e,
+                        statusCode: res.statusCode,
+                        message: e,
                         deal: {}
                     };
-                     reject(dealResponse);
               }
-             
+              fulfill(dealResponse);
             });
         });
 

@@ -29,6 +29,6 @@ var Alexa = require('alexa-sdk'),
 exports.handler = function(event, context, callback){
     var alexa = Alexa.handler(event, context, callback);
     alexa.appId = config.app_id;
-    alexa.registerHandlers(Handlers.newSessionHandlers, Handlers.startModeHandlers );
+    alexa.registerHandlers(Handlers.newSessionHandlers, Handlers.startModeHandlers, Handlers.dealModeHandlers );
     alexa.execute();
 };

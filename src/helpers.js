@@ -3,7 +3,9 @@
  * 
  */
 var AlexaDeviceAddressService = require('./alexaDeviceAddressService'),
-    GoogleMapAddressService = require('./googleMapAddressService');
+    GoogleMapAddressService = require('./googleMapAddressService'),
+    DealService = require('./dealService'),
+    Messages = require('./speech');
 
 var TREATMENTS="hair,products,nails,wellness,spa,products";
 
@@ -12,6 +14,7 @@ var TREATMENTS="hair,products,nails,wellness,spa,products";
 *   @return string list (common separated default treatment) or single string of treatment.
 */
 var getTreatmetSlot = function(request) {
+    console.log('getTreatmetSlot request', request.intent.slots);
     var slot = request.intent.slots["treatment"];
     var slotValue;
     if (slot && slot.value){
@@ -68,44 +71,44 @@ var getAddressFor = function(city){
 *   If no address is recognized, return default address object.
 *   @return address object
 */
-var getAddress = function(event){
-     return new Promise((fulfill, reject) => {
-        var cityName = getCitySlot(event.request);
-        console.log("Attempt to get google maps location ", cityName);
-        var address = getGoogleAddress(cityName).then(
-            (location) => {
-                try{
-                    console.log("Address successfully retrieved from google maps for " + cityName );
-                    return location;
-                }catch(e){
-                    return false;
-                }
-            },
-            (failure) => {
-                console.log("Attempt to get device location ");
-                var addr = getAlexaAddress(event.context).then(
-                        (location) => {
-                            try{
-                                console.log("Address successfully retrieved, from user alexa device", location);
-                                return location;
-                            }catch(e){
-                                return false;
-                            }
-                        },
-                        (failure) => {
-                           return false;
-                        }
-                    );
-                return addr;
-            });
-        if (address){
-            fulfill(address);
-        }else{
-            reject();
-        }
-    });
+// var getAddress = function(event){
+//      return new Promise((fulfill, reject) => {
+//         var cityName = getCitySlot(event.request);
+//         console.log("Attempt to get google maps location ", cityName);
+//         var address = getGoogleAddress(cityName).then(
+//             (location) => {
+//                 try{
+//                     console.log("Address successfully retrieved from google maps for " + cityName );
+//                     return location;
+//                 }catch(e){
+//                     return false;
+//                 }
+//             },
+//             (failure) => {
+//                 console.log("Attempt to get device location ");
+//                 var addr = getAlexaAddress(event.context).then(
+//                         (location) => {
+//                             try{
+//                                 console.log("Address successfully retrieved, from user alexa device", location);
+//                                 return location;
+//                             }catch(e){
+//                                 return false;
+//                             }
+//                         },
+//                         (failure) => {
+//                            return false;
+//                         }
+//                     );
+//                 return addr;
+//             });
+//         if (address){
+//             fulfill(address);
+//         }else{
+//             reject();
+//         }
+//     });
 
-};
+// };
 
 
 /*  This function calls the AlexaDeviceAddress service to obtains the Alexa location.
@@ -144,11 +147,9 @@ var getAlexaAddress = function(context){
                 reject();
             });
         }else{
-             //Only return default address while testing via the Service Simulator
-            console.log("Test with Service Simulator");
-            var defaultAddress = { "countryCode" : "US","postalCode" : 44139};
-            fullfil(defaultAddress);
-            //reject();                
+            // var defaultAddress = { "countryCode" : "US","postalCode" : 44139};
+            // fullfil(defaultAddress);
+            reject();
         }
     });
 };
@@ -232,12 +233,75 @@ var formatDate = function(currentDate){
     return day_names[currentDate.getDay()] + "," +  month_names[currentDate.getMonth()] + " " + currentDate.getDate() + " " + currentDate.getFullYear();
 };
 
+var searchDealHandler = function(obj, location, treatment){
+    console.log("HELPER DEALing searchDealHandler()");
+    var dealService = new DealService();
+    var dealRequest = dealService.searchDeal(location, treatment);
+    if( dealRequest ) {
+        dealRequest.then((response) => {
+            switch(response.statusCode) {
+                case 200:
+                    console.log('response 200');
+                    var deal = response.deal[0];
+                    //deliverDeal(obj, deal);
+                    deliverDeal.call(obj, deal);
+                    break;
+                case 404:
+                    var message = response.message;
+                    console.log('response 404', message);
+                    obj.response.speak(Messages.NO_DEAL);
+                    obj.emit(":responseReady");
+                    break;
+                case 204:
+                    obj.response.speak(Messages.NO_DEAL);
+                    obj.emit(":responseReady");
+                    break;
+                default:
+                    return Messages.ERROR;
+                    obj.emit(":tell", Messages.ERROR, Messages.ERROR);
+            }
+        }).catch(function (error) {
+            console.log("Promise Rejected", JSON.stringify(error));
+            if (error.response) {
+              console.log(error.response.data);
+              console.log(error.response.status);
+              console.log(error.response.headers);
+            }
+            obj.emit(":tell", Messages.ERROR, Messages.ERROR);
+        });
+
+    }else{
+        obj.emit(":tell", Messages.NO_DEAL);
+    }
+    console.log("DEAL MODE Ending searchDealHandler()");
+};
+
+var deliverDeal = function(deal){
+    console.log('deliverDeal', deal);
+
+    var expirationDate = convertDate(deal.deal_expiration_date);
+    
+
+    var DEAL_MESSAGE =  `${deal.salon_title}` + Messages.SALON_OFFER + 
+        `${unescape(deal.deal_description)}` + Messages.DEAL_EXPIRES + expirationDate;
+
+    console.log('DEAL_MESSAGE', DEAL_MESSAGE);
+    var i = deal.deal_image_url;
+
+    var imageObj = {
+                smallImageUrl: 'https://s3.amazonaws.com/mystylin-alexa-skill-assets/mystylin_512.png',
+                largeImageUrl: 'https://s3.amazonaws.com/mystylin-alexa-skill-assets/mystylin_512.png'
+    };
+    this.emit(':tellWithCard', DEAL_MESSAGE, "Promotion", DEAL_MESSAGE, imageObj);
+};
+
 module.exports = {
     "getAddressFor":getAddressFor,
 	"getTreatmetSlot": getTreatmetSlot,
     "getCitySlot":getCitySlot,
-    "getAddress":getAddress,
+    "searchDealHandler":searchDealHandler,
+    "deliverDeal": deliverDeal,
     "getGoogleAddress":getGoogleAddress,
-    "getAlexaAddress": getAlexaAddress,
-    "convertDate": convertDate
+    "getAlexaAddress": getAlexaAddress
+    //"convertDate": convertDate
 };

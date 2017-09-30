@@ -22,7 +22,7 @@ class GoogleMapAddressService {
      * @return {Promise} promise for the request in flight.
      */
     getAddress(cityName) {
-        const options = this.__getRequestOptions(`/maps/api/geocode/json?key=${this.key}&address=cityName`);
+        const options = this.__getRequestOptions(`/maps/api/geocode/json?key=${this.key}&address=${cityName}`);
 
         return new Promise((fulfill, reject) => {
             this.__handleDeviceAddressApiRequest(options, fulfill, reject);
@@ -43,14 +43,14 @@ class GoogleMapAddressService {
            if (response.statusCode < 200 || response.statusCode > 299) {
                 reject(new Error('FAILED TO LOAD API, STATUS CODE: ' + response.statusCode));
             }
-
+            console.log('google service request options', requestOptions);
             var body = '';
             response.on('data', function (data){
                 body += data;
             });
             response.on('end', function () {
               try{
-                    //console.log(' GOOGLE API RESPONSE RESULTS: ' + body);
+                    console.log(' GOOGLE API RESPONSE RESULTS: ' + body);
                     var googleAddressResponse = {
                         statusCode: response.statusCode,
                         address: JSON.parse(body).results[0].geometry.location
