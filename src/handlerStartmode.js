@@ -4,16 +4,12 @@ var Helpers = require('./helpers'),
 
 var getDealHandler = function() {
    console.log(" in delegateSlotCollection current dialogState: "+ JSON.stringify(this.event.request.dialogState));
-    if (this.event.request.dialogState === "STARTED") {
-      //console.log("in Beginning");
-      var updatedIntent=this.event.request.intent;
-      //console.log(" STARTED updatedIntent: "+ JSON.stringify(updatedIntent));
+    if (this.event.request.dialogState === "STARTED") {      
+      var updatedIntent=this.event.request.intent; 
       this.emit(":delegate", updatedIntent);
-    } else if (this.event.request.dialogState !== "COMPLETED") {
-      //console.log("in not COMPLETED", this.event.request.dialogState);
+    } else if (this.event.request.dialogState !== "COMPLETED") { 
       this.emit(":delegate");
-    } else {
-      //console.log("in completed returning: "+ JSON.stringify(this.event.request.intent));
+    } else { 
       var city = Helpers.getCitySlot(this.event.request);
       Helpers.getAddressFor(city).then(
         (location) => {

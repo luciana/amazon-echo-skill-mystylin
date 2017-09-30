@@ -303,5 +303,4 @@ module.exports = {
     "deliverDeal": deliverDeal,
     "getGoogleAddress":getGoogleAddress,
     "getAlexaAddress": getAlexaAddress
-    //"convertDate": convertDate
 };

@@ -6,20 +6,7 @@
  * Author: Luciana Bruscino
  * Copywrite 2016 MyStylin.com
  *
- * Example:
- * One-shot model:
- *  User:  "Alexa, ask MyStylin for deals near me"
- *  Alexa: "Salon K offers you 50% off haircut from Shawn K's spa. This is good until today!"
- *  User:  "Alexa, ask MyStylin for hair deals near me"
- *  Alexa: "Salon K offers you 50% off haircut from Shawn K's spa. This is good until today!"
- *  User: Alexa, ask MyStylin for hair deals near me
- *  Alexa: I can't identify your location. Please enable it from the Alexa App. 
- 
- * Dialog model:
- * User: Alexa, open MyStylin
- * Alexa: Welcome to MyStylin. In what city are you looking for deals?
- * User: Cleveland, Ohio
- * Alexa: Get 10 percent off hair products from salon K.
+ * See readme for script examples
  */
 var Alexa = require('alexa-sdk'),
     config = require('./config'),

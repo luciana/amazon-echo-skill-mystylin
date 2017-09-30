@@ -42,15 +42,14 @@ class GoogleMapAddressService {
             response.setEncoding('utf8');
            if (response.statusCode < 200 || response.statusCode > 299) {
                 reject(new Error('FAILED TO LOAD API, STATUS CODE: ' + response.statusCode));
-            }
-            console.log('google service request options', requestOptions);
+            }           
             var body = '';
             response.on('data', function (data){
                 body += data;
             });
             response.on('end', function () {
               try{
-                    console.log(' GOOGLE API RESPONSE RESULTS: ' + body);
+                   // console.log(' GOOGLE API RESPONSE RESULTS: ' + body);
                     var googleAddressResponse = {
                         statusCode: response.statusCode,
                         address: JSON.parse(body).results[0].geometry.location
