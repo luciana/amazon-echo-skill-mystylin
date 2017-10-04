@@ -21,35 +21,68 @@
       ]
     },
     {
-      "name": "GetAddress",
+      "name": "GetDealsNearMeIntent",
       "samples": [
-        "where am I located",
-        "GetAddress where do I live",
-        "GetAddress whats my address",
-        "GetAddress whats my location"
-      ],
-      "slots": []
-    },
-    {
-      "name": "OneshotGetDealsIntent",
-      "samples": [
-        "start",
-        "find deals",
-        "for deals",
-        "for top deals",
-        "to find deals",
-        "to find deals near me",
         "for deals near me",
-        "for {treatment} deals",
-        "for {treatment} deals near me",
-        "what is a good {treatment} deal today",
-        "for top {treatment} deal"
+        "for {treatment} coupons near me",
+        "for {treatment} coupons in my neighborhood",
+        "for promotions in my area",
+        "for deals in my neighborhood",
+        "for {treatment} deal near me",
+        "for deals by my house",
+        "to get promotions near me",
+        "for promotions by me",
+        "for deals by me",
+        "for coupons by me",
+        "for a deal near me",
+        "for a {treatment} coupon for any salons in the area",
+        "if there are salons offering coupons in my neighbohood",
+        "what salons around offer this week"
       ],
       "slots": [
         {
           "name": "treatment",
           "type": "Treatment",
           "samples": []
+        }
+      ]
+    },
+    {
+      "name": "OneshotGetDealsIntent",
+      "samples": [
+        "find deals",
+        "for deals",
+        "for top deals",
+        "to find deals",
+        "for {treatment} deals",
+        "what is a good {treatment} deal today",
+        "for top {treatment} deal",
+        "for {treatment} promotions near {city}",
+        "for coupons in near {city}",
+        "for {treatment} coupons in {city}",
+        "for deals in {city}",
+        "are there any deals in {city}",
+        "for {treatment} deals in {city}",
+        "to get me something",
+        "if there are salons offering deals in {city}",
+        "if there are salons offering deals"
+      ],
+      "slots": [
+        {
+          "name": "treatment",
+          "type": "Treatment",
+          "samples": []
+        },
+        {
+          "name": "city",
+          "type": "AMAZON.US_CITY",
+          "samples": [
+            "{city}",
+            "I am in {city}",
+            "I would like deals in {city}",
+            "Anything around {city}",
+            "close to {city}"
+          ]
         }
       ]
     }
@@ -90,7 +123,9 @@
           "id": null,
           "name": {
             "value": "Tanning",
-            "synonyms": []
+            "synonyms": [
+              "Spray Tanning"
+            ]
           }
         },
         {
@@ -99,8 +134,78 @@
             "value": "Products",
             "synonyms": []
           }
+        },
+        {
+          "id": null,
+          "name": {
+            "value": "Wellness",
+            "synonyms": [
+              "Fitness"
+            ]
+          }
+        },
+        {
+          "id": null,
+          "name": {
+            "value": "Yoga",
+            "synonyms": [
+              "Pilates, Fitness"
+            ]
+          }
+        },
+        {
+          "id": null,
+          "name": {
+            "value": "Nail",
+            "synonyms": []
+          }
         }
       ]
     }
-  ]
+  ],
+  "prompts": [
+    {
+      "id": "Elicit.Intent-OneshotGetDealsIntent.IntentSlot-city",
+      "promptVersion": "1.0",
+      "definitionVersion": "1.0",
+      "variations": [
+        {
+          "type": "PlainText",
+          "value": "In what city are you looking for deals?"
+        },
+        {
+          "type": "PlainText",
+          "value": "what city?"
+        }
+      ]
+    }
+  ],
+  "dialog": {
+    "version": "1.0",
+    "intents": [
+      {
+        "name": "OneshotGetDealsIntent",
+        "confirmationRequired": false,
+        "prompts": {},
+        "slots": [
+          {
+            "name": "treatment",
+            "type": "Treatment",
+            "elicitationRequired": false,
+            "confirmationRequired": false,
+            "prompts": {}
+          },
+          {
+            "name": "city",
+            "type": "AMAZON.US_CITY",
+            "elicitationRequired": true,
+            "confirmationRequired": false,
+            "prompts": {
+              "elicit": "Elicit.Intent-OneshotGetDealsIntent.IntentSlot-city"
+            }
+          }
+        ]
+      }
+    ]
+  }
 }

@@ -243,7 +243,6 @@ var searchDealHandler = function(obj, location, treatment){
                 case 200:
                     console.log('response 200');
                     var deal = response.deal[0];
-                    //deliverDeal(obj, deal);
                     deliverDeal.call(obj, deal);
                     break;
                 case 404:
