@@ -1,0 +1,12 @@
+{
+  "name": "Mystylin_Skill",
+  "version": "1.0.0",
+  "description": "Amazon Alexa helps you find deals!",
+  "main": "/src/index.js",
+  "author": "luciana bruscino",
+  "license": "",
+  "scripts": {
+    "test": "mocha",
+	"build": "gulp --env dev"
+  }
+}
