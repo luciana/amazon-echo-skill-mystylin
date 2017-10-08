@@ -3,6 +3,8 @@
  * This class contains all handler function definitions
  * for the various events that we will be registering for.
  */
+'use strict';
+
 var DealService = require('./dealService'),
     Messages = require('./speech'),
     Events = require('./events'),
@@ -10,19 +12,20 @@ var DealService = require('./dealService'),
     Handlers = require('./handlers');
 
 var newSessionRequestHandler =  function(){
-     console.log("Starting newSessionRequestHandler REQUEST", this.event.request);
+    console.log("Starting newSessionRequestHandler REQUEST", this.event.request);
     if(Object.keys(this.attributes).length === 0 ){
         this.attributes['dealList'] = {};
         this.attributes['activeDeal'] = 0;
     }
-    
+    this.handler.state = '';
 	if (this.event.request.type === Events.LAUNCH_REQUEST) {
 		this.emit(Events.LAUNCH_REQUEST);
 	} else if (this.event.request.type === "IntentRequest") {
         if(Intents.GET_DEAL_NEAR_ME === this.event.request.intent.name ){
             this.handler.state = '_DEALNEARMODE';
             this.emitWithState(Intents.GET_DEAL_NEAR_ME, true);
-        }else{
+        }
+        if(Intents.GET_DEAL === this.event.request.intent.name ){
             this.handler.state = '_STARTMODE';
             this.emitWithState(Intents.GET_DEAL, true);
         }
@@ -51,9 +54,9 @@ var sessionEndedRequestHandler = function() {
 };
 
 var amazonHelpHandler = function() {
-    console.info("Starting amazonHelpHandler()");
+    console.log("Starting amazonHelpHandler()");
     this.emit(":ask", Messages.HELP, Messages.HELP);
-    console.info("Ending amazonHelpHandler()");
+    console.log("Ending amazonHelpHandler()");
 };
 
 var amazonCancelHandler = function() {

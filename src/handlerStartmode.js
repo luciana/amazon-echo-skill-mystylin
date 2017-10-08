@@ -4,13 +4,17 @@ var Helpers = require('./helpers'),
 
 var getDealHandler = function() {
    console.log(" in delegateSlotCollection current dialogState: "+ JSON.stringify(this.event.request.dialogState));
-    if (this.event.request.dialogState === "STARTED") {      
-      var updatedIntent=this.event.request.intent; 
+    if (this.event.request.dialogState === "STARTED") {
+     console.log("STARTED");
+      var updatedIntent=this.event.request.intent;
+      console.log("updated intent", this.event.request.intent);
       this.emit(":delegate", updatedIntent);
-    } else if (this.event.request.dialogState !== "COMPLETED") { 
-      this.emit(":delegate");
-    } else { 
+    } else if (this.event.request.dialogState !== "COMPLETED") {
+        console.log("NOT COMPLETED");
+        this.emit(":delegate");
+    } else {
       var city = Helpers.getCitySlot(this.event.request);
+      console.log("COMPLETED");
       Helpers.getAddressFor(city).then(
         (location) => {
             try{
@@ -45,11 +49,11 @@ var sessionEndedRequestHandler = function() {
     console.info("START MODE Ending sessionEndedRequestHandler()");
 };
 
-var amazonHelpHandler = function() {
-    console.info("START MODE Starting amazonHelpHandler()");
-    this.emit(":ask", Messages.HELP, Messages.HELP);
-    console.info("START MODE Ending amazonHelpHandler()");
-};
+// var amazonHelpHandler = function() {
+//     console.info("START MODE Starting amazonHelpHandler()");
+//     this.emit(":ask", Messages.HELP, Messages.HELP);
+//     console.info("START MODE Ending amazonHelpHandler()");
+// };
 
 var amazonCancelHandler = function() {
     console.info("START MODE Starting amazonCancelHandler()");
@@ -87,6 +91,6 @@ module.exports = {
 	"amazonNextHandler": amazonNextHandler,
 	"amazonStopHandler": amazonStopHandler,
 	"amazonCancelHandler": amazonCancelHandler,
-	"amazonHelpHandler": amazonHelpHandler,
+//	"amazonHelpHandler": amazonHelpHandler,
 	"sessionEndedRequestHandler":sessionEndedRequestHandler
 };
