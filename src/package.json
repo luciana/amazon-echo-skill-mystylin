@@ -5,11 +5,11 @@
   "main": "index.js",
   "author": "luciana bruscino",
   "license": "",
-  "scripts": {
-    "prebuild": "npm run clean",    
-    "build": "gulp --env dev",
-    "deploy": "gulp deploy --env prod"
-  },
+  // "scripts": {
+  //   "prebuild": "npm run clean",    
+  //   "build": "gulp --env dev",
+  //   "deploy": "gulp deploy --env prod"
+  // },
   "dependencies": {
     "alexa-app": "^2.3.2",
   },

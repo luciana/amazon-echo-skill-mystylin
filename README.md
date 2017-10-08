@@ -36,8 +36,6 @@ Script Examples:
  * Alexa: "Salon K offers you 50% off haircut from Shawn K's spa. This is good until today!"
 
 
-## Locally
-run gulp --env dev to send to development environment in AWS Lambda
-run gulp --end prod to send to production environment in AWS Lamdda
+The code that runs on AWS Lambda for the Alexa skills is in the /src folder.
 
 
